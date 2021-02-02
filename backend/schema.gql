@@ -1,0 +1,56 @@
+scalar DateTime
+
+type Card {
+	id: ID!
+	location: String!
+	playable: Boolean!
+}
+
+type Lobby {
+	id: String!
+	playerNames: [String!]!
+	canStart: Boolean!
+}
+
+type Trick {
+	actual: Int!
+	called: Int!
+}
+
+type TrickCalling {
+	playersLeft: Int!
+	called: Int!
+	round: Int!
+	yourTurn: Boolean!
+}
+
+type Score {
+	name: String!
+	points: Int!
+	trick: Trick
+}
+
+type Query {
+	lobby: Lobby
+	hand: [Card!]
+	scores: [Score!]
+	deck: [String!]
+	deckColor: String
+	trickColor: String
+	gameInProgress: Boolean!
+	playerTurn: String
+	trickCallRequired: TrickCalling
+}
+
+type Mutation {
+	createLobby(playerName: String!): Lobby
+	joinLobby(id: ID!, playerName: String!) Lobby
+	playCard(cardID: ID!) [Card!]
+	startGame: DateTime
+	callTricks(count: Int!) TrickCalling
+}
+
+schema: {
+	query: Query
+	mutation: Mutation
+}
