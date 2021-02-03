@@ -5,6 +5,7 @@ import (
 	"log"
 	"math/rand"
 	"sync"
+	"time"
 )
 
 type Game struct {
@@ -19,6 +20,7 @@ type Game struct {
 	trickCallingCache *TrickCalling
 	turn              int
 	round             int
+	paused            bool
 }
 
 func NewGame(names []string) (*Game, error) {
@@ -56,6 +58,8 @@ func (game *Game) PlayCard(name string, id int) error {
 		return errors.New("not your turn")
 	} else if game.trickCallingCache != nil {
 		return errors.New("hold on a minute")
+	} else if game.paused {
+		return errors.New("game is paused")
 	}
 	player := game.players[game.order[game.turn]]
 	card, ok := player.hand[id]
@@ -72,18 +76,25 @@ func (game *Game) PlayCard(name string, id int) error {
 	game.turn = (game.turn + 1) % len(game.players)
 	// trick is finished
 	if game.starterTrun == game.turn {
-		game.finishTrick()
-		// round is over
-		if len(player.hand) <= 0 {
-			game.finishRound()
-			if !game.isGameOver() {
-				game.prepareRound()
-			} else {
-				for _, player := range game.players {
-					log.Printf("player=%s has %d points", player.Name, player.Points)
+		game.paused = true
+		go func() {
+			time.Sleep(3 * time.Second)
+			game.lock.Lock()
+			defer game.lock.Unlock()
+			game.finishTrick()
+			// round is over
+			if len(player.hand) <= 0 {
+				game.finishRound()
+				if !game.isGameOver() {
+					game.prepareRound()
+				} else {
+					for _, player := range game.players {
+						log.Printf("player=%s has %d points", player.Name, player.Points)
+					}
 				}
 			}
-		}
+			game.paused = false
+		}()
 	}
 	return nil
 }

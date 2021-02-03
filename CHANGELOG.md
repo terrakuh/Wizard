@@ -1,10 +1,11 @@
 # Change Log
 
-## [Unreleased]
+## [v0.2.0] - 2020-02-03
 ### Added
 - Permanent notification when players turn
 - Played card history
 - Caching for static content
+- Pause game after each trick
 
 ### Changed
 - Empty card
@@ -18,3 +19,5 @@
 ### Added
 - Frontend
 - Backend
+
+[v0.2.0]: https://github.com/terrakuh/wizard/compare/v0.1.0...v0.2.0

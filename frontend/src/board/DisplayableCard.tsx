@@ -15,8 +15,8 @@ function DisplayableCard(props: Props) {
 				!props.location ? <Skeleton style={cardStyles} variant="rect" /> :
 					<img
 						style={cardStyles}
-						src={`/cards/${props.location ?? "empty"}.jpg`}
-						alt={props.location ?? "No card played."}
+						src={`/cards/${props.location}.jpg`}
+						alt={props.location}
 						draggable={false} />
 			}
 		</div>

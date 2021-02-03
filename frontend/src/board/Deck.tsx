@@ -28,13 +28,13 @@ function Deck(props: Props) {
 					!props.trickColor ? null :
 						<ColorBox
 							color={props.trickColor}
-							text="Trick" />
+							text="Trumpf" />
 				}
 				{
 					!props.deckColor ? null :
 						<ColorBox
 							color={props.deckColor}
-							text="Deck" />
+							text="Angespielt" />
 				}
 			</div>
 			<div className={props.classes.spacer} style={{ textAlign: "right" }}>
