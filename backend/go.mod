@@ -1,4 +1,4 @@
-module git.ayar.eu/yunus/Wizard
+module github.com/terrakuh/wizard
 
 go 1.15
 

@@ -16,4 +16,4 @@ COPY --from=backend /tmp/backend/Wizard /app/
 COPY --from=frontend /tmp/frontend/build /app/static
 
 WORKDIR /app
-CMD ["./Wizard", "-host", "0.0.0.0:8080"]
+CMD ["./wizard", "-host", "0.0.0.0:8080"]
