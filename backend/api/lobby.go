@@ -3,9 +3,9 @@ package api
 import (
 	"errors"
 
-	"git.ayar.eu/yunus/Wizard/game"
 	"github.com/gorilla/sessions"
 	gql "github.com/graphql-go/graphql"
+	"github.com/terrakuh/wizard/game"
 )
 
 var lobbyManager = game.NewManager(game.ManagerOptions{

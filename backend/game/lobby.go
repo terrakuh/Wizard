@@ -5,7 +5,7 @@ import (
 	"math/rand"
 	"sync"
 
-	"git.ayar.eu/yunus/Wizard/game/logic"
+	"github.com/terrakuh/wizard/game/logic"
 )
 
 type Lobby struct {

@@ -5,8 +5,8 @@ import (
 	"strconv"
 	"time"
 
-	"git.ayar.eu/yunus/Wizard/game/logic"
 	gql "github.com/graphql-go/graphql"
+	"github.com/terrakuh/wizard/game/logic"
 )
 
 func resolveHand(p gql.ResolveParams) (interface{}, error) {

@@ -7,8 +7,8 @@ import (
 	"net/http"
 	"time"
 
-	"git.ayar.eu/yunus/Wizard/api"
 	"github.com/gorilla/mux"
+	"github.com/terrakuh/wizard/api"
 )
 
 func main() {
