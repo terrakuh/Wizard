@@ -1,4 +1,4 @@
-package game
+package lobby
 
 import (
 	"errors"
@@ -9,11 +9,12 @@ import (
 )
 
 type Lobby struct {
-	id        string
-	lock      sync.Mutex
-	masterKey string
-	players   map[string]*player
-	game      *logic.Game
+	id             string
+	lock           sync.Mutex
+	masterKey      string
+	players        map[string]*player
+	game           *logic.Game
+	inactiveToggle chan struct{}
 }
 
 func (lobby *Lobby) ID() string {
@@ -56,6 +57,10 @@ func (lobby *Lobby) IsLobbyMaster(key string) bool {
 	lobby.lock.Lock()
 	defer lobby.lock.Unlock()
 	return lobby.masterKey == key
+}
+
+func (lobby *Lobby) close() {
+	close(lobby.inactiveToggle)
 }
 
 func randomString(n int) string {

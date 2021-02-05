@@ -1,6 +1,8 @@
 # Change Log
 
 ## [Unreleased]
+### Added
+- Lobby lifetime and timeouts
 
 ## [v0.2.0] - 2020-02-03
 ### Added
