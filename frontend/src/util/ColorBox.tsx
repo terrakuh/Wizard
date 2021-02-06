@@ -1,21 +1,24 @@
 import React from "react"
-import { Box, createStyles, withStyles, WithStyles } from "@material-ui/core";
+import { Box, createStyles, Tooltip, withStyles, WithStyles } from "@material-ui/core";
 
 interface Props extends WithStyles<typeof styles> {
 	color: string
 	children: React.ReactNode
 	className?: string
+	tooltip: string
 }
 
 function ColorBox(props: Props) {
 	return (
-		<Box boxShadow={3}>
-			<div
-				style={{ backgroundColor: props.color }}
-				className={`${props.classes.background} ${props.className ?? ""}`}>
-				{props.children}
-			</div>
-		</Box>
+		<Tooltip title={props.tooltip}>
+			<Box boxShadow={3}>
+				<div
+					style={{ backgroundColor: props.color }}
+					className={`${props.classes.background} ${props.className ?? ""}`}>
+					{props.children}
+				</div>
+			</Box>
+		</Tooltip>
 	)
 }
 

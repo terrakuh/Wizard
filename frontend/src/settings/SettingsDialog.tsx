@@ -1,7 +1,7 @@
 import React from "react"
-import { AppBar, Button, createStyles, Dialog, DialogContent, FormControl, FormControlLabel, IconButton, Paper, Slide, Switch, Tab, Tabs, Toolbar, Typography, withStyles, WithStyles } from "@material-ui/core"
+import { AppBar, Button, createStyles, Dialog, DialogContent, FormControl, FormControlLabel, IconButton, InputLabel, MenuItem, Paper, Select, Slide, Switch, Tab, Tabs, Toolbar, Typography, withStyles, WithStyles } from "@material-ui/core"
 import { TransitionProps } from "@material-ui/core/transitions"
-import { Close as CloseIcon } from "@material-ui/icons"
+import { Close as CloseIcon, Notifications as NotificationsIcon } from "@material-ui/icons"
 import SwipeableViews from "react-swipeable-views"
 import { useSettings } from "./SettingsProvider"
 
@@ -28,7 +28,7 @@ function SettingsDialog(props: Props) {
 			open={props.open}>
 			<AppBar className={props.classes.appBar}>
 				<Toolbar>
-					<IconButton edge="start" color="inherit">
+					<IconButton onClick={props.onClose} edge="start" color="inherit">
 						<CloseIcon />
 					</IconButton>
 					<Typography variant="h6" className={props.classes.title}>Einstellungen</Typography>
@@ -53,7 +53,7 @@ function SettingsDialog(props: Props) {
 						centered
 						onChange={(_, newIndex) => setIndex(newIndex)}
 						value={index}>
-						<Tab label="Benachrichtungen" />
+						<Tab label={<NotificationsIcon />} />
 					</Tabs>
 				</Paper>
 
@@ -67,7 +67,7 @@ function SettingsDialog(props: Props) {
 										checked={newSettings.notifications.enabled}
 										color="primary" />
 								}
-								label="Enabled"
+								label={newSettings.notifications.enabled ? "Aktiviert" : "Deaktiviert"}
 								labelPlacement="start" />
 
 							<FormControlLabel
@@ -102,6 +102,19 @@ function SettingsDialog(props: Props) {
 								}
 								label="Spielerzug"
 								labelPlacement="start" />
+
+							<FormControl>
+								<InputLabel id="select-audio">Audio</InputLabel>
+								<Select
+									disabled={!newSettings.notifications.enabled || !newSettings.notifications.audio}
+									value={newSettings.notifications.audioTrack}
+									onChange={ev => setNewSettings({ ...newSettings, notifications: { ...newSettings.notifications, audioTrack: ev.target.value as string } })}
+									labelId="select-audio">
+									<MenuItem value="turn_0.mp3">Klang 1</MenuItem>
+									<MenuItem value="turn_1.mp3">Klang 2</MenuItem>
+									<MenuItem value="alarm.mp3">Alarm</MenuItem>
+								</Select>
+							</FormControl>
 						</FormControl>
 					</div>
 				</SwipeableViews>

@@ -9,42 +9,21 @@ import { gql, useQuery } from "@apollo/client"
 import { RouteComponentProps, withRouter } from "react-router-dom"
 import TrickCallDialog from "./TrickCallDialog"
 import { withSnackbar, WithSnackbarProps } from "notistack"
-import useSound from "use-sound"
 import { useSettings } from "../settings"
+import { useTurnSound } from "./soundEffect"
 
 interface Props extends WithStyles<typeof styles>, RouteComponentProps, WithSnackbarProps { }
 
 function Board(props: Props) {
-	const { settings } = useSettings()
+	const { settings, setSettings } = useSettings()
 	const { data: gameInfo } = useQuery<GameInfo>(GAME_INFO, { pollInterval: 1000 })
-	const [playTurnSound] = useSound("/your_turn_0.mp3")
-
-	React.useEffect(() => {
-		if (settings.notifications.enabled) {
-			if (gameInfo?.playerTurn === localStorage.getItem("name")) {
-				if (settings.notifications.desktop) {
-					Notification.requestPermission()
-						.then(() => {
-							new Notification("Wizard", {
-								body: "Du bist am Zug.",
-								silent: !settings.notifications.audio
-							})
-						})
-				} else {
-					props.enqueueSnackbar("Your turn.", {
-						autoHideDuration: null,
-						variant: "info",
-						key: "player-turn"
-					})
-					if (settings.notifications.audio) {
-						playTurnSound()
-					}
-				}
-			} else if (!settings.notifications.desktop) {
-				props.closeSnackbar("player-turn")
-			}
-		}
-	}, [gameInfo?.playerTurn, props, playTurnSound, settings])
+	
+	useTurnSound({
+		...props,
+		settings,
+		setSettings,
+		playerTurn: gameInfo?.playerTurn
+	})
 
 	if (gameInfo?.gameInProgress === false) {
 		props.history.push("/")

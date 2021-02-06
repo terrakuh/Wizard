@@ -2,10 +2,11 @@ import React from "react"
 import { deepMerge } from "../util"
 import Settings from "./type"
 
-const initialSettings = deepMerge({
+const initialSettings = deepMerge<Settings>({
 	notifications: {
 		enabled: true,
 		audio: true,
+		audioTrack: "turn_0.mp3",
 		desktop: true,
 		playerTurn: true
 	}

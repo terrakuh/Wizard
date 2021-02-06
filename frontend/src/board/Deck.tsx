@@ -19,7 +19,7 @@ function Deck(props: Props) {
 		})
 	})
 	const [anchorEl, setAnchorEl] = React.useState<HTMLElement | null>(null)
-	console.log(anchorEl)
+
 	return (
 		<Paper
 			className={props.classes.root}
@@ -27,13 +27,13 @@ function Deck(props: Props) {
 			<div className={props.classes.colorBox}>
 				{
 					!props.trickColor ? null :
-						<ColorBox color={props.trickColor}>
+						<ColorBox tooltip="Trumpf" color={props.trickColor}>
 							<GradeIcon fontSize="large" />
 						</ColorBox>
 				}
 				{
 					!props.deckColor ? null :
-						<ColorBox color={props.deckColor}>
+						<ColorBox tooltip="Angespielt" color={props.deckColor}>
 							<LooksOneIcon fontSize="large" />
 						</ColorBox>
 				}
@@ -69,7 +69,7 @@ function Deck(props: Props) {
 					<Grid container className={props.classes.cardHistory}>
 						{
 							props.deck?.map(location =>
-								<Grid item>
+								<Grid key={location} item>
 									<DisplayableCard
 										key={location}
 										location={location} />

@@ -35,7 +35,7 @@ function LobbyConnection(props: Props) {
 						disabled={props.lobbyInfo !== undefined}
 						value={name}
 						onChange={x => setName(x.target.value)}
-						label="Player Name" />
+						label="Spielername" />
 				</Grid>
 
 				<Grid item xs={10} md={5}>
@@ -52,7 +52,11 @@ function LobbyConnection(props: Props) {
 						color="secondary"
 						onClick={() => {
 							navigator.clipboard.writeText(`${window.location.origin}/lobby/${lobby}`)
-								.catch(console.error)
+								.then(() => props.enqueueSnackbar("Kopiert.", { variant: "success" }))
+								.catch(e => {
+									console.error(e)
+									props.enqueueSnackbar(e, { variant: "error" })
+								})
 						}}>
 						<FileCopyIcon />
 					</IconButton>
@@ -71,7 +75,7 @@ function LobbyConnection(props: Props) {
 									props.enqueueSnackbar((e as ApolloError).message, { variant: "error" })
 								})
 						}}>
-						Join
+						Beitreten
 						</Button>
 				</Grid>
 
@@ -88,7 +92,7 @@ function LobbyConnection(props: Props) {
 									props.enqueueSnackbar((e as ApolloError).message, { variant: "error" })
 								})
 						}}>
-						Create
+						Erstellen
 						</Button>
 				</Grid>
 
@@ -105,7 +109,7 @@ function LobbyConnection(props: Props) {
 											props.enqueueSnackbar((e as ApolloError).message, { variant: "error" })
 										})
 								}}>
-								Start
+								Starten
 								</Button>
 						</Grid>
 				}
