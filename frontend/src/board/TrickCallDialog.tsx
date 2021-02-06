@@ -28,7 +28,7 @@ function TrickCallDialog(props: Props) {
 			return marks
 		}
 		return []
-	}, [props.context])
+	}, [props.context, playersAfter])
 	const [calls, setCalls] = React.useState(marks[0]?.value ?? 0)
 	const [callTricks, { loading: callingTricks }] = useMutation(CALL_TRICKS)
 

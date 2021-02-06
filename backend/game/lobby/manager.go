@@ -2,6 +2,7 @@ package lobby
 
 import (
 	"errors"
+	"log"
 	"strings"
 	"sync"
 	"time"
@@ -46,9 +47,8 @@ func (manager *Manager) CreateLobby() (*Lobby, error) {
 		}
 	}
 	lobby := &Lobby{
-		id:             id,
-		players:        make(map[string]*player),
-		inactiveToggle: make(chan struct{}),
+		id:      id,
+		players: make(map[string]*player),
 	}
 	manager.lobbies[id] = lobby
 	manager.launchLobbyWatchdogs(lobby)
@@ -80,24 +80,23 @@ func (manager *Manager) launchLobbyWatchdogs(lobby *Lobby) {
 	if manager.options.OverallLifetime > 0 {
 		go func() {
 			time.Sleep(manager.options.OverallLifetime)
+			log.Print("closing lobby due to overall lifetime")
 			manager.RemoveLobby(lobby.id)
 		}()
 	}
 	if manager.options.InactiveLifetime > 0 {
+		lobby.inactiveReset = make(chan struct{})
 		go func() {
-			active := true
 			for {
 				select {
 				case <-time.After(manager.options.InactiveLifetime):
-					if active {
-						manager.RemoveLobby(lobby.id)
-					}
+					log.Print("closing lobby due to inactivity")
+					manager.RemoveLobby(lobby.id)
 					return
-				case _, ok := <-lobby.inactiveToggle:
+				case _, ok := <-lobby.inactiveReset:
 					if !ok {
 						return
 					}
-					active = !active
 				}
 			}
 		}()

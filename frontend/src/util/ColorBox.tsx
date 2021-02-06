@@ -1,29 +1,31 @@
 import React from "react"
-import { createStyles, Typography, withStyles, WithStyles } from "@material-ui/core";
+import { Box, createStyles, withStyles, WithStyles } from "@material-ui/core";
 
 interface Props extends WithStyles<typeof styles> {
 	color: string
-	text: string
+	children: React.ReactNode
 	className?: string
 }
 
 function ColorBox(props: Props) {
 	return (
-		<div
-			style={{ backgroundColor: props.color }}
-			className={`${props.classes.root} ${props.className ?? ""}`}>
-			<Typography className={props.classes.text} align="center">{props.text}</Typography>
-		</div>
+		<Box boxShadow={3}>
+			<div
+				style={{ backgroundColor: props.color }}
+				className={`${props.classes.background} ${props.className ?? ""}`}>
+				{props.children}
+			</div>
+		</Box>
 	)
 }
 
 const styles = createStyles({
-	root: {
+	background: {
 		width: "50px",
-		height: "50px"
-	},
-	text: {
-		mixBlendMode: "difference"
+		height: "50px",
+		display: "flex",
+		alignItems: "center",
+		justifyContent: "center"
 	}
 })
 

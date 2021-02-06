@@ -25,12 +25,12 @@ function Board(props: Props) {
 		} else {
 			props.closeSnackbar("player-turn")
 		}
-	}, [gameInfo?.playerTurn])
+	}, [gameInfo?.playerTurn, props])
 
 	if (gameInfo?.gameInProgress === false) {
 		props.history.push("/")
 		return <></>
-	} else if (gameInfo === undefined || gameInfo.scores === null || gameInfo.playerTurn === null || gameInfo.hand === null) {
+	} else if (gameInfo === undefined || gameInfo.scores === null || gameInfo.hand === null) {
 		return <Loading open={true} />
 	}
 

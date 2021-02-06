@@ -42,13 +42,9 @@ func standardCardSet() []*card {
 	return cards
 }
 
-func (c *card) calculateValue(trickColor, deckColor string) int {
-	if c.color != "" {
-		if c.color == trickColor {
-			return c.value + 13
-		} else if c.color != deckColor {
-			return 0
-		}
+func (c *card) calculateValue(winningColor string) int {
+	if c.color != "" && c.color == winningColor {
+		return c.value + 13
 	}
 	return c.value
 }
@@ -60,13 +56,6 @@ func getDeckColor(deck []*card) string {
 		}
 	}
 	return ""
-}
-
-func getTrickColor(trickColor string, deck []*card) string {
-	if trickColor == "" {
-		return getDeckColor(deck)
-	}
-	return trickColor
 }
 
 func (c *card) isPlayable(deckColor string, hand map[int]*card) bool {

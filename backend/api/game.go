@@ -21,8 +21,10 @@ func resolveTrickColor(p gql.ResolveParams) (interface{}, error) {
 	game, _, _ := getActiveGame(p)
 	if game == nil {
 		return nil, nil
+	} else if color := game.TrickColor(); color != "" {
+		return &color, nil
 	}
-	return game.TrickColor(), nil
+	return nil, nil
 }
 
 func resolveDeck(p gql.ResolveParams) (interface{}, error) {
@@ -51,8 +53,10 @@ func resolvePlayerTurn(p gql.ResolveParams) (interface{}, error) {
 	if game == nil {
 		return nil, nil
 	}
-	turn := game.PlayerTurn()
-	return &turn, nil
+	if turn := game.PlayerTurn(); turn != "" {
+		return &turn, nil
+	}
+	return nil, nil
 }
 
 func resolvePlayCard(p gql.ResolveParams) (interface{}, error) {

@@ -14,7 +14,7 @@ import (
 func main() {
 	rand.Seed(time.Now().Unix())
 
-	host := flag.String("host", "localhost:8080", "the host address and port")
+	host := flag.String("host", "0.0.0.0:8080", "the host address and port")
 	flag.Parse()
 
 	router := mux.NewRouter()

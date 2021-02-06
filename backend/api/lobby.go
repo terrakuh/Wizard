@@ -10,10 +10,10 @@ import (
 )
 
 var lobbyManager = lobby.NewManager(lobby.Options{
-	Limit:            5,
-	CodeLength:       5,
-	OverallLifetime:  2 * time.Hour,
-	InactiveLifetime: 15 * time.Minute,
+	Limit:           5,
+	CodeLength:      5,
+	OverallLifetime: 2 * time.Hour,
+	// InactiveLifetime: 15 * time.Minute,
 })
 
 type lobbyInfo struct {

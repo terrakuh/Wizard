@@ -9,12 +9,12 @@ import (
 )
 
 type Lobby struct {
-	id             string
-	lock           sync.Mutex
-	masterKey      string
-	players        map[string]*player
-	game           *logic.Game
-	inactiveToggle chan struct{}
+	id            string
+	lock          sync.Mutex
+	masterKey     string
+	players       map[string]*player
+	game          *logic.Game
+	inactiveReset chan struct{}
 }
 
 func (lobby *Lobby) ID() string {
@@ -33,9 +33,12 @@ func (lobby *Lobby) StartGame(key string) error {
 	for _, player := range lobby.players {
 		names = append(names, player.name)
 	}
-	game, err := logic.NewGame(names)
+	game, err := logic.NewGame(names, lobby.inactiveReset)
 	if err != nil {
 		return err
+	}
+	if lobby.inactiveReset != nil {
+		lobby.inactiveReset <- struct{}{}
 	}
 	lobby.game = game
 	return nil
@@ -60,7 +63,7 @@ func (lobby *Lobby) IsLobbyMaster(key string) bool {
 }
 
 func (lobby *Lobby) close() {
-	close(lobby.inactiveToggle)
+	close(lobby.inactiveReset)
 }
 
 func randomString(n int) string {

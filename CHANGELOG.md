@@ -4,6 +4,13 @@
 ### Added
 - Lobby lifetime and timeouts
 
+### Changed
+- Trick and played color
+- Highlight color of score board
+
+### Fixed
+- Automatically close history when empty
+
 ## [v0.2.0] - 2020-02-03
 ### Added
 - Permanent notification when players turn

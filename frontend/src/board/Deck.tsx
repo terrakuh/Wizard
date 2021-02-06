@@ -1,5 +1,6 @@
-import { createStyles, Grid, Paper, Popover, Theme, withStyles, WithStyles } from "@material-ui/core"
 import React from "react"
+import { createStyles, Grid, Paper, Popover, Theme, withStyles, WithStyles } from "@material-ui/core"
+import { AmpStories, Filter1, Grade, LooksOne } from "@material-ui/icons"
 import { useDrop } from "react-dnd"
 import { ColorBox } from "../util"
 import DisplayableCard from "./DisplayableCard"
@@ -26,15 +27,15 @@ function Deck(props: Props) {
 			<div className={props.classes.colorBox}>
 				{
 					!props.trickColor ? null :
-						<ColorBox
-							color={props.trickColor}
-							text="Trumpf" />
+						<ColorBox color={props.trickColor}>
+							<Grade fontSize="large" />
+						</ColorBox>
 				}
 				{
 					!props.deckColor ? null :
-						<ColorBox
-							color={props.deckColor}
-							text="Angespielt" />
+						<ColorBox color={props.deckColor}>
+							<LooksOne fontSize="large" />
+						</ColorBox>
 				}
 			</div>
 			<div className={props.classes.spacer} style={{ textAlign: "right" }}>
@@ -54,7 +55,7 @@ function Deck(props: Props) {
 
 			<Popover
 				onClose={() => setAnchorEl(null)}
-				open={anchorEl !== null}
+				open={anchorEl !== null && (props.deck?.length ?? 0) > 0}
 				anchorEl={anchorEl}
 				anchorOrigin={{
 					vertical: 'bottom',
@@ -95,7 +96,8 @@ const styles = (theme: Theme) => createStyles({
 	colorBox: {
 		display: "flex",
 		flexDirection: "column",
-		position: "absolute"
+		position: "absolute",
+		gap: theme.spacing()
 	},
 	cardDisplay: {
 		margin: theme.spacing(2)
