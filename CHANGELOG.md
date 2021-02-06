@@ -3,6 +3,7 @@
 ## [Unreleased]
 ### Added
 - Lobby lifetime and timeouts
+- Notification settings
 
 ### Changed
 - Trick and played color

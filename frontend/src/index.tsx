@@ -11,6 +11,7 @@ import { HTML5Backend } from "react-dnd-html5-backend"
 import { SnackbarProvider } from "notistack"
 import { ApolloClient, ApolloProvider, InMemoryCache } from "@apollo/client"
 import { Cancel as CancelIcon } from "@material-ui/icons"
+import { SettingsProvider } from "./settings"
 
 const client = new ApolloClient({
 	cache: new InMemoryCache(),
@@ -50,17 +51,19 @@ ReactDOM.render(
 		<ApolloProvider client={client}>
 			<ThemeProvider theme={theme}>
 				<BrowserRouter>
-					<SnackbarProvider
-						ref={notistackRef}
-						action={key => (
-							<IconButton size="small" onClick={() => notistackRef.current?.closeSnackbar(key)}>
-								<CancelIcon />
-							</IconButton>
-						)}>
-						<DndProvider backend={HTML5Backend}>
-							<App />
-						</DndProvider>
-					</SnackbarProvider>
+					<SettingsProvider>
+						<SnackbarProvider
+							ref={notistackRef}
+							action={key => (
+								<IconButton size="small" onClick={() => notistackRef.current?.closeSnackbar(key)}>
+									<CancelIcon />
+								</IconButton>
+							)}>
+							<DndProvider backend={HTML5Backend}>
+								<App />
+							</DndProvider>
+						</SnackbarProvider>
+					</SettingsProvider>
 				</BrowserRouter>
 			</ThemeProvider>
 		</ApolloProvider>

@@ -1,6 +1,6 @@
 import React from "react"
 import { createStyles, Grid, Paper, Popover, Theme, withStyles, WithStyles } from "@material-ui/core"
-import { AmpStories, Filter1, Grade, LooksOne } from "@material-ui/icons"
+import { Grade as GradeIcon, LooksOne as LooksOneIcon } from "@material-ui/icons"
 import { useDrop } from "react-dnd"
 import { ColorBox } from "../util"
 import DisplayableCard from "./DisplayableCard"
@@ -28,13 +28,13 @@ function Deck(props: Props) {
 				{
 					!props.trickColor ? null :
 						<ColorBox color={props.trickColor}>
-							<Grade fontSize="large" />
+							<GradeIcon fontSize="large" />
 						</ColorBox>
 				}
 				{
 					!props.deckColor ? null :
 						<ColorBox color={props.deckColor}>
-							<LooksOne fontSize="large" />
+							<LooksOneIcon fontSize="large" />
 						</ColorBox>
 				}
 			</div>
