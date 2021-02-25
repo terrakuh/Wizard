@@ -2,15 +2,18 @@ package api
 
 import (
 	"errors"
+	"time"
 
 	"github.com/gorilla/sessions"
 	gql "github.com/graphql-go/graphql"
-	"github.com/terrakuh/wizard/game"
+	"github.com/terrakuh/wizard/game/lobby"
 )
 
-var lobbyManager = game.NewManager(game.ManagerOptions{
-	LobbyLimit:      5,
-	LobbyCodeLength: 5,
+var lobbyManager = lobby.NewManager(lobby.Options{
+	Limit:           5,
+	CodeLength:      5,
+	OverallLifetime: 2 * time.Hour,
+	// InactiveLifetime: 15 * time.Minute,
 })
 
 type lobbyInfo struct {
@@ -78,7 +81,7 @@ func resolveJoinLobby(p gql.ResolveParams) (interface{}, error) {
 	return resolveLobby(p)
 }
 
-func getActiveLobby(p gql.ResolveParams) (lobby *game.Lobby, isMaster bool, err error) {
+func getActiveLobby(p gql.ResolveParams) (lobby *lobby.Lobby, isMaster bool, err error) {
 	params := p.Context.Value(keyParams).(params)
 	var session *sessions.Session
 	session, err = store.Get(params.request, "game")
@@ -101,7 +104,7 @@ func getActiveLobby(p gql.ResolveParams) (lobby *game.Lobby, isMaster bool, err 
 	return
 }
 
-func addPlayerToLobby(lobby *game.Lobby, name string, params params) error {
+func addPlayerToLobby(lobby *lobby.Lobby, name string, params params) error {
 	session, err := store.Get(params.request, "game")
 	if session == nil {
 		return err

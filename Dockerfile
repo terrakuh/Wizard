@@ -12,8 +12,10 @@ RUN cd /tmp/frontend && yarn && yarn build
 
 FROM alpine
 
-COPY --from=backend /tmp/backend/Wizard /app/
+EXPOSE 8080/tcp
+
+COPY --from=backend /tmp/backend/wizard /app/
 COPY --from=frontend /tmp/frontend/build /app/static
 
 WORKDIR /app
-CMD ["./wizard", "-host", "0.0.0.0:8080"]
+ENTRYPOINT ["./wizard"]

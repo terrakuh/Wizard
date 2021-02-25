@@ -1,8 +1,8 @@
 import React from "react"
-import { Paper, TableBody, TableCell, TableContainer, TableRow } from "@material-ui/core"
+import { Box, createStyles, Paper, TableBody, TableCell, TableContainer, TableRow, Theme, withStyles, WithStyles } from "@material-ui/core"
 import { Score } from "../types"
 
-interface Props {
+interface Props extends WithStyles<typeof styles> {
 	scores: Score[]
 	turn: string | null
 	className?: string
@@ -10,12 +10,13 @@ interface Props {
 
 function ScoreBoard(props: Props) {
 	return (
-		<div className={props.className}>
+		<Box boxShadow={3} className={props.className}>
 			<TableContainer component={Paper}>
 				<TableBody>
 					{
 						props.scores.map(score =>
 							<TableRow
+								classes={{ selected: props.classes.selected }}
 								selected={score.name === props.turn}
 								key={score.name}>
 								<TableCell>{score.points}</TableCell>
@@ -26,8 +27,14 @@ function ScoreBoard(props: Props) {
 					}
 				</TableBody>
 			</TableContainer>
-		</div>
+		</Box>
 	)
 }
 
-export default ScoreBoard
+const styles = (theme: Theme) => createStyles({
+	selected: {
+		backgroundColor: `${theme.palette.secondary.main} !important`
+	}
+})
+
+export default withStyles(styles)(ScoreBoard)

@@ -9,28 +9,26 @@ import { gql, useQuery } from "@apollo/client"
 import { RouteComponentProps, withRouter } from "react-router-dom"
 import TrickCallDialog from "./TrickCallDialog"
 import { withSnackbar, WithSnackbarProps } from "notistack"
+import { useSettings } from "../settings"
+import { useTurnSound } from "./soundEffect"
 
 interface Props extends WithStyles<typeof styles>, RouteComponentProps, WithSnackbarProps { }
 
 function Board(props: Props) {
+	const { settings, setSettings } = useSettings()
 	const { data: gameInfo } = useQuery<GameInfo>(GAME_INFO, { pollInterval: 1000 })
-
-	React.useEffect(() => {
-		if (gameInfo?.playerTurn === localStorage.getItem("name")) {
-			props.enqueueSnackbar("Your turn.", {
-				autoHideDuration: null,
-				variant: "info",
-				key: "player-turn"
-			})
-		} else {
-			props.closeSnackbar("player-turn")
-		}
-	}, [gameInfo?.playerTurn])
+	
+	useTurnSound({
+		...props,
+		settings,
+		setSettings,
+		playerTurn: gameInfo?.playerTurn
+	})
 
 	if (gameInfo?.gameInProgress === false) {
 		props.history.push("/")
 		return <></>
-	} else if (gameInfo === undefined || gameInfo.scores === null || gameInfo.playerTurn === null || gameInfo.hand === null) {
+	} else if (gameInfo === undefined || gameInfo.scores === null || gameInfo.hand === null) {
 		return <Loading open={true} />
 	}
 

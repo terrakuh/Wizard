@@ -2,7 +2,6 @@ import React from "react"
 import { createStyles, Grid, withStyles, WithStyles } from "@material-ui/core"
 import { Card } from "../types"
 import PlayableCard from "./PlayableCard"
-import { gql, useQuery } from "@apollo/client"
 
 interface Props extends WithStyles<typeof styles> {
 	hand: Card[]

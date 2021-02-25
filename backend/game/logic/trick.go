@@ -16,8 +16,11 @@ func (game *Game) CallTricks(name string, count int) error {
 		return errors.New("no trick calling required")
 	} else if name != game.trickCallingPlayer() {
 		return errors.New("not your trick calling turn")
-	} else if game.trickCallingCache.PlayersLeft == 1 && game.trickCallingCache.Called+count == game.round {
+	} else if game.trickCallingCache.PlayersLeft == 1 && game.trickCallingCache.Called+count == game.turner.round {
 		return errors.New("your call is not valid")
+	}
+	if game.inactiveReset != nil {
+		game.inactiveReset <- struct{}{}
 	}
 	// call
 	game.players[name].Trick = &Trick{
@@ -42,15 +45,8 @@ func (game *Game) TrickCallRequired(name string) *TrickCalling {
 	return &calling
 }
 
-func (game *Game) trickCallingPlayer() string {
-	return game.order[(len(game.players)-game.trickCallingCache.PlayersLeft+game.starterTrun)%len(game.players)]
-}
-
-func (game *Game) TrickColor() *string {
+func (game *Game) TrickColor() string {
 	game.lock.Lock()
 	defer game.lock.Unlock()
-	if color := getTrickColor(game.trickColor, game.deck); color != "" {
-		return &color
-	}
-	return nil
+	return game.trickColor
 }

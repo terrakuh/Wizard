@@ -1,5 +1,6 @@
-import { createStyles, Grid, Paper, Popover, Theme, withStyles, WithStyles } from "@material-ui/core"
 import React from "react"
+import { createStyles, Grid, Paper, Popover, Theme, withStyles, WithStyles } from "@material-ui/core"
+import { Grade as GradeIcon, LooksOne as LooksOneIcon } from "@material-ui/icons"
 import { useDrop } from "react-dnd"
 import { ColorBox } from "../util"
 import DisplayableCard from "./DisplayableCard"
@@ -18,7 +19,7 @@ function Deck(props: Props) {
 		})
 	})
 	const [anchorEl, setAnchorEl] = React.useState<HTMLElement | null>(null)
-	console.log(anchorEl)
+
 	return (
 		<Paper
 			className={props.classes.root}
@@ -26,15 +27,15 @@ function Deck(props: Props) {
 			<div className={props.classes.colorBox}>
 				{
 					!props.trickColor ? null :
-						<ColorBox
-							color={props.trickColor}
-							text="Trumpf" />
+						<ColorBox tooltip="Trumpf" color={props.trickColor}>
+							<GradeIcon fontSize="large" />
+						</ColorBox>
 				}
 				{
 					!props.deckColor ? null :
-						<ColorBox
-							color={props.deckColor}
-							text="Angespielt" />
+						<ColorBox tooltip="Angespielt" color={props.deckColor}>
+							<LooksOneIcon fontSize="large" />
+						</ColorBox>
 				}
 			</div>
 			<div className={props.classes.spacer} style={{ textAlign: "right" }}>
@@ -54,7 +55,7 @@ function Deck(props: Props) {
 
 			<Popover
 				onClose={() => setAnchorEl(null)}
-				open={anchorEl !== null}
+				open={anchorEl !== null && (props.deck?.length ?? 0) > 0}
 				anchorEl={anchorEl}
 				anchorOrigin={{
 					vertical: 'bottom',
@@ -68,7 +69,7 @@ function Deck(props: Props) {
 					<Grid container className={props.classes.cardHistory}>
 						{
 							props.deck?.map(location =>
-								<Grid item>
+								<Grid key={location} item>
 									<DisplayableCard
 										key={location}
 										location={location} />
@@ -95,7 +96,8 @@ const styles = (theme: Theme) => createStyles({
 	colorBox: {
 		display: "flex",
 		flexDirection: "column",
-		position: "absolute"
+		position: "absolute",
+		gap: theme.spacing()
 	},
 	cardDisplay: {
 		margin: theme.spacing(2)

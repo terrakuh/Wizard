@@ -2,6 +2,7 @@
 .eslintcache
 /public/icon/
 /public/cards/
+/public/*.mp3
 
 # dependencies
 /node_modules

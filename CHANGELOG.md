@@ -1,6 +1,16 @@
 # Change Log
 
-## [Unreleased]
+## [v0.3.0] - 2020-02-25
+### Added
+- Lobby lifetime and timeouts
+- Notification settings
+
+### Changed
+- Trick and played color
+- Highlight color of score board
+
+### Fixed
+- Automatically close history when empty
 
 ## [v0.2.0] - 2020-02-03
 ### Added
@@ -22,5 +32,6 @@
 - Frontend
 - Backend
 
-[Unreleased]: https://github.com/terrakuh/wizard/compare/v0.2.0...master
+[Unreleased]: https://github.com/terrakuh/wizard/compare/v0.3.0...dev
+[v0.3.0]: https://github.com/terrakuh/wizard/compare/v0.2.0...v0.3.0
 [v0.2.0]: https://github.com/terrakuh/wizard/compare/v0.1.0...v0.2.0
