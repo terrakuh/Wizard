@@ -43,8 +43,11 @@ func standardCardSet() []*card {
 }
 
 func (c *card) calculateValue(winningColor string) int {
-	if c.color != "" && c.color == winningColor {
-		return c.value + 13
+	if c.color != "" {
+		if c.color == winningColor {
+			return c.value + 13
+		}
+		return 0
 	}
 	return c.value
 }
