@@ -3,21 +3,18 @@ package logic
 import "log"
 
 func (game *Game) finishTrick() {
-	winningColor := game.trickColor
-	if winningColor == "" {
-		winningColor = getDeckColor(game.deck)
-	}
+	playedColor := getDeckColor(game.deck)
 	// get best player
 	best := game.deck[0]
 	bestIndex := 0
 	for i, card := range game.deck[1:] {
-		if card.calculateValue(winningColor) > best.calculateValue(winningColor) {
+		if card.calculateValue(game.trickColor, playedColor) > best.calculateValue(game.trickColor, playedColor) {
 			best = card
 			bestIndex = i + 1
 		}
 	}
 	bestIndex = (bestIndex + game.turner.starter) % len(game.players)
-	log.Printf("best was player at %d with %s value of %d", bestIndex, best.location, best.calculateValue(winningColor))
+	log.Printf("best was player at %d with %s value of %d", bestIndex, best.location, best.calculateValue(game.trickColor, playedColor))
 	player := game.players[game.order[bestIndex]]
 	player.Trick.Actual++
 	game.turner.starter = bestIndex

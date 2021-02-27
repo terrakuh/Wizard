@@ -42,12 +42,13 @@ func standardCardSet() []*card {
 	return cards
 }
 
-func (c *card) calculateValue(winningColor string) int {
+func (c *card) calculateValue(trickColor string, deckColor string) int {
 	if c.color != "" {
-		if c.color == winningColor {
+		if c.color == trickColor {
 			return c.value + 13
+		} else if c.color != deckColor {
+			return 0
 		}
-		return 0
 	}
 	return c.value
 }

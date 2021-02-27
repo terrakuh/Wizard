@@ -1,5 +1,9 @@
 # Change Log
 
+## [v0.3.1] - 2020-02-27
+### Fixed
+- Wrong calculation of the card value
+
 ## [v0.3.0] - 2020-02-25
 ### Added
 - Lobby lifetime and timeouts
