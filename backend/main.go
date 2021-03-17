@@ -1,18 +1,19 @@
 package main
 
 import (
+	sec_rand "crypto/rand"
+	"encoding/binary"
 	"flag"
 	"log"
 	"math/rand"
 	"net/http"
-	"time"
 
 	"github.com/gorilla/mux"
 	"github.com/terrakuh/wizard/api"
 )
 
 func main() {
-	rand.Seed(time.Now().Unix())
+	setupRandom()
 
 	host := flag.String("host", "0.0.0.0:8080", "the host address and port")
 	flag.Parse()
@@ -28,4 +29,10 @@ func main() {
 
 	log.Print("hosting on ", *host)
 	http.ListenAndServe(*host, nil)
+}
+
+func setupRandom() {
+	var seed [8]byte
+	sec_rand.Reader.Read(seed[:])
+	rand.Seed(int64(binary.BigEndian.Uint64(seed[:])))
 }
