@@ -9,11 +9,14 @@ import (
 	"github.com/terrakuh/wizard/game/lobby"
 )
 
-var lobbyManager = lobby.NewManager(lobby.Options{
+var lobbyManager = lobby.NewManager(lobby.ManagerOptions{
 	Limit:           5,
 	CodeLength:      5,
 	OverallLifetime: 2 * time.Hour,
 	// InactiveLifetime: 15 * time.Minute,
+	Lobby: lobby.LobbyOptions{
+		PlayerLimit: 8,
+	},
 })
 
 type lobbyInfo struct {

@@ -8,6 +8,10 @@ import (
 	"github.com/terrakuh/wizard/game/logic"
 )
 
+type LobbyOptions struct {
+	PlayerLimit int
+}
+
 type Lobby struct {
 	id            string
 	lock          sync.Mutex
@@ -15,6 +19,7 @@ type Lobby struct {
 	players       map[string]*player
 	game          *logic.Game
 	inactiveReset chan struct{}
+	options       LobbyOptions
 }
 
 func (lobby *Lobby) ID() string {

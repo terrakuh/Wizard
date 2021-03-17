@@ -24,7 +24,7 @@ func (lobby *Lobby) AddPlayer(name string) (string, error) {
 	defer lobby.lock.Unlock()
 	if lobby.game != nil {
 		return "", errors.New("game already started")
-	} else if len(lobby.players) >= 6 {
+	} else if len(lobby.players) >= lobby.options.PlayerLimit {
 		return "", errors.New("lobby player limit reached")
 	}
 	// check if in lobby

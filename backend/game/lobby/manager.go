@@ -9,19 +9,20 @@ import (
 )
 
 type Manager struct {
-	options Options
+	options ManagerOptions
 	lock    sync.Mutex
 	lobbies map[string]*Lobby
 }
 
-type Options struct {
+type ManagerOptions struct {
 	Limit            int
 	CodeLength       int
 	OverallLifetime  time.Duration
 	InactiveLifetime time.Duration
+	Lobby            LobbyOptions
 }
 
-func NewManager(options Options) *Manager {
+func NewManager(options ManagerOptions) *Manager {
 	if options.CodeLength <= 0 {
 		options.CodeLength = 5
 	}
@@ -49,6 +50,7 @@ func (manager *Manager) CreateLobby() (*Lobby, error) {
 	lobby := &Lobby{
 		id:      id,
 		players: make(map[string]*player),
+		options: manager.options.Lobby,
 	}
 	manager.lobbies[id] = lobby
 	manager.launchLobbyWatchdogs(lobby)
