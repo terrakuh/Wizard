@@ -1,6 +1,9 @@
 # Change Log
 
 ## [Unreleased]
+### Added
+- Database for backend
+
 ### Changed
 - Load upper player limit from options
 - Use secure random to mitigate time attacks

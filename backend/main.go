@@ -10,18 +10,26 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/terrakuh/wizard/api"
+	"github.com/terrakuh/wizard/database"
 )
 
 func main() {
 	setupRandom()
 
+	dbFile := flag.String("db", "wizard.db", "the database file")
 	host := flag.String("host", "0.0.0.0:8080", "the host address and port")
 	flag.Parse()
+
+	db, err := database.CreateDB(*dbFile)
+	if err != nil {
+		panic(err)
+	}
+	defer db.Close()
 
 	router := mux.NewRouter()
 	http.Handle("/api/", router)
 	http.Handle("/", cacher(http.FileServer(newRedirectFS("./static"))))
-	myAPI, err := api.NewAPI()
+	myAPI, err := api.NewAPI(db)
 	if err != nil {
 		panic(err)
 	}

@@ -3,6 +3,7 @@ package api
 import (
 	"compress/gzip"
 	"context"
+	"database/sql"
 	"encoding/json"
 	"log"
 	"net/http"
@@ -28,6 +29,7 @@ type params struct {
 
 type API struct {
 	schema gql.Schema
+	db     *sql.DB
 }
 
 type key int
@@ -36,7 +38,7 @@ const keyParams key = iota
 
 var store = sessions.NewCookieStore([]byte(os.Getenv("SESSION_KEY")))
 
-func NewAPI() (*API, error) {
+func NewAPI(db *sql.DB) (*API, error) {
 	var api API
 	var err error
 	api.schema, err = gql.NewSchema(gql.SchemaConfig{
@@ -46,6 +48,7 @@ func NewAPI() (*API, error) {
 	if err != nil {
 		return nil, err
 	}
+	api.db = db
 	return &api, nil
 }
 
