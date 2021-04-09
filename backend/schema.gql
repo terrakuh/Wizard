@@ -1,0 +1,102 @@
+scalar DateTime
+
+type User {
+	id: ID!
+	name: String!
+}
+
+type LoginInformation {
+	salt: String! # base64 encoded
+	hashType: String! # sha256, sha512
+}
+
+type Lobby {
+	mode: Int!
+	players: [User!]!
+}
+
+type PlayerState {
+	player: User!
+	score: Int!
+	tricksCalled: Int
+	tricksMade: Int
+}
+
+type RoundState {
+	trumpColor: Int
+	round: Int!
+}
+
+type PlayedCard {
+	id: ID!
+	player: User!
+	isWinning: Boolean!
+}
+
+type TrickState {
+	playerStates: [PlayerState!]!
+	leadColor: Int
+	round: Int
+	turn: User
+	deck: [PlayedCard!]
+}
+
+type PlayableCard {
+	id: ID!
+	playable: Boolean!
+	variants: [PlayableCard!]
+}
+
+# TODO
+# type Appointment {
+# 	start: DateTime!
+# 	end: DateTime
+# }
+
+type Query {
+	# user management
+	loginInformation(name: String!): LoginInformation
+	user(id: ID!): User
+	whoami: User
+
+	# lobby management
+	lobby: Lobby
+
+	# game logic
+	roundState: RoundState
+	trickState: TrickState
+	hand: [PlayableCard!]
+	requiredAction: Int
+}
+
+########################################
+############### MUTATION ###############
+########################################
+
+input LobbySettings {
+	mode: Int!
+}
+
+type Mutation {
+	# user management
+	register(name: String!, passwordHash: String!, salt: String!, hashType: String!): Boolean!
+	login(name: String!, passwordHash: String!): User
+	logout: Boolean!
+
+	# lobby management
+	createLobby: String!
+	changeLobbySettings(settings: LobbySettings!): Boolean!
+	joinLobby(code: String!): Boolean!
+	leaveLobby: Boolean!
+	startGame: Boolean!
+
+	# game logic
+	playCard(cardID: ID!): [Card!]
+	callTricks(amount: Int!): Boolean!
+	completeAction(argument: String): Boolean!
+}
+
+schema {
+	query: Query
+	mutation: Mutation
+}
