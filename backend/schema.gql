@@ -91,7 +91,7 @@ type Mutation {
 	startGame: Boolean!
 
 	# game logic
-	playCard(cardID: ID!): [Card!]
+	playCard(id: ID!): [PlayableCard!]
 	callTricks(amount: Int!): Boolean!
 	completeAction(argument: String): Boolean!
 }
