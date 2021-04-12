@@ -7,22 +7,25 @@ class Lobby:
 
 class Card:
 
-    def __init__(self, id, value, variants=[]):
-        self.id = id
-        self.value = value
+    def __init__(self, value, card_type, color=None, variants=[]):
+        self.value = value # ~1-100
+        self.card_type = card_type # 1-13, wizard, fool, dragon, ...
+        self.color = color
+        
+        self.id = card_type if color is None else color+"_"+card_type 
+
         self.variants = variants
 
-class HandCard(Card):
+class HandCard():
 
-    def __init__(self, id, value, variants, player):
-        Card.__init(self, id, value, variants)
+    def __init__(self, card, player):
+        self.card = card
         self.player = player
-        self.is_playable = True
 
 class PlayedCard(Card):
 
-    def __init__(self, id, value, player):
-        Card.__init(self, id, value)
+    def __init__(self, card, player):
+        self.card = card
         self.player = player
 
 class Player:
@@ -61,8 +64,10 @@ class Trick:
 
 class Round:
 
-    def __init__(self, players, card_deck, trump_color, trick_count):
-        self.trump_color = trump_color
+    import random
+
+    def __init__(self, players, card_deck, trick_count):
+        self.trump_color = random.choice(card_deck)
         self.trick_count = trick_count
         self.players = players
 
@@ -89,10 +94,18 @@ class Game:
     import itertools
 
     CARD_COLORS = ["red", "green", "yellow", "blue"]
-    CARD_VALUES = itertools.chain(range(1, 14), ["wizard", "fool"])
-
-    STANDARD_CARDS = [newCard("_".join(card_x), card_x[1]) for card_x in itertools.product(CARD_COLORS, CARD_VALUES)]
-    SPECIAL_CARDS_1 = ["fairy", "dragon", "bomb", "cloud", "juggler", "werewolf"]
+    CARD_VALUES = range(1, 14)
+    #(self, value, card_type, color=None, variants=[]):
+    STANDARD_CARDS = itertools.chain.from_iterable(([Card(card_x[0], card_x[0], card_x[1]) for card_x in itertools.product(CARD_VALUES, CARD_COLORS)], # Standard 1-13
+                                                    itertools.chain.from_iterable([(Card(50, "wizard", color), new Card(0, "fool", color)) for color in CARD_COLORS]))) # Wizards/Fools
+    SPECIAL_CARDS_1 = [
+        Card(0, "fairy"), 
+        Card(51, "dragon"), 
+        Card(52, "bomb"), 
+        Card(9.5, "cloud", variants=[]), 
+        Card(7.5, "juggler", variants=[]), 
+        Card(0, "werewolf")
+     ]
     SPECIAL_CARDS_1 = ["foozard"]
 
     def __init__(self, players, settings):
@@ -101,7 +114,7 @@ class Game:
         
         self.round_counter = 0
 
-        self.current_round = new Round(players, self.card_deck, "random", self.round_counter)
+        self.current_round = new Round(players, self.card_deck, self.round_counter)
 
     def start_game(self):
         while True:
