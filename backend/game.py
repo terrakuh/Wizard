@@ -3,13 +3,16 @@ class Lobby:
     def __init__(self):
         random_id = "ASD1F"
         self.id = random_id
+        self.settings = None #TODO default
         return random_id
 
 class Card:
 
-    def __init__(self, value, card_type, color=None, variants=[]):
+    def __init__(self, value, card_type, color_bound=True, color=None, variants=[]):
         self.value = value # ~1-100
         self.card_type = card_type # 1-13, wizard, fool, dragon, ...
+
+        self.color_bound = False if not color else color_bound # tells if following cards have to admit color / color is relevant for admission
         self.color = color
         
         self.id = card_type if color is None else "_".join((color, str(card_type))) 
@@ -40,48 +43,72 @@ class Player:
         self.name = name
         self.score = 0
         self.tricks_called = 0
-        self.tricks_made = 0
+        self.tricks_made = []
         self.cards = None
 
     def call_tricks(self):
+        #TODO API
         self.tricks_called = 1
 
     def play_card(lead_color) -> Card:
-        return None
+        card_selected = 0 #TODO API
+        while not self.__is_playable(self.cards[card_selected], lead_color):
+            #TODO Return API Look harder!
+            card_selected = 0 #TODO API
+        return self.cards.pop(card_selected)
 
+    def reset_player(self):
+        self.tricks_called = 0
+        self.tricks_made = []
+        self.cards = []
+
+    def __is_playable(self, card, lead_color):
+        if (card.is_special or lead_color is None):
+            return True
+        else:
+            playable_cards = filter(lambda card: not card.is_special and card.color == lead_color, self.cards)
+            return (not playable_cards) or (card in playable_cards)
 
 class Trick:
 
-    from collections import deque
-
     def __init__(self, first_player, players):
         self.lead_color = None
-        self.players = deque(players).rotate(first_player *(-1))
+        self.first_player = first_player
+        self.players = players
 
-        self.card_stack = None
+        self.card_stack = []
 
     def do_trick(self):
-        for player in self.players:
-            player.play_card(self.lead_color)
-        
+        player_count = len(self.players)
+
+        for i in range(player_count):
+            card_played = self.players[(i+self.first_player) mod player_count].play_card(self.lead_color)
+            self.card_stack.append(card_played)
+            if not self.lead_color and card_played.color_bound:
+                self.lead_color = card_played.color
+
         return self.__get_winner()
 
     def __get_winner():
-        return 0
+        max_index, max_card = max(self.card_stack, key=lambda card: card.value)
+        return self.players[max_index]
 
 
 
 class Round:
+    """
+    Round for one amount of cards (1, 2, 3, ...)
+    """
 
     import random
 
     def __init__(self, players, card_deck, trick_count):
-        self.trump_color = self.random.choice(card_deck) #TODO
         self.trick_count = trick_count
-        self.players = players
+        self.players =  list(players.map(lambda player: player .reset_player()))
 
     def start_round(self):
-        self.__handout_cards()
+        unhanded_cards = self.__handout_cards()
+        self.trump_card = self.random.choice(unhanded_cards)
         self.__get_estimations()
         for _ in range(self.trick_count):
             winner = Trick(0, self.players).do_trick()
@@ -90,8 +117,16 @@ class Round:
         self.__calculate_points()
 
     def __handout_cards(self):
-        for player in self.players:
-            player.cards = [] #TODO random
+        """
+        Returns: left cards
+        """
+        cards_shuffeled = random.shuffle(self.card_deck)
+        player_count = len(self.players)
+
+        for index, player in enumerate(self.players):
+            player.cards = cards_shuffeled[index:player_count*self.trick_count:player_count]
+
+        return cards_shuffeled[player_count*self.trick_count:]
 
     def __get_estimations(self):
         for player in self.players:
@@ -111,7 +146,7 @@ class Game:
     CARD_VALUES = range(1, 14)
     #(self, value, card_type, color=None, variants=[]):
     STANDARD_CARDS = list(itertools.chain([Card(card_x[0], card_x[0], card_x[1]) for card_x in itertools.product(CARD_VALUES, CARD_COLORS)], # Standard 1-13
-                            itertools.chain.from_iterable([(Card(50, "wizard", color), Card(0, "fool", color)) for color in CARD_COLORS]))) # Wizards/Fools
+                            itertools.chain.from_iterable([(Card(50, "wizard", False, color), Card(0, "fool", False, color)) for color in CARD_COLORS]))) # Wizards/Fools
     SPECIAL_CARDS_1 = [
         Card(0, "fairy"), 
         Card(51, "dragon"), 
@@ -130,7 +165,7 @@ class Game:
     def start_game(self):
         while self.round_counter <= self.card_deck//len(players):
             self.round_counter += 1
-            Round(players, self.card_deck, self.round_counter).start_round()
+            Round(players, self.card_deck.copy(), self.round_counter).start_round()
 
 g = Game(None, None)
 
