@@ -1,14 +1,10 @@
-import functools
-from typing import Callable, Dict
+from typing import Dict
 from fastapi import Request
 from fastapi.security.base import SecurityBase
 from threading import Lock
 from datetime import datetime, timedelta
 from enum import IntEnum
 
-from graphql import ResolveInfo, GraphQLError
-
-# from database import Database
 
 class AccessLevel(IntEnum):
 	NONE = 0
@@ -44,15 +40,3 @@ class UserAuthentication(SecurityBase):
 		with self._lock:
 			self._cache[logged_in] = datetime.now() + self._ttl
 		return logged_in
-
-
-def requires_access_level(level: AccessLevel):
-	def decorator(func: Callable):
-		@functools.wraps(func)
-		async def wrapper(root, info: ResolveInfo, **kwargs):
-			request = info.context["request"]
-			if await request.user_authentication(request) < level:
-				raise GraphQLError("not authorized")
-			return func(root, info, **kwargs)
-		return wrapper
-	return decorator

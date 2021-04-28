@@ -1,11 +1,15 @@
+from api.decorators import State
 from database import Database
 from fastapi import FastAPI, Request, Depends
 from starlette.graphql import GraphQLApp
-from api import schema
+from graphene import Schema
+from api.query import Query
+from api.mutation import Mutation
 from api.security import UserAuthentication
 from graphql.execution.executors.asyncio import AsyncioExecutor
 
 app = FastAPI()
+schema = Schema(query=Query, mutation=Mutation)
 gql_app = GraphQLApp(schema=schema, executor_class=AsyncioExecutor)
 db = Database("wizard.db")
 user_authentication = UserAuthentication(db)
@@ -14,10 +18,6 @@ user_authentication = UserAuthentication(db)
 
 @app.post("/api/gql")
 async def handle_gql(request: Request):
-	request.db = db
-	request.user_authentication = user_authentication
+	request.state.db = db
+	request.state.user_authentication = user_authentication
 	return await gql_app.handle_graphql(request=request)
-
-@app.get("/test")
-async def test(auth: UserAuthentication = Depends(user_authentication)):
-	return "hihi"

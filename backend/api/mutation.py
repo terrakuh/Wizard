@@ -1,12 +1,11 @@
-from api.security import AccessLevel, requires_access_level
+from api.decorators import smart_api
+from api.security import AccessLevel
 from graphene import ObjectType, Boolean, NonNull, String, ResolveInfo, Int, ID, List
 from graphql import GraphQLError
 from .types import User, PlayableCard
 from .inputs import LobbySettings
+from database import Database
 
-from typing import TYPE_CHECKING
-if TYPE_CHECKING:
-	from database import Database
 
 class Mutation(ObjectType):
 	# user management
@@ -15,7 +14,7 @@ class Mutation(ObjectType):
 	logout = NonNull(Boolean)
 
 
-	@requires_access_level(AccessLevel.ADMINISTRATOR)
+	@smart_api(access = AccessLevel.ADMINISTRATOR)
 	async def resolve_register(root, info: ResolveInfo, name: str, password_hash: str, salt: str, hash_type: str):
 		db: Database = info.context["request"].db
 		try:
@@ -25,12 +24,13 @@ class Mutation(ObjectType):
 		return True
 
 
+	@smart_api()
 	async def resolve_login(root, info: ResolveInfo, name: str, password_hash: str):
 		db: Database = info.context["request"].db
 		cookie = await db.login(name, password_hash)
 
 
-	@requires_access_level(AccessLevel.NORMAL_USER)
+	@smart_api(access = AccessLevel.NORMAL_USER)
 	def resolve_logout(root, info: ResolveInfo):
 		pass
 
@@ -43,27 +43,27 @@ class Mutation(ObjectType):
 	start_game = NonNull(Boolean)
 
 
-	@requires_access_level(AccessLevel.NORMAL_USER)
+	@smart_api(access = AccessLevel.NORMAL_USER)
 	def resolve_create_lobby(root, info: ResolveInfo):
 		pass
 
 
-	@requires_access_level(AccessLevel.NORMAL_USER)
+	@smart_api(access = AccessLevel.NORMAL_USER)
 	def resolve_change_lobby_settings(root, info: ResolveInfo):
 		pass
 
 
-	@requires_access_level(AccessLevel.NORMAL_USER)
+	@smart_api(access = AccessLevel.NORMAL_USER)
 	def resolve_join_lobby(root, info: ResolveInfo):
 		pass
 
 
-	@requires_access_level(AccessLevel.NORMAL_USER)
+	@smart_api(access = AccessLevel.NORMAL_USER)
 	def resolve_leave_lobby(root, info: ResolveInfo):
 		pass
 
 
-	@requires_access_level(AccessLevel.NORMAL_USER)
+	@smart_api(access = AccessLevel.NORMAL_USER)
 	def resolve_start_game(root, info: ResolveInfo):
 		pass
 
@@ -74,16 +74,16 @@ class Mutation(ObjectType):
 	complete_action = NonNull(Boolean, argument=String())
 
 
-	@requires_access_level(AccessLevel.NORMAL_USER)
+	@smart_api(access = AccessLevel.NORMAL_USER)
 	def resolve_play_card(root, info: ResolveInfo):
 		pass
 
 
-	@requires_access_level(AccessLevel.NORMAL_USER)
+	@smart_api(access = AccessLevel.NORMAL_USER)
 	def resolve_call_tricks(root, info: ResolveInfo):
 		pass
 
 
-	@requires_access_level(AccessLevel.NORMAL_USER)
+	@smart_api(access = AccessLevel.NORMAL_USER)
 	def resolve_complete_action(root, info: ResolveInfo):
 		pass

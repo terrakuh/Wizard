@@ -1,5 +1,6 @@
 from graphene import ObjectType, ID, String, NonNull, List, Int, Boolean
 
+
 class User(ObjectType):
 	id = NonNull(ID)
 	name = NonNull(String)

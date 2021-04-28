@@ -46,7 +46,7 @@ class Database:
 		await get_event_loop().run_in_executor(self._pool, lambda: self._db.close())
 
 
-	async def get_logging_information(self, name: str) -> LoginInformation:
+	async def get_login_information(self, name: str) -> LoginInformation:
 		result = await get_event_loop().run_in_executor(self._pool, self.__execute, """
 			SELECT salt, hash_type
 			FROM user
