@@ -75,7 +75,7 @@ class Mutation(ObjectType):
 
 
 	@smart_api(access = AccessLevel.NORMAL_USER)
-	def resolve_play_card(root, info: ResolveInfo):
+	def resolve_play_card(root, info: ResolveInfo, id: ID):
 		pass
 
 
