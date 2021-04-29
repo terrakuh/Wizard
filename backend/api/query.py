@@ -4,6 +4,7 @@ from graphql import GraphQLError
 from .types import Lobby, LoginInformation, PlayableCard, RoundState, TrickState, User
 from .security import AccessLevel
 from database import Database
+from fastapi import Request
 
 
 class Query(ObjectType):
@@ -12,14 +13,12 @@ class Query(ObjectType):
 	user = Field(User, id=NonNull(ID))
 	whoami = Field(User)
 
-
 	@smart_api()
 	async def resolve_login_information(root, info: ResolveInfo, name: str, db: Database):
 		try:
 			return await db.get_login_information(name)
 		except:
 			raise GraphQLError(f"User '{name}' does not exist.")
-
 
 	@smart_api(access = AccessLevel.NORMAL_USER)
 	async def resolve_user(root, info: ResolveInfo, id: ID, db: Database):
@@ -28,10 +27,9 @@ class Query(ObjectType):
 		except:
 			raise GraphQLError(f"User #{id} does not exist.")
 
-
 	@smart_api(access = AccessLevel.NORMAL_USER)
-	def resolve_whoami(root, info: ResolveInfo):
-		pass
+	async def resolve_whoami(root, info: ResolveInfo, db: Database, request: Request):
+		return await db.get_user_by_cookie(request.cookies["login"])
 
 
 	# lobby management

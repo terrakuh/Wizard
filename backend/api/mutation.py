@@ -1,10 +1,11 @@
-from api.decorators import smart_api
+from api.decorators import smart_api, Response
 from api.security import AccessLevel
 from graphene import ObjectType, Boolean, NonNull, String, ResolveInfo, Int, ID, List
 from graphql import GraphQLError
 from .types import User, PlayableCard
 from .inputs import LobbySettings
 from database import Database
+from fastapi import Request
 
 
 class Mutation(ObjectType):
@@ -13,26 +14,30 @@ class Mutation(ObjectType):
 	login = NonNull(User, name=NonNull(String), password_hash=NonNull(String))
 	logout = NonNull(Boolean)
 
-
 	@smart_api(access = AccessLevel.ADMINISTRATOR)
-	async def resolve_register(root, info: ResolveInfo, name: str, password_hash: str, salt: str, hash_type: str):
-		db: Database = info.context["request"].db
+	async def resolve_register(root, info: ResolveInfo, name: str, password_hash: str, salt: str, hash_type: str, db: Database):
 		try:
 			await db.register_user(name, password_hash, salt, hash_type)
 		except:
 			raise GraphQLError(f"User '{name}' already exists.'")
 		return True
 
-
 	@smart_api()
-	async def resolve_login(root, info: ResolveInfo, name: str, password_hash: str):
-		db: Database = info.context["request"].db
-		cookie = await db.login(name, password_hash)
-
+	async def resolve_login(root, info: ResolveInfo, name: str, password_hash: str, db: Database, response: Response):
+		try:
+			cookie = await db.login(name, password_hash)
+			response.cookies["login"] = cookie
+		except:
+			raise GraphQLError(f"User '{name}' does not exist.")
+		return User(id=0, name=name)
 
 	@smart_api(access = AccessLevel.NORMAL_USER)
-	def resolve_logout(root, info: ResolveInfo):
-		pass
+	async def resolve_logout(root, info: ResolveInfo, db: Database, request: Request, response: Response):
+		cookie = request.cookies.get("login")
+		if cookie is not None:
+			await db.logout(cookie)
+			response.cookies["login"] = None
+		return True
 
 
 	# lobby management
