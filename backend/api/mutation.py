@@ -14,7 +14,7 @@ class Mutation(ObjectType):
 	login = NonNull(User, name=NonNull(String), password_hash=NonNull(String))
 	logout = NonNull(Boolean)
 
-	@smart_api(access = AccessLevel.ADMINISTRATOR)
+	@smart_api(access=AccessLevel.ADMINISTRATOR)
 	async def resolve_register(root, info: ResolveInfo, name: str, password_hash: str, salt: str, hash_type: str, db: Database):
 		try:
 			await db.register_user(name, password_hash, salt, hash_type)
@@ -31,7 +31,7 @@ class Mutation(ObjectType):
 			raise GraphQLError(f"User '{name}' does not exist.")
 		return User(id=0, name=name)
 
-	@smart_api(access = AccessLevel.NORMAL_USER)
+	@smart_api(access=AccessLevel.NORMAL_USER)
 	async def resolve_logout(root, info: ResolveInfo, db: Database, request: Request, response: Response):
 		cookie = request.cookies.get("login")
 		if cookie is not None:
@@ -47,28 +47,23 @@ class Mutation(ObjectType):
 	leave_lobby = NonNull(Boolean)
 	start_game = NonNull(Boolean)
 
-
-	@smart_api(access = AccessLevel.NORMAL_USER)
+	@smart_api(access=AccessLevel.NORMAL_USER)
 	def resolve_create_lobby(root, info: ResolveInfo):
 		pass
 
-
-	@smart_api(access = AccessLevel.NORMAL_USER)
+	@smart_api(access=AccessLevel.NORMAL_USER)
 	def resolve_change_lobby_settings(root, info: ResolveInfo):
 		pass
 
-
-	@smart_api(access = AccessLevel.NORMAL_USER)
+	@smart_api(access=AccessLevel.NORMAL_USER)
 	def resolve_join_lobby(root, info: ResolveInfo):
 		pass
 
-
-	@smart_api(access = AccessLevel.NORMAL_USER)
+	@smart_api(access=AccessLevel.NORMAL_USER)
 	def resolve_leave_lobby(root, info: ResolveInfo):
 		pass
 
-
-	@smart_api(access = AccessLevel.NORMAL_USER)
+	@smart_api(access=AccessLevel.NORMAL_USER)
 	def resolve_start_game(root, info: ResolveInfo):
 		pass
 
@@ -78,17 +73,14 @@ class Mutation(ObjectType):
 	call_tricks = NonNull(Boolean, amount=NonNull(Int))
 	complete_action = NonNull(Boolean, argument=String())
 
-
-	@smart_api(access = AccessLevel.NORMAL_USER)
+	@smart_api(access=AccessLevel.NORMAL_USER)
 	def resolve_play_card(root, info: ResolveInfo):
 		pass
 
-
-	@smart_api(access = AccessLevel.NORMAL_USER)
+	@smart_api(access=AccessLevel.NORMAL_USER)
 	def resolve_call_tricks(root, info: ResolveInfo):
 		pass
 
-
-	@smart_api(access = AccessLevel.NORMAL_USER)
+	@smart_api(access=AccessLevel.NORMAL_USER)
 	def resolve_complete_action(root, info: ResolveInfo):
 		pass
