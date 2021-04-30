@@ -1,3 +1,4 @@
+from api.types import User
 from datetime import datetime, timedelta
 import functools
 from threading import Lock
@@ -6,8 +7,9 @@ from graphql import ResolveInfo
 from typing import Any, Callable, Dict, OrderedDict, Tuple, Union
 from fastapi import Request
 from database import Database
-from api.security import AccessLevel, UserAuthentication
+from api.security import UserAuthentication
 from inspect import getfullargspec, iscoroutine
+from lobby.manager import Manager
 
 
 class Response:
@@ -19,6 +21,7 @@ class State:
 	db: Database
 	user_authentication: UserAuthentication
 	response: Response
+	lobby_manager: Manager
 
 
 class Cache:
@@ -51,16 +54,16 @@ class Cache:
 		return hash(frozenset(args.items()))
 
 
-
-def smart_api(access: AccessLevel = None, cache: Cache = None):
+def smart_api(access_control: bool = True, cache: Cache = None):
 	def decorator(func: Callable):
 		@functools.wraps(func)
 		async def wrapper(root, info: ResolveInfo, **kwargs):
 			request: Request = info.context["request"]
 			state: State = request.state
+			user: User = None
 			# authorization
-			if access is not None and await state.user_authentication(request) < access:
-				raise GraphQLError("not authorized")
+			if access_control:
+				user = await state.user_authentication.authenticate(request)
 			# try cache
 			try:
 				return cache.get_cached(kwargs)
@@ -76,8 +79,11 @@ def smart_api(access: AccessLevel = None, cache: Cache = None):
 					additional[key] = state.response
 				elif value is Request:
 					additional[key] = request
+				elif value is Manager:
+					additional[key] = state.lobby_manager
+				elif value is User:
+					additional[key] = user
 			# execute
-			print("executing")
 			result = func(root, info, **kwargs, **additional)
 			if iscoroutine(result):
 				result = await result

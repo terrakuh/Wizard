@@ -20,9 +20,12 @@ lobby_manager = Manager()
 
 @app.post("/api/gql")
 async def handle_gql(request: Request):
+	# dependencies
 	request.state.db = db
 	request.state.user_authentication = user_authentication
 	request.state.response = Response()
+	request.state.lobby_manager = lobby_manager
+	# execute
 	real_response = await gql_app.handle_graphql(request=request)
 	for key, value in request.state.response.cookies.items():
 		if value is None:
