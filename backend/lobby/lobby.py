@@ -24,6 +24,10 @@ class Lobby:
 				raise Exception("game already in progress")
 			self._players.remove(id)
 
+	def get_players(self):
+		with self._lock:
+			return self._players.copy()
+
 	def start_game(self, id: int):
 		with self._lock:
 			if self.game_started is not None:
