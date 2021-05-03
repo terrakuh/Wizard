@@ -70,7 +70,7 @@ class Database:
 		await get_event_loop().run_in_executor(self._pool, func)
 		return cookie
 
-	async def logout(self, cookie: str):
+	async def logout(self, cookie: str) -> None:
 		await get_event_loop().run_in_executor(self._pool, self.__execute,
 			"DELETE FROM session WHERE cookie=?", (cookie,))
 
@@ -78,6 +78,16 @@ class Database:
 		result = await get_event_loop().run_in_executor(self._pool, self.__execute,
 			"SELECT 1 FROM session WHERE cookie=? AND expires>DATETIME('now')", (cookie,))
 		return len(result) != 0
+
+	async def consume_token(self, token: str) -> None:
+		def func():
+			with self._db:
+				result = self._db.execute("SELECT 1 FROM register_token WHERE token=?", (token,)).fetchone()
+				if result is None and self._db.execute("SELECT COUNT(*) FROM user").fetchone()[0] != 0:
+					raise Exception("invalid token")
+				self._db.execute("DELETE FROM register_token WHERE token=?", (token,))
+		await get_event_loop().run_in_executor(self._pool, func)
+
 
 
 if __name__ == "__main__":

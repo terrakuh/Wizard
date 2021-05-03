@@ -79,7 +79,7 @@ input LobbySettings {
 
 type Mutation {
 	# user management
-	register(name: String!, passwordHash: String!, salt: String!, hashType: String!): Boolean!
+	register(name: String!, passwordHash: String!, salt: String!, hashType: String!, token: String!): Boolean!
 	login(name: String!, passwordHash: String!): User
 	logout: Boolean!
 

@@ -11,16 +11,17 @@ from lobby.lobby import Lobby, Settings
 
 class Mutation(ObjectType):
 	# user management
-	register = NonNull(Boolean, name=NonNull(String), password_hash=NonNull(String), salt=NonNull(String), hash_type=NonNull(String))
+	register = NonNull(Boolean, name=NonNull(String), password_hash=NonNull(String), salt=NonNull(String), hash_type=NonNull(String), token=NonNull(String))
 	login = NonNull(User, name=NonNull(String), password_hash=NonNull(String))
 	logout = NonNull(Boolean)
 
 	@smart_api(access_control=False)
-	async def resolve_register(root, info: ResolveInfo, name: str, password_hash: str, salt: str, hash_type: str, db: Database):
+	async def resolve_register(root, info: ResolveInfo, name: str, password_hash: str, salt: str, hash_type: str, token: str, db: Database):
+		await db.consume_token(token)
 		try:
 			await db.register_user(name, password_hash, salt, hash_type)
 		except:
-			raise GraphQLError(f"User '{name}' already exists.'")
+			raise GraphQLError(f"User '{name}' already exists.")
 		return True
 
 	@smart_api(access_control=False)
