@@ -1,16 +1,17 @@
 import React from "react"
-import { AppBar, Button, createStyles, Dialog, DialogContent, FormControl, FormControlLabel, IconButton, InputLabel, MenuItem, Paper, Select, Slide, Switch, Tab, Tabs, Toolbar, Typography, withStyles, WithStyles } from "@material-ui/core"
+import { AppBar, Button, Dialog, DialogContent, FormControl, FormControlLabel, IconButton, InputLabel, makeStyles, MenuItem, Paper, Select, Slide, Switch, Tab, Tabs, Toolbar, Typography } from "@material-ui/core"
 import { TransitionProps } from "@material-ui/core/transitions"
 import { Close as CloseIcon, Notifications as NotificationsIcon } from "@material-ui/icons"
 import SwipeableViews from "react-swipeable-views"
 import { useSettings } from "./SettingsProvider"
 
-interface Props extends WithStyles<typeof styles> {
+interface Props {
 	open: boolean
 	onClose: () => void
 }
 
-function SettingsDialog(props: Props) {
+export default function SettingsDialog(props: Props) {
+	const classes = useStyles()
 	const { settings, setSettings } = useSettings()
 	const [newSettings, setNewSettings] = React.useState(settings)
 	const [index, setIndex] = React.useState(0)
@@ -26,12 +27,12 @@ function SettingsDialog(props: Props) {
 			TransitionComponent={Transition}
 			fullScreen
 			open={props.open}>
-			<AppBar className={props.classes.appBar}>
+			<AppBar className={classes.appBar}>
 				<Toolbar>
 					<IconButton onClick={props.onClose} edge="start" color="inherit">
 						<CloseIcon />
 					</IconButton>
-					<Typography variant="h6" className={props.classes.title}>Einstellungen</Typography>
+					<Typography variant="h6" className={classes.title}>Einstellungen</Typography>
 					<Button
 						color="inherit"
 						onClick={props.onClose}>
@@ -123,7 +124,7 @@ function SettingsDialog(props: Props) {
 	)
 }
 
-const styles = createStyles({
+const useStyles = makeStyles({
 	appBar: {
 		position: "relative"
 	},
@@ -135,5 +136,3 @@ const styles = createStyles({
 const Transition = React.forwardRef(function (props: TransitionProps & { children?: React.ReactElement }, ref: React.Ref<unknown>,) {
 	return <Slide direction="up" ref={ref} {...props} />
 })
-
-export default withStyles(styles)(SettingsDialog)

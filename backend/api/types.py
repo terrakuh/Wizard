@@ -1,4 +1,4 @@
-from graphene import ObjectType, ID, String, NonNull, List, Int, Boolean
+from graphene import ObjectType, ID, String, NonNull, List, Int, Boolean, Field
 
 
 class User(ObjectType):
@@ -19,12 +19,12 @@ class LoginInformation(ObjectType):
 class PlayerState(ObjectType):
 	player = NonNull(User)
 	score = NonNull(Int)
-	tricks_called = Int
-	tricks_made = Int
+	tricks_called = Int()
+	tricks_made = Int()
 
 
 class RoundState(ObjectType):
-	trump_color = Int
+	trump_color = String()
 	round = NonNull(Int)
 
 
@@ -36,9 +36,9 @@ class PlayedCard(ObjectType):
 
 class TrickState(ObjectType):
 	players_states = NonNull(List(NonNull(PlayerState)))
-	lead_color = Int
-	round = Int
-	turn = User
+	lead_color = String()
+	round = Int()
+	turn = Field(User)
 	deck = List(NonNull(PlayedCard))
 
 
@@ -46,3 +46,8 @@ class PlayableCard(ObjectType):
 	id = NonNull(ID)
 	playable = NonNull(Boolean)
 	variants = List(NonNull(lambda: PlayableCard))
+
+
+class RequiredAction(ObjectType):
+	type = NonNull(String)
+	options = NonNull(List(NonNull(String)))

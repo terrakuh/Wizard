@@ -1,4 +1,4 @@
-export default interface Settings {
+export interface Settings {
 	notifications: {
 		enabled: boolean
 		audio: boolean

@@ -23,7 +23,7 @@ type PlayerState {
 }
 
 type RoundState {
-	trumpColor: Int
+	trumpColor: String
 	round: Int!
 }
 
@@ -35,7 +35,7 @@ type PlayedCard {
 
 type TrickState {
 	playerStates: [PlayerState!]!
-	leadColor: Int
+	leadColor: String
 	round: Int
 	turn: User
 	deck: [PlayedCard!]
@@ -45,6 +45,11 @@ type PlayableCard {
 	id: ID!
 	playable: Boolean!
 	variants: [PlayableCard!]
+}
+
+type RequiredAction {
+	type: String!
+	options: [String!]!
 }
 
 # TODO
@@ -66,7 +71,7 @@ type Query {
 	roundState: RoundState
 	trickState: TrickState
 	hand: [PlayableCard!]
-	requiredAction: Int
+	requiredAction: RequiredAction
 }
 
 ########################################
@@ -79,7 +84,7 @@ input LobbySettings {
 
 type Mutation {
 	# user management
-	register(name: String!, passwordHash: String!, salt: String!, hashType: String!): Boolean!
+	register(name: String!, passwordHash: String!, salt: String!, hashType: String!, token: String!): Boolean!
 	login(name: String!, passwordHash: String!): User
 	logout: Boolean!
 
@@ -91,9 +96,7 @@ type Mutation {
 	startGame: Boolean!
 
 	# game logic
-	playCard(id: ID!): [PlayableCard!]
-	callTricks(amount: Int!): Boolean!
-	completeAction(argument: String): Boolean!
+	completeAction(option: String!): Boolean!
 }
 
 schema {

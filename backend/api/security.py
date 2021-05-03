@@ -1,42 +1,33 @@
-from typing import Dict
+from graphql import GraphQLError
+from api.types import User
+from typing import Dict, Tuple
 from fastapi import Request
 from fastapi.security.base import SecurityBase
 from threading import Lock
 from datetime import datetime, timedelta
-from enum import IntEnum
-
-
-class AccessLevel(IntEnum):
-	NONE = 0
-	NORMAL_USER = 1
-	ADMINISTRATOR = 2
+from database import Database
 
 
 class UserAuthentication(SecurityBase):
-	def __init__(self, db, ttl: timedelta = timedelta(hours=1)):
+	def __init__(self, db: Database, ttl: timedelta = timedelta(minutes=1)) -> None:
 		self._lock = Lock()
-		self._cache: Dict[str, datetime] = {}
+		self._cache: Dict[str, Tuple[datetime, User]] = {}
 		self._ttl = ttl
 		self.db = db
 
-	async def __call__(self, request: Request) -> AccessLevel:
+	async def authenticate(self, request: Request) -> User:
 		try:
 			cookie = request.cookies["login"]
+			with self._lock:
+				try:
+					time, user = self._cache[cookie]
+					if datetime.now() < time:
+						return user
+				except:
+					pass
+			user = await self.db.get_user_by_cookie(cookie)
+			with self._lock:
+				self._cache[cookie] = datetime.now()+self._ttl, user
+			return user
 		except:
-			cookie = None
-		if cookie is None or not await self._is_logged_in(cookie):
-			return AccessLevel.NONE
-		return AccessLevel.NORMAL_USER
-
-	async def _is_logged_in(self, cookie: str) -> bool:
-		with self._lock:
-			try:
-				time = self._cache[cookie]
-				if datetime.now() < time:
-					return True
-			except:
-				pass
-		logged_in = await self.db.is_logged_in(cookie)
-		with self._lock:
-			self._cache[logged_in] = datetime.now() + self._ttl
-		return logged_in
+			raise GraphQLError("authentication failed")
