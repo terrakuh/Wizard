@@ -10,6 +10,7 @@ from database import Database
 from api.security import UserAuthentication
 from inspect import getfullargspec, iscoroutine
 from lobby.manager import Manager
+from lobby.lobby import Lobby
 
 
 class Response:
@@ -83,6 +84,12 @@ def smart_api(access_control: bool = True, cache: Cache = None):
 					additional[key] = state.lobby_manager
 				elif value is User:
 					additional[key] = user
+				elif value is Lobby:
+					try:
+						lobby = state.lobby_manager.get_lobby_by_player(user.id)
+					except:
+						raise GraphQLError("lobby does not exist")
+					additional[key] = lobby
 			# execute
 			result = func(root, info, **kwargs, **additional)
 			if iscoroutine(result):

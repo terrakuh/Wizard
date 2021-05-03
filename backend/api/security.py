@@ -9,7 +9,7 @@ from database import Database
 
 
 class UserAuthentication(SecurityBase):
-	def __init__(self, db: Database, ttl: timedelta = timedelta(minutes=1)):
+	def __init__(self, db: Database, ttl: timedelta = timedelta(minutes=1)) -> None:
 		self._lock = Lock()
 		self._cache: Dict[str, Tuple[datetime, User]] = {}
 		self._ttl = ttl

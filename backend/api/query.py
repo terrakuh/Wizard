@@ -2,9 +2,10 @@ from datetime import timedelta
 from api.decorators import Cache, smart_api
 from graphene import ObjectType, Field, ID, String, NonNull, ResolveInfo, List, Int
 from graphql import GraphQLError
-from .types import Lobby, LoginInformation, PlayableCard, RoundState, TrickState, User
+from .types import Lobby as LobbyType, LoginInformation, PlayableCard, RoundState, TrickState, User
 from database import Database
 from lobby.manager import Manager
+from lobby.lobby import Lobby
 
 
 class Query(ObjectType):
@@ -33,16 +34,15 @@ class Query(ObjectType):
 
 
 	# lobby management
-	lobby = Field(Lobby)
+	lobby = Field(LobbyType)
 
 	@smart_api()
-	async def resolve_lobby(root, info: ResolveInfo, user: User, manager: Manager):
+	async def resolve_lobby(root, info: ResolveInfo, lobby: Lobby):
 		try:
-			lobby = manager.get_lobby_by_player(user.id)
+			settings = lobby.get_settings()
 			players = [await Query.resolve_user(root, info, id=id) for id in lobby.get_players()]
-			return Lobby(mode=0, players=players)
-		except Exception as e:
-			print(e)
+			return LobbyType(mode=settings.mode, players=players)
+		except:
 			return None
 
 
