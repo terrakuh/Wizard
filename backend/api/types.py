@@ -46,3 +46,8 @@ class PlayableCard(ObjectType):
 	id = NonNull(ID)
 	playable = NonNull(Boolean)
 	variants = List(NonNull(lambda: PlayableCard))
+
+
+class RequiredAction(ObjectType):
+	type = NonNull(String)
+	options = NonNull(List(NonNull(String)))

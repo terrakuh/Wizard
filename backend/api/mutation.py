@@ -84,19 +84,17 @@ class Mutation(ObjectType):
 
 
 	# game logic
-	play_card = List(NonNull(PlayableCard), id=NonNull(ID))
-	call_tricks = NonNull(Boolean, amount=NonNull(Int))
-	complete_action = NonNull(Boolean, argument=String())
+	complete_action = NonNull(Boolean, option=NonNull(String()))
+
+	# @smart_api()
+	# def resolve_play_card(root, info: ResolveInfo, id: ID, player: Player, trick: Trick):
+	# 	left_cards = game.game_interface.play_card(id, player, trick.lead_color)
+	# 	return cards_to_playable_cards(left_cards)
+
+	# @smart_api()
+	# def resolve_call_tricks(root, info: ResolveInfo, player: Player, amount: int):
+	# 	return game.game_interface.call_tricks(amount, player)
 
 	@smart_api()
-	def resolve_play_card(root, info: ResolveInfo, id: ID, player: Player, trick: Trick):
-		left_cards = game.game_interface.play_card(id, player, trick.lead_color)
-		return cards_to_playable_cards(left_cards)
-
-	@smart_api()
-	def resolve_call_tricks(root, info: ResolveInfo, player: Player, amount: int):
-		return game.game_interface.call_tricks(amount, player)
-
-	@smart_api()
-	def resolve_complete_action(root, info: ResolveInfo, player: Player, argument: str):
-		return game.game_interface.complete_action(argument, player)
+	def resolve_complete_action(root, info: ResolveInfo, player: Player, option: str):
+		return game.game_interface.complete_action(option, player)

@@ -3,7 +3,7 @@ from typing import Optional
 from api.decorators import Cache, smart_api
 from graphene import ObjectType, Field, ID, String, NonNull, ResolveInfo, List, Int
 from graphql import GraphQLError
-from .types import Lobby as LobbyType, LoginInformation, PlayableCard, RoundState, TrickState, User
+from .types import Lobby as LobbyType, LoginInformation, PlayableCard, RequiredAction, RoundState, TrickState, User
 from database import Database
 from lobby.manager import Manager
 from lobby.lobby import Lobby
@@ -56,7 +56,7 @@ class Query(ObjectType):
 	round_state = Field(RoundState)
 	trick_state = Field(TrickState)
 	hand = List(NonNull(PlayableCard))
-	required_action = String()
+	required_action = Field(RequiredAction)
 
 	@smart_api()
 	def resolve_round_state(root, info: ResolveInfo, round: Round):
@@ -78,4 +78,5 @@ class Query(ObjectType):
 
 	@smart_api()
 	def resolve_required_action(root, info: ResolveInfo, player: Player):
+		# TODO return RequiredAction
 		return game.game_interface.get_action_required(player)

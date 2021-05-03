@@ -47,6 +47,11 @@ type PlayableCard {
 	variants: [PlayableCard!]
 }
 
+type RequiredAction {
+	type: String!
+	options: [String!]!
+}
+
 # TODO
 # type Appointment {
 # 	start: DateTime!
@@ -66,7 +71,7 @@ type Query {
 	roundState: RoundState
 	trickState: TrickState
 	hand: [PlayableCard!]
-	requiredAction: String
+	requiredAction: RequiredAction
 }
 
 ########################################
@@ -91,9 +96,7 @@ type Mutation {
 	startGame: Boolean!
 
 	# game logic
-	playCard(id: ID!): [PlayableCard!]
-	callTricks(amount: Int!): Boolean!
-	completeAction(argument: String): Boolean!
+	completeAction(option: String!): Boolean!
 }
 
 schema {
