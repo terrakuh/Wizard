@@ -27,41 +27,130 @@ class Card:
 
 class Player:
 
+    import asyncio
+
     def __init__(self, name):
         self.name = name
         self.score = 0
         self.tricks_called = 0
         self.tricks_made = 0
-        self.cards = None
+        self.cards = Non
+
+        self.selection = []
+        self.selected = None
+        self.input_error = None
+
+        self.wait_for_input = asyncio.Event()
+        self.wait_for_input.set()
+
+        self.waiting_function = asyncio.Event()
+        self.waiting_function.set()
 
     def select_trump_color(self) -> str:
         logging.info(self.name + " is selecting trump color...")
         return input()
 
-    def call_tricks(self):
-        logging.info(self.name + " is calling tricks")
-        self.tricks_called = int(input())
-        logging.info(self.name + " called " + str(self.tricks_called) +  " trick(s)")
+    async def user_action(self, action, is_valid_input, error_message, process_input=None):
+        logging.info(self.name + " is waiting for input on " + action)
 
-    def play_card(self, lead_color) -> str:
+        self.wait_for_input.clear()
+        self.waiting_function.clear()
+
+        await self.wait_for_input.wait()
+
+        user_input = self.selected
+
+        if is_valid_input(user_input):
+            self.input_error = error_message
+            self.waiting_function.set()
+            return
+
+        logging.info(self.name + "'s input for " + action + ": " + user_input)
+
+        if process_input:
+            user_input = process_input(user_input)
+
+        self.waiting_function.set()
+
+        return user_input
+
+    async def call_tricks(self, called_tricks, max_tricks) -> str:
+        check_input = lambda user_input: int(user_input) + called_tricks == max_tricks
+
+        return self.user_action("call_tricks", check_input, "Trick number must not equal card number")
+
+
+    async def play_card(self, lead_color) -> str:
+        check_input = lambda user_input: not self.__is_playable(user_input, lead_color)
+
+        def payload(user_input):
+            card_variants = Game.CARDS.get(user_input).variants
+            if card_variants:
+                variant_selected = self.select_input(card_variants)
+                logging.info(self.name + " has selected " + str(variant_selected))
+                return variant_selected
+            return user_input
+        
+        return self.user_action("play_card", check_input, "Card not playable", payload)
+
         logging.info(self.name + ", play card! Your cards are: " + str(self.cards))
-        card_selected = int(input())
-        while not self.__is_playable(self.cards[card_selected], lead_color):
-            print("Look harder!")
-            card_selected = int(input())
-        card_played = self.cards.pop(card_selected)
+
+        self.wait_for_input.clear()
+
+        await self.wait_for_input.wait()
+
+        card_selected = self.selected
+
+        if not self.__is_playable(card_selected, lead_color):
+            self.input_error = "Card not playable"
+            self.waiting_function.set()
+            return
+
+        self.cards.remove(card_selected)
+
         logging.info(self.name + " has played " + str(card_played))
-        card_variants = Game.CARDS.get(card_played).variants
+
+        card_variants = Game.CARDS.get(card_selected).variants
         if card_variants:
             variant_selected = self.select_input(card_variants)
             logging.info(self.name + " has selected " + str(variant_selected))
-            card_played = variant_selected.id
-        return card_played
+            card_selected = variant_selected
 
-    def select_input(self, options):
+        self.waiting_function.set()
+
+        return card_selected.id
+
+    async def select_input(self, options):
         logging.info(self.name + " selecting from " + str(options) + " (enter 0-n)")
-        selection = input()
-        return options[int(selection)]
+
+        self.selection = options
+
+        self.wait_for_input.clear()
+        self.waiting_function.clear()
+        
+        await self.wait_for_input.wait()
+
+        value_selected = self.selection
+
+        if value_selected not in self.options:
+            self.input_error = "Invalid value selected"
+            self.waiting_function.set()
+            return
+
+        self.selection = []
+
+        self.waiting_function.set()
+
+        return value_selected
+
+    async def get_user_input(self, arg):
+        self.selection = arg
+        self.wait_for_input.set()
+
+        await self.waiting_function.wait()
+        if self.input_error:
+            #TODO throw error
+            self.input_error = None
 
     def reset(self):
         self.tricks_called = 0
@@ -174,6 +263,7 @@ class Round:
         self.game_mode = game_context.get("mode")
 
         self.round_number = game_context.get("round_counter")
+        self.tricks_called = 0
         self.card_deck = game_context.get("card_deck")
         self.players = game_context.get("players")
         self.first_player = game_context.get("first_player")
@@ -258,7 +348,7 @@ class Round:
 
         for i in range(player_count):
             player = self.players[(i + self.first_player) % player_count]
-            player.call_tricks()
+            self.tricks_called += player.call_tricks(self.tricks_called, self.round_number)
     
     def __calculate_points(self):
         for player in self.players:
@@ -329,6 +419,10 @@ class Game:
             self.first_player = (self.first_player + 1) % len(self.players)
 
             for p in self.players: p.reset()
+
+    def get_round_state() {
+
+    }
 
 import logging
 

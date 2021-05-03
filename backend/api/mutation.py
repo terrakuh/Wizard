@@ -7,6 +7,10 @@ from database import Database
 from fastapi import Request
 from lobby.manager import Manager
 from lobby.lobby import Lobby, Settings
+from game.player import Player
+from game.trick import Trick
+from .helpers import *
+import game.game_interface
 
 
 class Mutation(ObjectType):
@@ -85,13 +89,14 @@ class Mutation(ObjectType):
 	complete_action = NonNull(Boolean, argument=String())
 
 	@smart_api()
-	def resolve_play_card(root, info: ResolveInfo):
-		pass
+	def resolve_play_card(root, info: ResolveInfo, id: ID, player: Player, trick: Trick):
+		left_cards = game.game_interface.play_card(id, player, trick.lead_color)
+		return cards_to_playable_cards(left_cards)
 
 	@smart_api()
-	def resolve_call_tricks(root, info: ResolveInfo):
-		pass
+	def resolve_call_tricks(root, info: ResolveInfo, player: Player, amount: int):
+		return game.game_interface.call_tricks(amount, player)
 
 	@smart_api()
-	def resolve_complete_action(root, info: ResolveInfo):
-		pass
+	def resolve_complete_action(root, info: ResolveInfo, player: Player, argument: str):
+		return game.game_interface.complete_action(argument, player)

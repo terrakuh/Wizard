@@ -6,6 +6,11 @@ from .types import Lobby as LobbyType, LoginInformation, PlayableCard, RoundStat
 from database import Database
 from lobby.manager import Manager
 from lobby.lobby import Lobby
+from game.round import Round
+from game.player import Player
+from game.trick import Trick
+from .helpers import *
+import game.game_interface
 
 
 class Query(ObjectType):
@@ -53,17 +58,21 @@ class Query(ObjectType):
 	required_action = Int
 
 	@smart_api()
-	def resolve_round_state(root, info: ResolveInfo):
-		pass
+	def resolve_round_state(root, info: ResolveInfo, round: Round):
+		round_state = game.game_interface.get_round_state(round)
+		return RoundState(trump_color=round_state["trump_color"], round=round_state["number"])
 
 	@smart_api()
-	def resolve_trick_state(root, info: ResolveInfo):
-		pass
+	def resolve_trick_state(root, info: ResolveInfo, trick: Trick):
+		trick_state = game.game_interface.get_trick_state(trick)
+		turn = User(id=trick_state["turn"]["id"], name=trick_state["turn"]["name"])
+		cards = cards_to_playable_cards(trick_state["cards"])
+		return TrickState(player_states=players_to_player_states(trick_state["players"]), lead_color=trick_state["lead_color"], round=trick_state["trick_number"], turn=turn, deck=cards)
 
 	@smart_api()
-	def resolve_hand(root, info: ResolveInfo):
-		pass
+	def resolve_hand(root, info: ResolveInfo, player: Player, trick: Trick):
+		return cards_to_playable_cards(game.game_interface.get_hand_cards(player, trick.lead_color))
 
 	@smart_api()
-	def resolve_required_action(root, info: ResolveInfo):
-		pass
+	def resolve_required_action(root, info: ResolveInfo, player: Player):
+		return game.game_interface.get_action_required(player)
