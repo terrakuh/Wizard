@@ -1,16 +1,14 @@
 import React from "react"
 import { AppBar, createStyles, IconButton, Theme, Toolbar, Typography, withStyles, WithStyles } from "@material-ui/core"
 import { Redirect, Route, Switch } from "react-router-dom"
-import { Lobby } from "./lobby"
-import Board from "./board/Board"
-import TrickCallDialog from "./board/TrickCallDialog"
-import Deck from "./board/Deck"
-import Hand from "./board/Hand"
 import { SettingsDialog } from "./settings"
 import { Settings as SettingsIcon } from "@material-ui/icons"
+import RequiresLogin from "./util/RequiresLogin"
+import { Login, Register } from "./login"
 
 function App(props: WithStyles<typeof styles>) {
 	const [openSettings, setOpenSettings] = React.useState(false)
+
 	return (
 		<div className={props.classes.root}>
 			<AppBar position="static">
@@ -27,16 +25,33 @@ function App(props: WithStyles<typeof styles>) {
 				</Toolbar>
 			</AppBar>
 
-			<SettingsDialog open={openSettings} onClose={() => setOpenSettings(false)} />
+			<SettingsDialog
+				open={openSettings}
+				onClose={() => setOpenSettings(false)} />
 
 			<div className={props.classes.content}>
 				<Switch>
-					<Route path="/lobby/:id"><Lobby /></Route>
-					<Route path="/lobby"><Lobby /></Route>
-					<Route exact path="/game"><Board /></Route>
+					<Route path="/login">
+						<Login />
+					</Route>
+
+					<Route path="/register/:token">
+						<Register />
+					</Route>
+					<Route path="/register">
+						<Register />
+					</Route>
+
+					{/* <Route path="/lobby/:id"><Lobby /></Route> */}
+					{/* <Route path="/lobby">
+						<RequiresLogin>
+							<Lobby />
+						</RequiresLogin>
+					</Route> */}
+					{/* <Route exact path="/game"><Board /></Route>
 					<Route exact path="/test">
 						<SettingsDialog open={true} onClose={() => console.log("hi")} />
-					</Route>
+					</Route> */}
 					<Route path="/"><Redirect to="/lobby" /></Route>
 				</Switch>
 			</div>

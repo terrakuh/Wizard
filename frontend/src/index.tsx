@@ -25,7 +25,7 @@ const client = new ApolloClient({
 			errorPolicy: "all",
 		},
 	},
-	uri: "/api/graphql"
+	uri: "/api/gql"
 })
 
 const theme = createMuiTheme({

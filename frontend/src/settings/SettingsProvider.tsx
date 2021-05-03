@@ -1,6 +1,11 @@
 import React from "react"
 import { deepMerge } from "../util"
-import Settings from "./type"
+import { Settings } from "./types"
+
+interface Context {
+	settings: Settings
+	setSettings(settings: Settings): void
+}
 
 const initialSettings = deepMerge<Settings>({
 	notifications: {
@@ -12,20 +17,22 @@ const initialSettings = deepMerge<Settings>({
 	}
 }, JSON.parse(localStorage.getItem("settings") || "{}"))
 
-const context = React.createContext<{
-	settings: Settings
-	setSettings: (settings: Settings) => void
-}>({ settings: initialSettings, setSettings(_) { } })
+const context = React.createContext<Context>({
+	settings: initialSettings,
+	setSettings(_) { }
+})
 
 interface Props {
 	children: React.ReactNode
 }
 
-function SettingsProvider(props: Props) {
+export default function SettingsProvider(props: Props) {
 	const [settings, setSettings] = React.useState<Settings>(initialSettings)
+
 	React.useEffect(() => {
 		localStorage.setItem("settings", JSON.stringify(settings))
 	}, [settings])
+
 	return (
 		<context.Provider value={{ settings, setSettings }}>
 			{props.children}
@@ -34,4 +41,3 @@ function SettingsProvider(props: Props) {
 }
 
 export const useSettings = () => React.useContext(context)
-export default SettingsProvider
