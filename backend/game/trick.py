@@ -64,9 +64,9 @@ class Trick:
                     curr_max_value = card.value
                     curr_winner = player
                 
-            self.logging.info("Curr card: " + card + ", curr max: " + str(curr_max_value) + ", curr Winner: " + str(curr_winner))
+            self.logging.info(f"Curr card: {card}, curr max: {curr_max_value}, curr Winner: {curr_winner}")
 
-        self.logging.info("Trick: " + str(self.card_stack) + "; trump: " + self.trump_color)
+        self.logging.info("Trick: " + str(self.card_stack_by_player) + "; trump: " + str(self.trump_color))
         self.logging.info("Trick was won by " + curr_winner)
         winning_card = self.card_stack_by_player[curr_winner]
         return self.card_stack_by_card[winning_card.id]

@@ -23,7 +23,7 @@ type PlayerState {
 }
 
 type RoundState {
-	trumpColor: Int
+	trumpColor: String
 	round: Int!
 }
 
@@ -35,7 +35,7 @@ type PlayedCard {
 
 type TrickState {
 	playerStates: [PlayerState!]!
-	leadColor: Int
+	leadColor: String
 	round: Int
 	turn: User
 	deck: [PlayedCard!]
@@ -66,7 +66,7 @@ type Query {
 	roundState: RoundState
 	trickState: TrickState
 	hand: [PlayableCard!]
-	requiredAction: Int
+	requiredAction: String
 }
 
 ########################################

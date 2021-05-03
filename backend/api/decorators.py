@@ -1,16 +1,19 @@
+from game.player import Player
 from api.types import User
 from datetime import datetime, timedelta
 import functools
 from threading import Lock
 from graphql import GraphQLError
 from graphql import ResolveInfo
-from typing import Any, Callable, Dict, OrderedDict, Tuple, Union
+from typing import Any, Callable, Dict, Optional, OrderedDict, Tuple, Union
 from fastapi import Request
 from database import Database
 from api.security import UserAuthentication
 from inspect import getfullargspec, iscoroutine
 from lobby.manager import Manager
 from lobby.lobby import Lobby
+from game.round import Round
+from game.trick import Trick
 
 
 class Response:
@@ -62,6 +65,23 @@ def smart_api(access_control: bool = True, cache: Cache = None):
 			request: Request = info.context["request"]
 			state: State = request.state
 			user: User = None
+			lobby: Lobby = None
+			round: Round = None
+			def assert_lobby() -> None:
+				nonlocal lobby
+				if lobby is None:
+					try:
+						lobby = state.lobby_manager.get_lobby_by_player(user)
+					except:
+						raise GraphQLError("lobby does not exist")
+			def assert_round() -> None:
+				nonlocal round
+				if round is None:
+					assert_lobby()
+					round = lobby.get_game().curr_round
+					if round is None:
+						raise GraphQLError("no round")
+
 			# authorization
 			if access_control:
 				user = await state.user_authentication.authenticate(request)
@@ -85,11 +105,20 @@ def smart_api(access_control: bool = True, cache: Cache = None):
 				elif value is User:
 					additional[key] = user
 				elif value is Lobby:
-					try:
-						lobby = state.lobby_manager.get_lobby_by_player(user.id)
-					except:
-						raise GraphQLError("lobby does not exist")
+					assert_lobby()
 					additional[key] = lobby
+				elif value is Round:
+					assert_round()
+					additional[key] = round
+				elif value is Optional[Trick]:
+					assert_round()
+					trick = round.curr_trick
+					if trick is None and value is Trick:
+						raise GraphQLError("no trick")
+					additional[key] = trick
+				elif value is Player:
+					assert_lobby()
+					additional[key] = lobby.get_game().players[user.id]
 			# execute
 			result = func(root, info, **kwargs, **additional)
 			if iscoroutine(result):

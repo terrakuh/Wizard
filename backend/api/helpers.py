@@ -8,7 +8,7 @@ def cards_to_playable_cards(cards: list):
     """
     playable_cards = []
     for card in cards:
-        variants = cards_to_playable_cards(card.variants) if card.variants else None
+        variants = cards_to_playable_cards(card["variants"]) if card["variants"] else None
         playable_cards.append(PlayableCard(id=card["id"], playable=card["playable"], variants=variants))
     return playable_cards
 

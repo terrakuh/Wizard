@@ -1,44 +1,43 @@
 from threading import Lock
-from typing import Set
+from typing import List, Set
 from datetime import datetime
 from copy import deepcopy
-
-
-class Settings:
-	mode: int = 0
+from game.game import Game, Settings
+from api.types import User
 
 
 class Lobby:
 	def __init__(self) -> None:
 		self._settings = Settings()
 		self._lock = Lock()
-		self._players: list[int] = []
+		self._players: List[User] = []
 		self.created = datetime.now()
+		self._game: Game = None
 		self.game_started: datetime = None
 
-	def _add_player(self, id: int) -> None:
+	def _add_player(self, user: User) -> None:
 		with self._lock:
 			if self.game_started is not None:
 				raise Exception("game already in progress")
 			elif len(self._players) > 6:
 				raise Exception("too many players")
 			try:
-				self._players.index(id)
+				self._players.index(user)
 			except:
-				self._players.append(id)
+				self._players.append(user)
 
-	def _remove_player(self, id: int) -> None:
+	def _remove_player(self, user: User) -> None:
 		with self._lock:
 			if self.game_started is not None:
 				raise Exception("game already in progress")
 			try:
-				self._players.remove(id)
+				self._players.remove(user)
 			except:
 				pass
 
-	def is_lobby_master(self, id: int) -> bool:
+	def is_lobby_master(self, user: User) -> bool:
 		with self._lock:
-			return self._players[0] == id
+			return self._players[0].id == user.id
 
 	def set_settings(self, mode: int) -> None:
 		with self._lock:
@@ -48,20 +47,23 @@ class Lobby:
 		with self._lock:
 			return deepcopy(self._settings)
 
-	def get_players(self) -> Set[int]:
+	def get_players(self) -> List[User]:
 		with self._lock:
 			return self._players.copy()
 
-	def start_game(self, id: int) -> None:
+	def start_game(self) -> None:
 		with self._lock:
 			if self.game_started is not None:
 				raise Exception("game already started")
-			elif len(self._players) < 3:
-				raise Exception("at least 3 players required")
-			elif id != self._players[0]:
-				raise Exception("not lobby master")
+			# elif len(self._players) < 3:
+			# 	raise Exception("at least 3 players required")
 			self.game_started = datetime.now()
-		#TODO
+			self._game = Game(self._players, self._settings)
+			self._game.setDaemon(True)
+			self._game.start()
 
-	def get_game(self):
-		pass
+	def get_game(self) -> Game:
+		with self._lock:
+			if self._game is None:
+				raise Exception("game not started")
+			return self._game

@@ -23,7 +23,8 @@ class Round:
             }
         """
         self.game_mode = game_context.get("mode")
-
+        self.trump_color = None
+        self.trump_card = None
         self.round_number = game_context.get("round_counter")
         self.tricks_called = 0
         self.card_deck = game_context.get("card_deck")
@@ -71,7 +72,7 @@ class Round:
             self.curr_trick = Trick(round_context)
             self.curr_trick.do_trick()
             winner = self.curr_trick.get_current_winner()
-            after_effect = self.curr_trick.get_after_effect
+            after_effect = self.curr_trick.get_after_effect()
 
             self.logging.info("Trick winner is " + str(winner))
 
@@ -86,7 +87,7 @@ class Round:
                         self.players[index].cards.pop(card)
                         self.players[(index + 1) % len(self.players)].append(card)
 
-            winning_player.tricks_made += 0 if after_effect == "bomb" else 1
+            winner.tricks_made += 0 if after_effect == "bomb" else 1
             self.logging.info("Trick completed")
         
         self.__calculate_points()

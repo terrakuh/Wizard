@@ -1,4 +1,5 @@
 from datetime import timedelta
+from typing import Optional
 from api.decorators import Cache, smart_api
 from graphene import ObjectType, Field, ID, String, NonNull, ResolveInfo, List, Int
 from graphql import GraphQLError
@@ -55,7 +56,7 @@ class Query(ObjectType):
 	round_state = Field(RoundState)
 	trick_state = Field(TrickState)
 	hand = List(NonNull(PlayableCard))
-	required_action = Int
+	required_action = String()
 
 	@smart_api()
 	def resolve_round_state(root, info: ResolveInfo, round: Round):
@@ -63,15 +64,17 @@ class Query(ObjectType):
 		return RoundState(trump_color=round_state["trump_color"], round=round_state["number"])
 
 	@smart_api()
-	def resolve_trick_state(root, info: ResolveInfo, trick: Trick):
+	def resolve_trick_state(root, info: ResolveInfo, trick: Optional[Trick]):
+		if trick is None:
+			return None
 		trick_state = game.game_interface.get_trick_state(trick)
 		turn = User(id=trick_state["turn"]["id"], name=trick_state["turn"]["name"])
 		cards = cards_to_playable_cards(trick_state["cards"])
 		return TrickState(player_states=players_to_player_states(trick_state["players"]), lead_color=trick_state["lead_color"], round=trick_state["trick_number"], turn=turn, deck=cards)
 
 	@smart_api()
-	def resolve_hand(root, info: ResolveInfo, player: Player, trick: Trick):
-		return cards_to_playable_cards(game.game_interface.get_hand_cards(player, trick.lead_color))
+	def resolve_hand(root, info: ResolveInfo, player: Player, trick: Optional[Trick]):
+		return cards_to_playable_cards(game.game_interface.get_hand_cards(player, None if trick is None else trick.lead_color))
 
 	@smart_api()
 	def resolve_required_action(root, info: ResolveInfo, player: Player):

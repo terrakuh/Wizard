@@ -6,7 +6,7 @@ from .inputs import LobbySettings
 from database import Database
 from fastapi import Request
 from lobby.manager import Manager
-from lobby.lobby import Lobby, Settings
+from lobby.lobby import Lobby
 from game.player import Player
 from game.trick import Trick
 from .helpers import *
@@ -55,31 +55,31 @@ class Mutation(ObjectType):
 
 	@smart_api()
 	def resolve_create_lobby(root, info: ResolveInfo, manager: Manager, user: User):
-		return manager.create_lobby(user.id)
+		return manager.create_lobby(user)
 
 	@smart_api()
 	def resolve_change_lobby_settings(root, info: ResolveInfo, settings: LobbySettings, lobby: Lobby, user: User):
 		print(settings.mode)
-		if not lobby.is_lobby_master(user.id):
+		if not lobby.is_lobby_master(user):
 			raise GraphQLError("not lobby master")
 		lobby.set_settings(settings.mode)
 		return True
 
 	@smart_api()
 	def resolve_join_lobby(root, info: ResolveInfo, code: str, manager: Manager, user: User):
-		manager.join_lobby(user.id, code)
+		manager.join_lobby(user, code)
 		return True
 
 	@smart_api()
 	def resolve_leave_lobby(root, info: ResolveInfo, manager: Manager, user: User):
-		manager.leave_lobby(user.id)
+		manager.leave_lobby(user)
 		return True
 
 	@smart_api()
 	def resolve_start_game(root, info: ResolveInfo, lobby: Lobby, user: User):
-		if not lobby.is_lobby_master(user.id):
+		if not lobby.is_lobby_master(user):
 			raise GraphQLError("not lobby master")
-		lobby.start_game(user.id)
+		lobby.start_game()
 		return True
 
 

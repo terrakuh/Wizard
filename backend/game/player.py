@@ -1,12 +1,14 @@
+from api.types import User
 from .card import Card
+
 
 class Player:
 
     import logging
 
-    def __init__(self, user):
-        self.user_id = user["id"]
-        self.name = user["name"]
+    def __init__(self, user: User):
+        self.user_id = user.id
+        self.name = user.name
 
         self.score = 0
         self.tricks_called = 0
