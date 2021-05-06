@@ -1,51 +1,39 @@
 from .game import Game
-from .card_decks import CardDecks
-import game.game_api
+from .round import Round, RoundState
+from .trick import Trick, TrickState
+from .player import Player, PlayerState, TaskState, HandCard
 
 class GameInteraction:
     def __init__(self, game):
         self.game = game
 
-    def get_hand_card_state(self, card_id: str):
-        lead_color = self.__get_leand_color()
-        card = self.__get_card(card_id)
-        return game.game_api.get_hand_card_state(card, lead_color)
+    def get_player_state(player: Player) -> PlayerState:
+        return player.get_state()
 
-    def get_trick_card_state(card_id: str):
-        card = self.__get_card(card_id)
-        trick = self.__get_trick()
-        return game.game_api.get_trick_card_state(card, trick)
-
-    def get_player_state(player: Player):
-        return game.game_api.get_player_state(player)
-
-    def get_round_state():
+    def get_round_state() -> RoundState:
         round_o = self.__get_round()
-        return game.game_api().get_round_state(round_o)
+        return round_o.get_state()
 
-    def get_trick_state():
+    def get_trick_state() -> TrickState:
         trick = self.__get_trick()
-        return game.game_api.get_trick_state(trick)
+        return trick.get_state()
 
-    def get_hand_cards(player: Player):
+    def get_hand_cards(player: Player) -> list(HandCard):
         lead_color = self.__get_leand_color()
-        return game.game_api.get_hand_cards(player, lead_color)
+        return player.get_hand_cards(lead_color)
 
-    def get_action_required(player: Player):
-        return game.game_api.get_action_required(player)
+    def get_action_required(player: Player) -> TaskState:
+        return player.get_task()
 
-    def complete_action(argument: str, player: Player):
-        return game.game_api.complete_action(argument, player)
+    def complete_action(argument: str, player: Player) -> list(HandCard):
+        return player.complete_task(argument)
 
 
-    def __get_card(card_id: str):
-        return CardDecks.CARDS[card_id]
-
-    def __get_round(self):
+    def __get_round(self) -> Round:
         return self.game.curr_round
 
-    def __get_trick(self):
+    def __get_trick(self) -> Trick:
         return self.__get_round().curr_trick
 
-    def __get_leand_color(self):
+    def __get_leand_color(self) -> str:
         return self.__get_trick().lead_color

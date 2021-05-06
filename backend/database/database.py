@@ -1,4 +1,5 @@
-from api.types import LoginInformation, User
+from api.types import LoginInformation
+from game.player import User
 from sqlite3 import connect
 import random
 import string

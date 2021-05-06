@@ -3,15 +3,17 @@ from typing import Optional
 from api.decorators import Cache, smart_api
 from graphene import ObjectType, Field, ID, String, NonNull, ResolveInfo, List, Int
 from graphql import GraphQLError
+
 from .types import Lobby as LobbyType, LoginInformation, PlayableCard, RequiredAction, RoundState, TrickState, User
 from database import Database
+
 from lobby.manager import Manager
 from lobby.lobby import Lobby
-from game.round import Round
+
 from game.player import Player
-from game.trick import Trick
-from .helpers import *
-import game.game_interface
+from game.game_interaction import GameInteraction
+
+from .graphene_parser import *
 
 
 class Query(ObjectType):
@@ -59,24 +61,17 @@ class Query(ObjectType):
 	required_action = Field(RequiredAction)
 
 	@smart_api()
-	def resolve_round_state(root, info: ResolveInfo, round: Round):
-		round_state = game.game_interface.get_round_state(round)
-		return RoundState(trump_color=round_state["trump_color"], round=round_state["number"])
+	def resolve_round_state(root, info: ResolveInfo, game_i: GameInteraction) -> RoundState:
+		return parse_round_state(game_i.get_round_state())
 
 	@smart_api()
-	def resolve_trick_state(root, info: ResolveInfo, trick: Optional[Trick]):
-		if trick is None:
-			return None
-		trick_state = game.game_interface.get_trick_state(trick)
-		turn = User(id=trick_state["turn"]["id"], name=trick_state["turn"]["name"])
-		cards = cards_to_playable_cards(trick_state["cards"])
-		return TrickState(player_states=players_to_player_states(trick_state["players"]), lead_color=trick_state["lead_color"], round=trick_state["trick_number"], turn=turn, deck=cards)
+	def resolve_trick_state(root, info: ResolveInfo, game_i: GameInteraction) -> TrickState:
+		return parse_trick_state(game_i.get_trick_state())
 
 	@smart_api()
-	def resolve_hand(root, info: ResolveInfo, player: Player, trick: Optional[Trick]):
-		return cards_to_playable_cards(game.game_interface.get_hand_cards(player, None if trick is None else trick.lead_color))
+	def resolve_hand(root, info: ResolveInfo, player: Player, game_i: GameInteraction) -> list[PlayableCard]:
+		return parse_hand_cards(game_i.get_hand_cards(player))
 
 	@smart_api()
-	def resolve_required_action(root, info: ResolveInfo, player: Player):
-		# TODO return RequiredAction
-		return game.game_interface.get_action_required(player)
+	def resolve_required_action(root, info: ResolveInfo, player: Player, game_i: GameInteraction) -> RequiredAction:
+		return parse_player_task(game_i.get_action_required(player))

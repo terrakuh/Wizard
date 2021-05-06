@@ -1,7 +1,8 @@
-from api.types import User
+from game.player import User
+from .lobby import Lobby
+
 from threading import RLock
 from typing import Dict, List
-from .lobby import Lobby
 from datetime import datetime, timedelta
 from random import choices
 from string import ascii_uppercase
