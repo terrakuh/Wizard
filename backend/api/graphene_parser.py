@@ -29,7 +29,7 @@ def parse_graphene_round_state(rs: RoundStateType) -> RoundState:
     return RoundState(rs.trump_card, rs.trump_color, rs.round)
 
 def __parse_trick_card(tc: TrickCard) -> PlayedCard:
-    return PlayedCard(id=tc.card_id, player=parse_user(tc.player), tc.is_winning)
+    return PlayedCard(id=tc.card_id, player=parse_user(tc.player), is_winning=tc.is_winning)
 def __parse_played_card(pc: PlayedCard) -> TrickCard:
     return TrickCard(pc.id, parse_graphene_user(pc.player), pc.is_winning)
 
@@ -39,9 +39,9 @@ def parse_played_cards(pcs: list[PlayedCard]) -> list[TrickCard]:
     return [__parse_played_card(card) for card in pcs]
 
 def __parse_hand_card(hc: HandCard) -> PlayableCard:
-    return PlayableCard(id=hc.card_id, playable=hc.playable, variants=[parse_hand_card(hand_card) for hand_card in hc.variants])
+    return PlayableCard(id=hc.card_id, playable=hc.playable, variants=parse_hand_cards(hc.variants))
 def __parse_playable_card(pc: PlayableCard) -> HandCard:
-    return HandCard(pc.id, pc.playable, [parse_playable_card(playable_card) for playable_card in pc.variants])
+    return HandCard(pc.id, pc.playable, parse_playable_cards(pc.variants))
 
 def parse_hand_cards(hcs: list[HandCard]) -> list[PlayableCard]:
     return [__parse_hand_card(card) for card in hcs]
