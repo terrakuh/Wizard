@@ -1,19 +1,31 @@
+import { useMutation } from "@apollo/client"
 import { Button, TextField } from "@material-ui/core"
+import gql from "graphql-tag"
 import React from "react"
-import { useParams } from "react-router"
+import { useHistory, useParams } from "react-router"
+import CryptoJS from "crypto-js"
+import { generatePasswordHash } from "../util/security"
+import { Loading } from "../util"
+import { useSnackbar } from "notistack"
 
 export default function Register() {
+	const { enqueueSnackbar } = useSnackbar()
+	const history = useHistory()
 	const urlToken = useParams<{ token?: string }>().token
 	const [token, setToken] = React.useState(urlToken ?? "")
-	const [user, setUser] = React.useState("")
+	const [name, setName] = React.useState("")
 	const [password, setPassword] = React.useState("")
 	const [repeatPassword, setRepeatPassword] = React.useState("")
+	const [loading, setLoading] = React.useState(false)
+	const [registerUser] = useMutation(REGISTER_USER)
 
 	return (
 		<div>
+			<Loading loading={loading} />
+
 			<TextField
-				value={user}
-				onChange={ev => setUser(ev.target.value)}
+				value={name}
+				onChange={ev => setName(ev.target.value)}
 				label="Benutzer"
 				fullWidth />
 
@@ -42,11 +54,40 @@ export default function Register() {
 				fullWidth />
 
 			<Button
-				disabled={user === "" || password.length < 6 || password !== repeatPassword}
+				disabled={name === "" || password.length < 6 || password !== repeatPassword}
 				variant="contained"
+				onClick={async () => {
+					setLoading(true)
+					try {
+						const salt = CryptoJS.lib.WordArray.random(8)
+						const passwordHash = generatePasswordHash(password, salt, "sha512")
+						await registerUser({
+							variables: {
+								name,
+								token,
+								salt: CryptoJS.enc.Base64.stringify(salt),
+								passwordHash
+							}
+						})
+					} catch (err) {
+						enqueueSnackbar(`Registrierung fehlgeschlagen: ${err}`, { variant: "error" })
+						console.error(err)
+						return
+					} finally {
+						setLoading(false)
+					}
+					enqueueSnackbar("Konto erfolgreich erstellt.", { variant: "success" })
+					history.push("/login")
+				}}
 				color="primary">
 				Registrieren
 			</Button>
 		</div>
 	)
 }
+
+const REGISTER_USER = gql`
+	mutation ($name: String!, $passwordHash: String!, $salt: String!, $token: String!) {
+		register(name: $name, passwordHash: $passwordHash, salt: $salt, hashType: "sha512", token: $token)
+	}
+`

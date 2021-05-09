@@ -45,3 +45,8 @@ export interface PlayableCard {
 	playable: boolean
 	variants: PlayableCard[] | null
 }
+
+export interface RequiredAction {
+	type: string
+	options: string[]
+}

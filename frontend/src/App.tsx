@@ -5,6 +5,7 @@ import { SettingsDialog } from "./settings"
 import { Settings as SettingsIcon } from "@material-ui/icons"
 import RequiresLogin from "./util/RequiresLogin"
 import { Login, Register } from "./login"
+import Lobby from "./lobby"
 
 function App(props: WithStyles<typeof styles>) {
 	const [openSettings, setOpenSettings] = React.useState(false)
@@ -42,12 +43,13 @@ function App(props: WithStyles<typeof styles>) {
 						<Register />
 					</Route>
 
-					{/* <Route path="/lobby/:id"><Lobby /></Route> */}
-					{/* <Route path="/lobby">
-						<RequiresLogin>
-							<Lobby />
-						</RequiresLogin>
-					</Route> */}
+					<RequiresLogin path="/lobby/:code">
+						<Lobby />
+					</RequiresLogin>
+					<RequiresLogin path="/lobby">
+						<Lobby />
+					</RequiresLogin>
+
 					{/* <Route exact path="/game"><Board /></Route>
 					<Route exact path="/test">
 						<SettingsDialog open={true} onClose={() => console.log("hi")} />

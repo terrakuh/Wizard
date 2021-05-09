@@ -84,7 +84,7 @@ class Mutation(ObjectType):
 
 
 	# game logic
-	complete_action = NonNull(Boolean, option=NonNull(String()))
+	complete_action = NonNull(Boolean, option=NonNull(String))
 
 	# @smart_api()
 	# def resolve_play_card(root, info: ResolveInfo, id: ID, player: Player, trick: Trick):

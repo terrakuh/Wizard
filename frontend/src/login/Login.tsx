@@ -5,6 +5,7 @@ import { useLazyQuery, useMutation } from "@apollo/client"
 import { Loading } from "../util"
 import CryptoJS from "crypto-js"
 import { useSnackbar } from "notistack"
+import { generatePasswordHash } from "../util/security"
 
 export default function Login() {
 	const { enqueueSnackbar } = useSnackbar()
@@ -14,24 +15,18 @@ export default function Login() {
 	const [login] = useMutation(LOGIN)
 	const [fetchLoginInformation, { loading }] = useLazyQuery<GetLoginInformation>(GET_LOGIN_INFORMATION, {
 		onCompleted(data) {
-			if (data.loginInformation.hashType.toLowerCase() !== "sha512") {
-				enqueueSnackbar(`Nicht unterstützte Hashfunktion "${data.loginInformation.hashType}"`, { variant: "error" })
+			setLogginIn(true)
+			let passwordHash: string
+			try {
+				passwordHash = generatePasswordHash(password, CryptoJS.enc.Base64.parse(data.loginInformation.salt), data.loginInformation.hashType)
+			} catch (err) {
+				setLogginIn(false)
+				enqueueSnackbar(err, { variant: "error" })
 				return
 			}
-			setLogginIn(true)
-			const passwordHash = CryptoJS.PBKDF2(password, CryptoJS.enc.Base64.parse(data.loginInformation.salt), {
-				iterations: 1,
-				hasher: CryptoJS.algo.SHA512,
-				keySize: 256 / 32
-			})
-			console.log(CryptoJS.enc.Base64.stringify(passwordHash))
+			console.log({ passwordHash })
 
-			login({
-				variables: {
-					name,
-					passwordHash: CryptoJS.enc.Base64.stringify(passwordHash)
-				}
-			})
+			login({ variables: { name, passwordHash } })
 				.then(() => enqueueSnackbar("Erfolgreich eingeloggt", { variant: "success" }))
 				.catch(err => enqueueSnackbar(`Login fehlgeschlagen: ${err}`, { variant: "error" }))
 				.finally(() => setLogginIn(false))

@@ -3,13 +3,14 @@ import gql from "graphql-tag"
 import React from "react"
 import { Redirect, Route, RouteProps } from "react-router"
 import { User } from "../types"
+import Loading from "./Loading"
 
 interface Props extends RouteProps {
 	children?: React.ReactNode | null
 }
 
 export default function RequiresLogin(props: Props) {
-	const [isLoggedIn, setIsLoggedIn] = React.useState(false)
+	const [isLoggedIn, setIsLoggedIn] = React.useState<boolean>()
 	const { data, stopPolling } = useQuery<Whoami>(WHOAMI, {
 		pollInterval: 1000
 	})
@@ -22,9 +23,12 @@ export default function RequiresLogin(props: Props) {
 	}, [data, stopPolling])
 
 	return (
-		<Route>
-			{isLoggedIn ? props.children : <Redirect to="/login" />}
-		</Route>
+		<>
+			<Loading loading={isLoggedIn === undefined} />
+			<Route {...props}>
+				{isLoggedIn !== false ? props.children : <Redirect to="/login" />}
+			</Route>
+		</>
 	)
 }
 
