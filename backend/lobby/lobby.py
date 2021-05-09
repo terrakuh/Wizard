@@ -7,7 +7,8 @@ from api.types import User
 
 
 class Lobby:
-	def __init__(self) -> None:
+	def __init__(self, code: str) -> None:
+		self.code = code
 		self._settings = Settings()
 		self._lock = Lock()
 		self._players: List[User] = []

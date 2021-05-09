@@ -43,11 +43,13 @@ class Query(ObjectType):
 	lobby = Field(LobbyType)
 
 	@smart_api()
-	async def resolve_lobby(root, info: ResolveInfo, lobby: Lobby):
+	async def resolve_lobby(root, info: ResolveInfo, lobby: Lobby, user: User):
 		try:
 			settings = lobby.get_settings()
-			players = [await Query.resolve_user(root, info, id=id) for id in lobby.get_players()]
-			return LobbyType(mode=settings.mode, players=players)
+			result = LobbyType(code=lobby.code, mode=settings.mode, players=lobby.get_players())
+			if lobby.is_lobby_master(user):
+				result.can_start = len(result.players) >= 3
+			return result
 		except:
 			return None
 

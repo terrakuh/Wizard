@@ -29,7 +29,7 @@ class Manager:
 				raise Exception("bad luck")
 			elif user.id in self._player_code:
 				raise Exception("player already in lobby")
-			self._lobbies[code] = Lobby()
+			self._lobbies[code] = Lobby(code)
 			self.join_lobby(user, code)
 		return code
 

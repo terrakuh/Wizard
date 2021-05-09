@@ -48,17 +48,17 @@ export default function LobbyConnection(props: Props) {
 					<TextField
 						fullWidth
 						disabled={props.lobbyInfo !== undefined || codeParam != null}
-						value={code}
+						value={props.lobbyInfo?.code ?? code}
 						onChange={x => setCode(x.target.value)}
 						label="Lobby Code" />
 				</Grid>
 				<Grid item xs={2} md={1}>
 					<IconButton
-						disabled={code === ""}
+						disabled={!props.lobbyInfo?.code}
 						color="secondary"
 						onClick={async () => {
 							try {
-								await navigator.clipboard.writeText(`${window.location.origin}/lobby/${code}`)
+								await navigator.clipboard.writeText(`${window.location.origin}/lobby/${props.lobbyInfo?.code}`)
 								enqueueSnackbar("In die Zwischenablage kopiert.", { variant: "success" })
 							} catch (err) {
 								console.error(err)
@@ -70,12 +70,37 @@ export default function LobbyConnection(props: Props) {
 				</Grid>
 
 				<Grid item xs={4} md={1}>
-					<Button
-						color="primary"
-						variant="contained"
-						onClick={handleMainAction(true)}>
-						{codeParam == null && code === "" ? "Erstellen" : "Beitreten"}
-					</Button>
+					{
+						props.lobbyInfo == null ?
+							codeParam == null && code === "" ?
+								<Button
+									onClick={handleMainAction(false)}
+									variant="contained"
+									color="primary">
+									Erstellen
+								</Button> :
+								<Button
+									onClick={handleMainAction(true)}
+									variant="contained"
+									color="primary">
+									Beitreten
+								</Button> :
+							props.lobbyInfo.canStart == null ? null :
+								<Button
+									variant="contained"
+									color="primary"
+									onClick={async () => {
+										try {
+											await startGame()
+										} catch (err) {
+											console.error(err)
+											enqueueSnackbar("Konnte das Spiel nicht starten.", { variant: "error" })
+										}
+									}}
+									disabled={!props.lobbyInfo.canStart}>
+									Starten
+								</Button>
+					}
 				</Grid>
 
 				{/* {

@@ -10,8 +10,10 @@ export interface LoginInformation {
 }
 
 export interface Lobby {
+	code: string
 	mode: number
 	players: User[]
+	canStart: boolean | null
 }
 
 export interface PlayerState {

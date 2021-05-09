@@ -7,8 +7,10 @@ class User(ObjectType):
 
 
 class Lobby(ObjectType):
+	code = NonNull(String)
 	mode = NonNull(Int)
 	players = NonNull(List(NonNull(User)))
+	can_start = Boolean()
 
 
 class LoginInformation(ObjectType):

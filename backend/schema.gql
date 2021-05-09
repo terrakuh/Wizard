@@ -11,8 +11,10 @@ type LoginInformation {
 }
 
 type Lobby {
+	code: String!
 	mode: Int!
 	players: [User!]!
+	canStart: Boolean
 }
 
 type PlayerState {

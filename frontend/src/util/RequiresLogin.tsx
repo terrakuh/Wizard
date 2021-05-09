@@ -1,4 +1,4 @@
-import { useQuery } from "@apollo/client"
+import { useLazyQuery, useQuery } from "@apollo/client"
 import gql from "graphql-tag"
 import React from "react"
 import { Redirect, Route, RouteProps } from "react-router"
@@ -11,12 +11,16 @@ interface Props extends RouteProps {
 
 export default function RequiresLogin(props: Props) {
 	const [isLoggedIn, setIsLoggedIn] = React.useState<boolean>()
-	const { data, stopPolling } = useQuery<Whoami>(WHOAMI, {
-		pollInterval: 1000
-	})
+	const { data, stopPolling, startPolling } = useQuery<Whoami>(WHOAMI)
+
+	React.useEffect(() => {
+		startPolling(1000)
+		return stopPolling
+	}, [startPolling, stopPolling])
 
 	React.useEffect(() => {
 		if (data?.whoami) {
+			console.log("logged in")
 			setIsLoggedIn(true)
 			stopPolling()
 		}
