@@ -2,6 +2,7 @@ import threading
 import itertools
 import random
 import logging
+from typing import List
 
 from .round import Round
 from .card import Card
@@ -30,7 +31,7 @@ class Game(threading.Thread):
         self.curr_round = None
 
     def run(self):
-        self.logging.info("Starting Game...")
+        logging.info("Starting Game...")
         
         while self.round_counter <= len(self.card_deck)//len(self.players):
             self.round_counter += 1

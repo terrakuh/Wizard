@@ -1,5 +1,6 @@
 import logging
 import threading
+from typing import List
 
 from .card import Card
 from .card_decks import CardDecks
@@ -42,23 +43,23 @@ class Player:
         self.tricks_made += 1
         self.__update_state()
 
-    def set_cards(self, cards: list[Card]):
+    def set_cards(self, cards: List[Card]):
         with self.card_lock:
             self.cards = {card.id: card for card in cards}
 
-    def replace_card(self, card_to_replace_id: str, new_card: Card):
+    def replace_card(self, card_to_replace_id: str, new_card: Card) -> Card:
         with self.card_lock:
-            del self.cards[card_to_replace_id]
             self.cards[new_card.id] = new_card
+            return self.cards.pop(card_to_replace_id)
 
 
-    def call_tricks(self, called_tricks: int, max_tricks: int) -> int:
+    def call_tricks(self, called_tricks: int, max_tricks: int, is_last: bool) -> int:
         logging.debug("Calling call_tricks for " + self.name)
 
         valid_values = [str(i) for i in range(max_tricks + 1)]
         left_tricks = max_tricks - called_tricks
 
-        if left_tricks >= 0:
+        if is_last and left_tricks >= 0:
             valid_values.remove(str(left_tricks))
 
         with self.task_lock:
@@ -73,26 +74,29 @@ class Player:
         valid_values = self.__get_playable_cards(lead_color)
 
         def payload(user_input):
-            card_variants = self.cards.get(user_input).variants
+            card_variants = [card.id for card in self.cards[user_input].variants]
             if card_variants:
                 variant_selected = self.select_input("card_variant", card_variants)
                 logging.info(self.name + " has selected " + str(variant_selected))
 
-                with self.card_lock:
-                    self.replace_card(user_input, CardDecks.CARDS[variant_selected])
+                self.replace_card(user_input, CardDecks.CARDS[variant_selected])
+
+                print("Replaced card: " + str(self.cards))
 
                 return variant_selected
             return user_input
         
         with self.task_lock:
             self.current_task = PlayerTask("play_card", self, valid_values)
+
+        card_selected = self.current_task.do_task(payload)
         
         with self.card_lock:
-            return self.cards.pop(self.current_task.do_task(payload))
+            return self.cards.pop(card_selected)
 
-    def select_input(self, select_type: str, options: list[str]):
+    def select_input(self, select_type: str, options: List[str]):
         with self.task_lock:
-            self.current_task = PlayerTask("choose_" + select_type6, self, options)
+            self.current_task = PlayerTask("choose_" + select_type, self, options)
         return self.current_task.do_task()
 
     def reset(self):
@@ -104,8 +108,10 @@ class Player:
     def __get_playable_cards(self, lead_color):
         if not lead_color:
             return self.cards.keys()
-        playable_cards = [key for key, card in self.cards.items() if not card.color_bound or card.color == lead_color]
-        return [card.id for card in playable_cards]
+        
+        lead_cards = [card.id for card in self.cards.values() if card.color_bound and card.color == lead_color]
+        playable_cards = [key for key, card in self.cards.items() if not lead_cards or not card.color_bound or card.color == lead_color]
+        return [card for card in playable_cards]
 
 
     def get_state(self):
@@ -118,7 +124,8 @@ class Player:
 
     def get_task(self):
         with self.task_lock:
-            return TaskState(self.current_task.task_type, self.current_task.options)
+            if self.current_task:
+                return TaskState(self.current_task.task_type, self.current_task.options)
 
     def complete_task(self, arg: str):
         with self.task_lock:
@@ -153,7 +160,7 @@ class PlayerTask:
         self.input_lock = threading.Lock()
 
     def do_task(self, process_input=None) -> str:
-        logging.info(self.player.name + " is waiting for input on " + self.task_type)
+        logging.info(self.player.name + " is waiting for input on " + self.task_type + ": " + str(self.options))
 
         self.input_event.wait()
 
@@ -186,13 +193,13 @@ class PlayerState:
         self.tricks_made = tricks_made
     
 class HandCard:
-    def __init__(self, card_id: str, playable: bool, variants: list[PlayableCard]):
+    def __init__(self, card_id: str, playable: bool, variants: list=None):
         self.card_id = card_id
         self.playable = playable
         self.variants = variants
 
 class TaskState:
-    def __init__(self, task_type: str, options: list[str]):
+    def __init__(self, task_type: str, options: List[str]):
         self.task_type = task_type
         self.options = options
 
