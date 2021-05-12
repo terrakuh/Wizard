@@ -5,11 +5,8 @@ import { SettingsDialog } from "./settings"
 import { Settings as SettingsIcon } from "@material-ui/icons"
 import RequiresLogin from "./util/RequiresLogin"
 import { Login, Register } from "./login"
-<<<<<<< HEAD
 import Lobby from "./lobby"
 import Game from "./game"
-=======
->>>>>>> origin/dev-maxi
 
 export default function App() {
 	const classes = useStyles()

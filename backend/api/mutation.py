@@ -89,5 +89,5 @@ class Mutation(ObjectType):
 	complete_action = NonNull(Boolean, option=NonNull(String))
 
 	@smart_api()
-	def resolve_complete_action(root, info: ResolveInfo, player: Player, option: str, game_i: GameInteraction) -> List[PlayableCard]:
+	def resolve_complete_action(root, info: ResolveInfo, player: Player, option: str, game_i: GameInteraction):
 		return parse_hand_cards(game_i.complete_action(player, option))

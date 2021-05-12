@@ -1,7 +1,6 @@
 from datetime import timedelta
-from typing import List
 from api.decorators import Cache, smart_api
-from graphene import ObjectType, Field, ID, String, NonNull, ResolveInfo, List, Int
+from graphene import ObjectType, Field, ID, String, NonNull, ResolveInfo, List
 from graphql import GraphQLError
 
 from .types import Lobby as LobbyType, LoginInformation, PlayableCard, RequiredAction, RoundState, TrickState, User
@@ -13,7 +12,7 @@ from lobby.lobby import Lobby
 from game.player import Player
 from game.game_interaction import GameInteraction
 
-from .graphene_parser import *
+from . import graphene_parser
 
 
 class Query(ObjectType):
@@ -63,17 +62,17 @@ class Query(ObjectType):
 	required_action = Field(RequiredAction)
 
 	@smart_api()
-	def resolve_round_state(root, info: ResolveInfo, game_i: GameInteraction) -> RoundState:
-		return parse_round_state(game_i.get_round_state())
+	def resolve_round_state(root, info: ResolveInfo, game_i: GameInteraction):
+		return graphene_parser.parse_round_state(game_i.get_round_state())
 
 	@smart_api()
-	def resolve_trick_state(root, info: ResolveInfo, game_i: GameInteraction) -> TrickState:
-		return parse_trick_state(game_i.get_trick_state())
+	def resolve_trick_state(root, info: ResolveInfo, game_i: GameInteraction):
+		return graphene_parser.parse_trick_state(game_i.get_trick_state())
 
 	@smart_api()
-	def resolve_hand(root, info: ResolveInfo, player: Player, game_i: GameInteraction) -> List[PlayableCard]:
-		return parse_hand_cards(game_i.get_hand_cards(player))
+	def resolve_hand(root, info: ResolveInfo, player: Player, game_i: GameInteraction):
+		return graphene_parser.parse_hand_cards(game_i.get_hand_cards(player))
 
 	@smart_api()
-	def resolve_required_action(root, info: ResolveInfo, player: Player, game_i: GameInteraction) -> RequiredAction:
-		return parse_player_task(game_i.get_action_required(player))
+	def resolve_required_action(root, info: ResolveInfo, player: Player, game_i: GameInteraction):
+		return graphene_parser.parse_player_task(game_i.get_action_required(player))
