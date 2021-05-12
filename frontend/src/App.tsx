@@ -1,21 +1,23 @@
 import React from "react"
-import { AppBar, createStyles, IconButton, Theme, Toolbar, Typography, withStyles, WithStyles } from "@material-ui/core"
+import { AppBar, IconButton, makeStyles, Theme, Toolbar, Typography } from "@material-ui/core"
 import { Redirect, Route, Switch } from "react-router-dom"
 import { SettingsDialog } from "./settings"
 import { Settings as SettingsIcon } from "@material-ui/icons"
 import RequiresLogin from "./util/RequiresLogin"
 import { Login, Register } from "./login"
 import Lobby from "./lobby"
+import Game from "./game"
 
-function App(props: WithStyles<typeof styles>) {
+export default function App() {
+	const classes = useStyles()
 	const [openSettings, setOpenSettings] = React.useState(false)
 
 	return (
-		<div className={props.classes.root}>
+		<div className={classes.root}>
 			<AppBar position="static">
 				<Toolbar>
 					<Typography
-						className={props.classes.title}
+						className={classes.title}
 						variant="h6"
 						color="inherit">
 						Wizard Online
@@ -30,7 +32,7 @@ function App(props: WithStyles<typeof styles>) {
 				open={openSettings}
 				onClose={() => setOpenSettings(false)} />
 
-			<div className={props.classes.content}>
+			<div className={classes.content}>
 				<Switch>
 					<Route path="/login">
 						<Login />
@@ -50,6 +52,10 @@ function App(props: WithStyles<typeof styles>) {
 						<Lobby />
 					</RequiresLogin>
 
+					<RequiresLogin path="/game">
+						<Game />
+					</RequiresLogin>
+
 					{/* <Route exact path="/game"><Board /></Route>
 					<Route exact path="/test">
 						<SettingsDialog open={true} onClose={() => console.log("hi")} />
@@ -61,7 +67,7 @@ function App(props: WithStyles<typeof styles>) {
 	)
 }
 
-const styles = (theme: Theme) => createStyles({
+const useStyles = makeStyles((theme: Theme) => ({
 	root: {
 		display: "flex",
 		flexDirection: "column",
@@ -76,6 +82,4 @@ const styles = (theme: Theme) => createStyles({
 	title: {
 		flexGrow: 1
 	}
-})
-
-export default withStyles(styles)(App)
+}))

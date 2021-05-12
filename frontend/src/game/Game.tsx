@@ -12,6 +12,9 @@
 // import { useSettings } from "../settings"
 // import useTurnSound from "./useTurnSound"
 
+import { Loading } from "../util";
+import Hand from "./Hand";
+
 // export default function Game() {
 // 	const classes = useStyles()
 // 	const history = useHistory()
@@ -92,5 +95,71 @@
 // 	}
 // `
 export default function Game() {
-	return null
+	return (
+		<div>
+			<Hand 
+				cards={[
+					{
+						id: "green_3",
+						playable: true,
+						variants: null
+					},
+					{
+						id: "blue_3",
+						playable: false,
+						variants: null
+					},
+					{
+						id: "red_5",
+						playable: true,
+						variants: null
+					},
+					{
+						id: "yellow_6",
+						playable: true,
+						variants: null
+					},
+					{
+						id: "green_3",
+						playable: true,
+						variants: null
+					},
+					{
+						id: "blue_3",
+						playable: false,
+						variants: null
+					},
+					{
+						id: "green_3",
+						playable: true,
+						variants: null
+					},
+					{
+						id: "blue_3",
+						playable: false,
+						variants: null
+					},
+					{
+						id: "red_5",
+						playable: true,
+						variants: null
+					},
+					{
+						id: "yellow_6",
+						playable: true,
+						variants: null
+					},
+					{
+						id: "green_3",
+						playable: true,
+						variants: null
+					},
+					{
+						id: "blue_3",
+						playable: false,
+						variants: null
+					},
+				]}/>
+		</div>
+	)
 }

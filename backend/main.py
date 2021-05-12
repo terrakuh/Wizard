@@ -1,5 +1,6 @@
 from database import Database
 from fastapi import FastAPI, Request
+from fastapi.staticfiles import StaticFiles
 from starlette.graphql import GraphQLApp
 from graphene import Schema
 from api.query import Query
@@ -16,8 +17,6 @@ db = Database("wizard.db")
 user_authentication = UserAuthentication(db)
 lobby_manager = Manager()
 
-# app.mount("/", StaticFiles(directory="static"))
-
 @app.post("/api/gql")
 async def handle_gql(request: Request):
 	# dependencies
@@ -33,3 +32,5 @@ async def handle_gql(request: Request):
 		else:
 			real_response.set_cookie(key, value)
 	return real_response
+
+app.mount("/", StaticFiles(directory="static"))

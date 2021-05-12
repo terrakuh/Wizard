@@ -29,7 +29,7 @@ export interface RoundState {
 }
 
 export interface PlayedCard {
-	id: number
+	id: string
 	player: User
 	isWinning: boolean
 }
@@ -43,7 +43,7 @@ export interface TrickState {
 }
 
 export interface PlayableCard {
-	id: number
+	id: string
 	playable: boolean
 	variants: PlayableCard[] | null
 }

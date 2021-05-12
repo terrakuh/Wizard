@@ -1,5 +1,5 @@
 import React from "react"
-import { Backdrop, CircularProgress, makeStyles, Theme, ThemeProviderProps } from "@material-ui/core"
+import { Backdrop, CircularProgress, makeStyles, Theme } from "@material-ui/core"
 
 interface Props {
 	loading: boolean

@@ -16,11 +16,11 @@ export default function Lobby() {
 	}, [startPolling, stopPolling])
 
 	// redirect to game page when game started
-	// React.useEffect(() => {
-	// 	if (info?.roundState) {
-	// 		history.push("/game")
-	// 	}
-	// }, [info, history])
+	React.useEffect(() => {
+		if (info?.roundState) {
+			history.push("/game")
+		}
+	}, [info, history])
 
 	return (
 		<Grid container spacing={2}>
@@ -40,7 +40,7 @@ export default function Lobby() {
 
 interface Info {
 	lobby: LobbyType | null
-	// roundState: {} | null
+	roundState: {} | null
 }
 
 const INFO = gql`
@@ -53,6 +53,9 @@ const INFO = gql`
 				name
 			}
 			canStart
+		}
+		roundState {
+			round
 		}
 	}
 `

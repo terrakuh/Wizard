@@ -6,8 +6,10 @@ import { Loading } from "../util"
 import CryptoJS from "crypto-js"
 import { useSnackbar } from "notistack"
 import { generatePasswordHash } from "../util/security"
+import { useHistory } from "react-router"
 
 export default function Login() {
+	const history = useHistory()
 	const { enqueueSnackbar } = useSnackbar()
 	const [loggingIn, setLogginIn] = React.useState(false)
 	const [name, setName] = React.useState("")
@@ -28,6 +30,7 @@ export default function Login() {
 
 			login({ variables: { name, passwordHash } })
 				.then(() => enqueueSnackbar("Erfolgreich eingeloggt", { variant: "success" }))
+				.then(() => history.push("/game"))
 				.catch(err => enqueueSnackbar(`Login fehlgeschlagen: ${err}`, { variant: "error" }))
 				.finally(() => setLogginIn(false))
 		},
