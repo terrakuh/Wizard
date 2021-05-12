@@ -12,8 +12,10 @@
 // import { useSettings } from "../settings"
 // import useTurnSound from "./useTurnSound"
 
-import { Loading } from "../util";
-import Hand from "./Hand";
+import gql from "graphql-tag"
+import { PlayableCard } from "../types"
+import { Loading } from "../util"
+import Hand from "./Hand"
 
 // export default function Game() {
 // 	const classes = useStyles()
@@ -163,3 +165,20 @@ export default function Game() {
 		</div>
 	)
 }
+
+interface Info {
+	hand: PlayableCard[] | null
+}
+
+const GET_INFO = gql`
+	query {
+		hand {
+			id
+			playable
+			variants {
+				id
+				playable
+			}
+		}
+	}
+`

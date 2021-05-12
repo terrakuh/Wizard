@@ -47,7 +47,7 @@ const theme = createMuiTheme({
 const notistackRef = React.createRef<SnackbarProvider>()
 
 ReactDOM.render(
-	<React.StrictMode>
+	<React.Fragment>
 		<ApolloProvider client={client}>
 			<ThemeProvider theme={theme}>
 				<BrowserRouter>
@@ -67,7 +67,7 @@ ReactDOM.render(
 				</BrowserRouter>
 			</ThemeProvider>
 		</ApolloProvider>
-	</React.StrictMode>,
+	</React.Fragment>,
 	document.getElementById("root")
 )
 
