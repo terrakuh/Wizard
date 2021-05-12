@@ -16,7 +16,7 @@ def parse_graphene_login_information():
     pass
 
 def parse_user(user: User) -> UserType:
-    return UserType(id=user.id, name=user.name)
+    return UserType(id=user.user_id, name=user.name)
 def parse_graphene_user(user: UserType) -> User:
     return User(user.id, user.name)
 
