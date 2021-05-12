@@ -1,1 +1,1 @@
-export { default as TrickCalling } from "./TrickCalling"
+export { default } from "./Action"

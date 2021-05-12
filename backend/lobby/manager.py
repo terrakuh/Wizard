@@ -1,6 +1,6 @@
 from game.player import User
 from threading import RLock
-from typing import Dict, List
+from typing import Dict
 from .lobby import Lobby
 from datetime import datetime, timedelta
 from random import choices
@@ -27,7 +27,7 @@ class Manager:
 				raise Exception("lobby limit reached")
 			elif code in self._lobbies:
 				raise Exception("bad luck")
-			elif user.id in self._player_code:
+			elif user.user_id in self._player_code:
 				raise Exception("player already in lobby")
 			self._lobbies[code] = Lobby(code)
 			self.join_lobby(user, code)
@@ -37,17 +37,17 @@ class Manager:
 		with self._lock:
 			lobby = self._lobbies[code]
 			lobby._add_player(user)
-			self._player_code[user.id] = code
+			self._player_code[user.user_id] = code
 
 	def leave_lobby(self, user: User) -> None:
 		with self._lock:
-			lobby = self._lobbies[self._player_code[user.id]]
+			lobby = self._lobbies[self._player_code[user.user_id]]
 			lobby._remove_player(user)
-			del self._player_code[user.id]
+			del self._player_code[user.user_id]
 
 	def get_lobby_by_player(self, user: User) -> Lobby:
 		with self._lock:
-			return self._lobbies[self._player_code[user.id]]
+			return self._lobbies[self._player_code[user.user_id]]
 
 	def get_lobby(self, code: str) -> Lobby:
 		with self._lock:

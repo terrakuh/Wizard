@@ -1,5 +1,5 @@
+from game.game_interaction import GameInteraction
 from game.player import Player
-from api.types import User
 from datetime import datetime, timedelta
 import functools
 from threading import Lock
@@ -14,6 +14,7 @@ from lobby.manager import Manager
 from lobby.lobby import Lobby
 from game.round import Round
 from game.trick import Trick
+from game.player import User
 
 
 class Response:
@@ -66,7 +67,6 @@ def smart_api(access_control: bool = True, cache: Cache = None):
 			state: State = request.state
 			user: User = None
 			lobby: Lobby = None
-			round: Round = None
 			def assert_lobby() -> None:
 				nonlocal lobby
 				if lobby is None:
@@ -74,13 +74,6 @@ def smart_api(access_control: bool = True, cache: Cache = None):
 						lobby = state.lobby_manager.get_lobby_by_player(user)
 					except:
 						raise GraphQLError("lobby does not exist")
-			def assert_round() -> None:
-				nonlocal round
-				if round is None:
-					assert_lobby()
-					round = lobby.get_game().curr_round
-					if round is None:
-						raise GraphQLError("no round")
 
 			# authorization
 			if access_control:
@@ -104,21 +97,22 @@ def smart_api(access_control: bool = True, cache: Cache = None):
 					additional[key] = state.lobby_manager
 				elif value is User:
 					additional[key] = user
+				elif value is Optional[Lobby]:
+					try: assert_lobby()
+					except: pass
+					additional[key] = lobby
 				elif value is Lobby:
 					assert_lobby()
 					additional[key] = lobby
-				elif value is Round:
-					assert_round()
-					additional[key] = round
-				elif value is Optional[Trick]:
-					assert_round()
-					trick = round.curr_trick
-					if trick is None and value is Trick:
-						raise GraphQLError("no trick")
-					additional[key] = trick
-				elif value is Player:
+				elif value is Optional[GameInteraction]:
+					try:
+						assert_lobby()
+						additional[key] = lobby.get_game_interaction()
+					except:
+						additional[key] = None
+				elif value is GameInteraction:
 					assert_lobby()
-					additional[key] = lobby.get_game().players[user.id]
+					additional[key] = lobby.get_game_interaction()
 			# execute
 			result = func(root, info, **kwargs, **additional)
 			if iscoroutine(result):

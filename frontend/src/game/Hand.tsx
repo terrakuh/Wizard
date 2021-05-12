@@ -36,7 +36,7 @@ export default function Hand(props: Props) {
 									filter: card.playable ? undefined : "brightness(30%)"
 								}}
 								key={`${card.id}${index}`}
-								src={`/cards/${card.id}.jpg`} />
+								card={card} />
 						}
 						)
 					}

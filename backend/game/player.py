@@ -1,14 +1,43 @@
 import logging
 import threading
-from typing import List
+from typing import List, Optional
 
 from .card import Card
 from .card_decks import CardDecks
+
 
 class User:
     def __init__(self, user_id: str, name: str):
         self.user_id = user_id
         self.name = name
+
+    def __str__(self) -> str:
+        return f"[id={self.user_id},name={self.name}]"
+
+
+class PlayerState:
+    def __init__(self, player: User, score: int, tricks_called: Optional[int], tricks_made: Optional[int]):
+        self.player = player
+        self.score = score
+        self.tricks_called = tricks_called
+        self.tricks_made = tricks_made
+
+    def __str__(self) -> str:
+        return f"[User={self.player}]"
+
+
+class HandCard:
+    def __init__(self, card_id: str, playable: bool, variants: list=None):
+        self.card_id = card_id
+        self.playable = playable
+        self.variants = variants
+
+
+class TaskState:
+    def __init__(self, task_type: str, options: List[str]):
+        self.task_type = task_type
+        self.options = options
+
 
 class Player:
     def __init__(self, user: User):
@@ -16,8 +45,8 @@ class Player:
         self.name = user.name
 
         self.score = 0
-        self.tricks_called = 0
-        self.tricks_made = 0
+        self.tricks_called: Optional[int] = None
+        self.tricks_made: Optional[int] = None
         self.cards = None
 
         self.current_task = None
@@ -29,10 +58,6 @@ class Player:
 
     def add_score(self, points: int):
         self.score += points
-        self.__update_state()
-
-    def set_tricks_called(self, amount: int):
-        self.tricks_called = amount
         self.__update_state()
 
     def add_tricks_called(self, amount: int):
@@ -66,6 +91,7 @@ class Player:
             self.current_task = PlayerTask("call_tricks", self, valid_values)
 
         self.tricks_called = int(self.current_task.do_task())
+        self.tricks_made = 0 if self.tricks_made is None else self.tricks_made
         self.__update_state()
 
         return self.tricks_called
@@ -100,27 +126,28 @@ class Player:
         return self.current_task.do_task()
 
     def reset(self):
-        with self.state_lock, self.card_lock:
-            self.tricks_called = 0
-            self.tricks_made = 0
+        with self.card_lock:
             self.cards = None
+        self.tricks_called = None
+        self.tricks_made = None
+        self.__update_state()
 
     def __get_playable_cards(self, lead_color):
         if not lead_color:
             return self.cards.keys()
-        
+
         lead_cards = [card.id for card in self.cards.values() if card.color_bound and card.color == lead_color]
         playable_cards = [key for key, card in self.cards.items() if not lead_cards or not card.color_bound or card.color == lead_color]
-        return [card for card in playable_cards]
+        return playable_cards
 
 
     def get_state(self):
         with self.state_lock:
             return self.state
 
-    def get_hand_cards(self, lead_color: str):
+    def get_hand_cards(self, lead_color: str) -> List[HandCard]:
         with self.card_lock:
-            return [self.__get_hand_card(card, lead_color) for card in self.cards]
+            return [self.__get_hand_card(card, lead_color) for card in self.cards.values()]
 
     def get_task(self):
         with self.task_lock:
@@ -184,21 +211,3 @@ class PlayerTask:
             self.player.current_task = None
 
             self.input_event.set()
-
-class PlayerState:
-    def __init__(self, player: User, score: int, tricks_called: int, tricks_made: int):
-        self.player = player
-        self.score = score
-        self.tricks_called = tricks_called
-        self.tricks_made = tricks_made
-    
-class HandCard:
-    def __init__(self, card_id: str, playable: bool, variants: list=None):
-        self.card_id = card_id
-        self.playable = playable
-        self.variants = variants
-
-class TaskState:
-    def __init__(self, task_type: str, options: List[str]):
-        self.task_type = task_type
-        self.options = options

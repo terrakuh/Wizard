@@ -1,5 +1,5 @@
 from graphql import GraphQLError
-from api.types import User
+from game.player import User
 from typing import Dict, Tuple
 from fastapi import Request
 from fastapi.security.base import SecurityBase

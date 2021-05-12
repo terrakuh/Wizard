@@ -56,30 +56,30 @@ class Mutation(ObjectType):
 	start_game = NonNull(Boolean)
 
 	@smart_api()
-	def resolve_create_lobby(root, info: ResolveInfo, manager: Manager, user: UserType):
-		return manager.create_lobby(parse_graphene_user(user))
+	def resolve_create_lobby(root, info: ResolveInfo, manager: Manager, user: User):
+		return manager.create_lobby(user)
 
 	@smart_api()
-	def resolve_change_lobby_settings(root, info: ResolveInfo, settings: LobbySettings, lobby: Lobby, user: UserType):
+	def resolve_change_lobby_settings(root, info: ResolveInfo, settings: LobbySettings, lobby: Lobby, user: User):
 		print(settings.mode)
-		if not lobby.is_lobby_master(parse_graphene_user(user)):
+		if not lobby.is_lobby_master(user):
 			raise GraphQLError("not lobby master")
 		lobby.set_settings(settings.mode)
 		return True
 
 	@smart_api()
-	def resolve_join_lobby(root, info: ResolveInfo, code: str, manager: Manager, user: UserType):
-		manager.join_lobby(parse_graphene_user(user), code)
+	def resolve_join_lobby(root, info: ResolveInfo, code: str, manager: Manager, user: User):
+		manager.join_lobby(user, code)
 		return True
 
 	@smart_api()
-	def resolve_leave_lobby(root, info: ResolveInfo, manager: Manager, user: UserType):
-		manager.leave_lobby(parse_graphene_user(user))
+	def resolve_leave_lobby(root, info: ResolveInfo, manager: Manager, user: User):
+		manager.leave_lobby(user)
 		return True
 
 	@smart_api()
-	def resolve_start_game(root, info: ResolveInfo, lobby: Lobby, user: UserType):
-		if not lobby.is_lobby_master(parse_graphene_user(user)):
+	def resolve_start_game(root, info: ResolveInfo, lobby: Lobby, user: User):
+		if not lobby.is_lobby_master(user):
 			raise GraphQLError("not lobby master")
 		lobby.start_game()
 		return True
@@ -89,5 +89,6 @@ class Mutation(ObjectType):
 	complete_action = NonNull(Boolean, option=NonNull(String))
 
 	@smart_api()
-	def resolve_complete_action(root, info: ResolveInfo, player: Player, option: str, game_i: GameInteraction):
-		return parse_hand_cards(game_i.complete_action(player, option))
+	def resolve_complete_action(root, info: ResolveInfo, user: User, option: str, game_i: GameInteraction):
+		game_i.complete_action(option, user)
+		return True

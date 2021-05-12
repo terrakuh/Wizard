@@ -12,9 +12,14 @@
 // import { useSettings } from "../settings"
 // import useTurnSound from "./useTurnSound"
 
+import { useQuery } from "@apollo/client"
+import { makeStyles } from "@material-ui/core"
 import gql from "graphql-tag"
-import { PlayableCard } from "../types"
+import { useDrag } from "react-dnd"
+import { PlayableCard, RequiredAction, TrickState, RoundState } from "../types"
 import { Loading } from "../util"
+import Action from "./actions"
+import Deck from "./Deck"
 import Hand from "./Hand"
 
 // export default function Game() {
@@ -23,7 +28,7 @@ import Hand from "./Hand"
 // 	const {enqueueSnackbar} = useSnackbar()
 // 	const { settings, setSettings } = useSettings()
 // 	const { data: gameInfo } = useQuery<GameInfo>(GAME_INFO, { pollInterval: 1000 })
-	
+
 // 	useTurnSound({
 // 		settings,
 // 		setSettings,
@@ -97,77 +102,39 @@ import Hand from "./Hand"
 // 	}
 // `
 export default function Game() {
+	const classes = useStyles()
+	const { data } = useQuery<Info>(GET_INFO, { pollInterval: 1000 })
+
 	return (
-		<div>
-			<Hand 
-				cards={[
-					{
-						id: "green_3",
-						playable: true,
-						variants: null
-					},
-					{
-						id: "blue_3",
-						playable: false,
-						variants: null
-					},
-					{
-						id: "red_5",
-						playable: true,
-						variants: null
-					},
-					{
-						id: "yellow_6",
-						playable: true,
-						variants: null
-					},
-					{
-						id: "green_3",
-						playable: true,
-						variants: null
-					},
-					{
-						id: "blue_3",
-						playable: false,
-						variants: null
-					},
-					{
-						id: "green_3",
-						playable: true,
-						variants: null
-					},
-					{
-						id: "blue_3",
-						playable: false,
-						variants: null
-					},
-					{
-						id: "red_5",
-						playable: true,
-						variants: null
-					},
-					{
-						id: "yellow_6",
-						playable: true,
-						variants: null
-					},
-					{
-						id: "green_3",
-						playable: true,
-						variants: null
-					},
-					{
-						id: "blue_3",
-						playable: false,
-						variants: null
-					},
-				]}/>
+		<div className={classes.root}>
+			<Deck />
+
+			<Hand cards={data?.hand ?? []} />
+
+			<Action
+				info={data?.requiredAction != null && data.roundState != null && data.trickState != null ? {
+					requiredAction: data.requiredAction,
+					roundState: data.roundState,
+					trickState: data.trickState
+				} : null} />
 		</div>
 	)
 }
 
+const useStyles = makeStyles({
+	root: {
+		display: "flex",
+		flexDirection: "column",
+		height: "100%",
+		width: "100%"
+	}
+})
+
 interface Info {
 	hand: PlayableCard[] | null
+	requiredAction: RequiredAction | null
+	trickState: TrickState | null
+	roundState: RoundState | null
 }
 
 const GET_INFO = gql`
@@ -179,6 +146,39 @@ const GET_INFO = gql`
 				id
 				playable
 			}
+		}
+		requiredAction {
+			type
+			options
+		}
+		trickState {
+			playerStates {
+				player {
+					id
+					name
+				}
+			score
+			tricksCalled
+			tricksMade
+			}
+			leadColor
+			round
+			turn {
+				id
+				name
+			}
+			deck {
+				id
+				player {
+					id
+					name
+				}
+				isWinning
+			}
+		}
+		roundState {
+			trumpColor
+			round
 		}
 	}
 `

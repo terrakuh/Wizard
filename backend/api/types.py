@@ -32,7 +32,7 @@ class PlayedCard(ObjectType):
 
 
 class TrickState(ObjectType):
-	players_states = NonNull(List(NonNull(PlayerState)))
+	player_states = NonNull(List(NonNull(PlayerState)))
 	lead_color = String()
 	round = Int()
 	turn = Field(User)

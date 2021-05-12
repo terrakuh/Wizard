@@ -1,3 +1,6 @@
+from typing import Optional
+
+
 class Card:
 
     def __init__(self, value: int, card_type: str, color: str=None, color_bound: bool=True, variants: list=[]):
@@ -12,8 +15,8 @@ class Card:
 
         self.variants = variants
 
-    def is_playable(self, lead_color: str):
-        return not self.color_bound or self.color == lead_color
+    def is_playable(self, lead_color: Optional[str]):
+        return not self.color_bound or lead_color is None or self.color == lead_color
 
     def __str__(self):
         return self.id

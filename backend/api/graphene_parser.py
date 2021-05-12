@@ -2,6 +2,7 @@ from .types import User as UserType, PlayerState as PlayerStateType, RoundState 
 from game.player import PlayerState, PlayerTask, HandCard, User
 from game.trick import TrickState, TrickCard
 from game.round import RoundState
+from game.card_decks import CardDecks
 
 from typing import List
 
@@ -21,14 +22,9 @@ def parse_graphene_user(user: UserType) -> User:
     return User(user.id, user.name)
 
 def parse_player_state(ps: PlayerState) -> PlayerStateType:
-    return PlayerStateType(player=parse_user(ps.user), score=ps.score, tricks_called=ps.tricks_called, tricks_made=ps.tricks_made)
+    return PlayerStateType(player=parse_user(ps.player), score=ps.score, tricks_called=ps.tricks_called, tricks_made=ps.tricks_made)
 def parse_graphene_player_state(ps: PlayerStateType) -> PlayerState:
     return PlayerState(parse_graphene_user(ps.player), ps.score, ps.tricks_called, ps.tricks_made)
-
-def parse_round_state(rs: RoundState) -> RoundStateType:
-    return RoundStateType(trump_color=rs.trump_color, trump_card=parse_hand_card(rs.trump_card), round=rs.round_number)
-def parse_graphene_round_state(rs: RoundStateType) -> RoundState:
-    return RoundState(rs.trump_card, rs.trump_color, rs.round)
 
 def __parse_trick_card(tc: TrickCard) -> PlayedCard:
     return PlayedCard(id=tc.card_id, player=parse_user(tc.player), is_winning=tc.is_winning)
@@ -52,11 +48,13 @@ def parse_playable_cards(pcs: List[PlayableCard]) -> List[HandCard]:
 
 def parse_trick_state(ts: TrickState) -> TrickStateType:
     player_states = [parse_player_state(player_state) for player_state in ts.players_states]
-    turn = parse_user(ts.turn)
-    deck = parse_trick_cards(ts.cards)
+    if ts.turn is not None: turn = parse_user(ts.turn)
+    else: turn = None
+    if ts.cards is not None: deck = parse_trick_cards(ts.cards)
+    else: deck = None
     return TrickStateType(player_states=player_states, lead_color=ts.lead_color, round=ts.trick_number, turn=turn, deck=deck)
 def parse_graphene_trick_state(ts: TrickStateType) -> TrickState:
-    player_states = [parse_graphene_player_state(player_state) for player_state in ts.players_states]
+    player_states = [parse_graphene_player_state(player_state) for player_state in ts.player_states]
     turn = parse_graphene_user(ts.turn)
     cards = parse_played_cards(ts.deck)
     return TrickState(player_states, ts.lead_color, ts.round, turn, cards)
@@ -65,3 +63,8 @@ def parse_player_task(pt: PlayerTask) -> RequiredAction:
     return RequiredAction(type=pt.task_type, options=pt.options)
 def parse_required_action(ra: RequiredAction) -> PlayerTask:
     return PlayerTask(ra.type, ra.options)
+
+def parse_round_state(rs: RoundState) -> RoundStateType:
+    return RoundStateType(trump_color=rs.trump_color, trump_card=CardDecks.CARDS.get(rs.trump_card), round=rs.round_number)
+def parse_graphene_round_state(rs: RoundStateType) -> RoundState:
+    return RoundState(rs.trump_card, rs.trump_color, rs.round)

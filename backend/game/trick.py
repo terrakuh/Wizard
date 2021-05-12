@@ -1,7 +1,7 @@
 from .player import User, Player, PlayerState, HandCard
 from .card import Card
 from .card_decks import CardDecks
-from typing import List
+from typing import List, Optional
 
 import logging
 import threading
@@ -107,7 +107,7 @@ class Trick:
         return [TrickCard(card.id, player.user, (player == self.get_current_winner())) for card, player in zip(self.card_stack_by_player.values(), self.card_stack_by_card.values())]
 
 class TrickState:
-    def __init__(self, player_states: List[PlayerState], lead_color: str, trick_number: int, turn: User, cards: List[HandCard]):
+    def __init__(self, player_states: List[PlayerState], lead_color: Optional[str] = None, trick_number: Optional[int] = None, turn: Optional[User] = None, cards: Optional[List[HandCard]] = None):
         self.players_states = player_states
         self.lead_color = lead_color
         self.trick_number = trick_number
