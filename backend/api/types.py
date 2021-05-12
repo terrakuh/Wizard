@@ -25,11 +25,6 @@ class PlayerState(ObjectType):
 	tricks_made = Int()
 
 
-class RoundState(ObjectType):
-	trump_color = String()
-	round = NonNull(Int)
-
-
 class PlayedCard(ObjectType):
 	id = NonNull(ID)
 	player = NonNull(User)
@@ -48,6 +43,12 @@ class PlayableCard(ObjectType):
 	id = NonNull(ID)
 	playable = NonNull(Boolean)
 	variants = List(NonNull(lambda: PlayableCard))
+
+
+class RoundState(ObjectType):
+	trump_color = String()
+	trump_card = NonNull(PlayableCard)
+	round = NonNull(Int)
 
 
 class RequiredAction(ObjectType):

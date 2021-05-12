@@ -1,94 +1,93 @@
 from .card_decks import CardDecks
-
 from .trick import Trick
 from .player import Player
 from .card import Card
+from typing import List
+
+import random
+import logging
+import threading
 
 class Round:
     """
     Round for one amount of cards (1, 2, 3, ...)
     """
 
-    import random
-    import logging
+    def __init__(self, mode: int, players: List[Player], first_player: int, card_deck: List[Card], round_counter: int):
+        """
+        """
 
-    def __init__(self, game_context):
-        """
-        game_context: {
-                mode: int,
-                players: list,
-                first_player: int,
-                card_deck: list,
-                round_counter: int
-            }
-        """
-        self.game_mode = game_context.get("mode")
-        self.trump_color = None
-        self.trump_card = None
-        self.round_number = game_context.get("round_counter")
+        self.game_mode = mode
+        self.round_number = round_counter
+        self.card_deck = card_deck
+        self.players = players
+        self.first_player = first_player
+
         self.tricks_called = 0
-        self.card_deck = game_context.get("card_deck")
-        self.players = game_context.get("players")
-        self.first_player = game_context.get("first_player")
-
         self.curr_trick = None
 
-    def start_round(self):
-        self.logging.info("Starting round " + str(self.round_number))
+        self.__init_trump()
+
+        self.state_lock = threading.Lock()
+        self.__update_state()
+
+    def __init_trump(self):
+        logging.info("Initializing round " + str(self.round_number))
 
         card_giver = self.players[(self.first_player - 1 + len(self.players)) % len(self.players)]
 
         unhanded_cards = self.__handout_cards()
 
-        self.trump_card = self.random.choice(unhanded_cards)
-        self.logging.info("Trump card is " + self.trump_card.id)
+        # Set trump
+        self.trump_card = random.choice(unhanded_cards)
+        self.trump_color = None if self.trump_card.card_type in CardDecks.NO_TRUMP_CARDS else (card_giver.select_input("trump_color", CardDecks.CARD_COLORS) if self.trump_card.card_type in CardDecks.TRUMP_SELECTION_CARDS else self.trump_card.color)
 
-        self.trump_color = None if self.trump_card.card_type in CardDecks.NO_TRUMP_CARDS else (card_giver.select_input(CardDecks.CARD_COLORS) if self.trump_card.card_type in CardDecks.TRUMP_SELECTION_CARDS else self.trump_card.color)
-
-        self.logging.info("Trump is " + str(self.trump_card) + " -> " + str(self.trump_color))
+        logging.info("Trump is " + str(self.trump_card) + " -> " + str(self.trump_color))
 
         # Werewolf
         if self.game_mode > 0:
             for player in self.players:
                 if "werewolf" in player.cards:
-                    player.cards[self.trump_card.id] = self.trump_card
-                    self.trump_card = player.cards["werewolf"]
-                    del player.cards["werewolf"]
-                    
-                    self.trump_color = player.select_input(CardDecks.CARD_COLORS)
+                    self.trump_card = player.replace_card("werewolf", self.trump_card)                    
+                    self.trump_color = player.select_input("trump_color", CardDecks.CARD_COLORS)
 
+    def start_round(self):
+        logging.info("Starting round " + str(self.round_number))
+
+        print("Curr first player is: " + str(self.first_player) + " from: " + str(self.players))
         self.__get_estimations()
-        self.logging.info("Starting trick(s) for round " + str(self.round_number))
-        winner = self.first_player
+        
         for i in range(self.round_number):
-            round_context = {
-                "mode": self.game_mode,
-                "players": self.players,
-                "first_player": winner,
-                "trump_color": self.trump_color,
-                "trick_number": i
-            }
+            print("Curr first player is: " + str(self.first_player) + " from: " + str(self.players))
+            self.curr_trick = Trick(mode=self.game_mode, players=self.players, first_player=self.first_player, trump_color=self.trump_color, trick_number=i)
+            
+            self.first_player = self.curr_trick.do_trick()
+            winning_player = self.players[self.first_player]
 
-            self.curr_trick = Trick(round_context)
-            self.curr_trick.do_trick()
-            winner = self.curr_trick.get_current_winner()
             after_effect = self.curr_trick.get_after_effect()
 
-            self.logging.info("Trick winner is " + str(winner))
+            logging.info("Trick winner is " + str(self.first_player) + " - " + str(winning_player))
 
             if after_effect:
-                self.logging.info("Got after effect " + after_effect)
+                logging.info("Got after effect " + after_effect)
                 if after_effect == "cloud":
-                    trick_modification = winner.select_input([-1, 1])
-                    winner.tricks_called += trick_modification
-                if after_effect == "juggler" and i < self.round_number - 1:
-                    passed_cards = [player.select_input(player.cards.keys()) for player in self.players]
-                    for index, card in enumerate(passed_cards):
-                        self.players[index].cards.pop(card)
-                        self.players[(index + 1) % len(self.players)].append(card)
+                    trick_modification = 1 if winning_player.select_input("cloud_effect", ["+", "-"]) == "+" else -1
+                    winning_player.add_tricks_called(trick_modification)
 
-            winner.tricks_made += 0 if after_effect == "bomb" else 1
-            self.logging.info("Trick completed")
+                if after_effect == "juggler" and i < self.round_number - 1:
+                    passed_cards = [player.select_input("juggler_effect", player.cards.keys()) for player in self.players]
+                    with [player.card_lock for player in self.players]:
+                        for index, card in enumerate(passed_cards):
+                            next_index = (index + 1) % len(self.players)
+
+                            remove_from = self.players[index]
+                            give_to = self.players[next_index]
+
+                            given_card = remove_from.cards.pop(card)
+                            give_to.cards[given_card.id] = given_card
+
+            if after_effect != "bomb": winning_player.inc_tricks_made()
+            logging.info("Trick completed")
         
         self.__calculate_points()
 
@@ -96,15 +95,15 @@ class Round:
         """
         Returns: left cards
         """
-        self.random.shuffle(self.card_deck)
+        random.shuffle(self.card_deck)
         player_count = len(self.players)
 
         for i in range(player_count):
             index = (i + self.first_player) % player_count
             player = self.players[index]
-
-            player.cards = {card.id: card for card in self.card_deck[index:player_count*self.round_number:player_count]}
-            self.logging.info("Player " + player.name + " got cards: " + str(player.cards))
+            player.set_cards(self.card_deck[index:player_count*self.round_number:player_count])
+            
+            logging.info("Player " + player.name + " got cards: " + str(player.cards))
 
         return self.card_deck[player_count*self.round_number:]
 
@@ -113,13 +112,29 @@ class Round:
 
         for i in range(player_count):
             player = self.players[(i + self.first_player) % player_count]
-            self.logging.info(player.name + " is calling tricks")
-            self.tricks_called += player.call_tricks(self.tricks_called, self.round_number)
+            logging.info(player.name + " is calling tricks")
+            self.tricks_called += player.call_tricks(self.tricks_called, self.round_number, i==player_count-1)
     
     def __calculate_points(self):
         for player in self.players:
             if player.tricks_called == player.tricks_made:
-                player.score += 10 + 20 * player.tricks_called
+                player.add_score(10 + 20 * player.tricks_called)
             else:
-                player.score -= 20 * abs(player.tricks_called - player.tricks_made)
-            self.logging.info("New score of " + player.name + " is " + str(player.score))
+                player.add_score(-20 * abs(player.tricks_called - player.tricks_made))
+
+            logging.info("New score of " + player.name + " is " + str(player.score))
+
+    def get_state(self):
+        with self.state_lock:
+            return self.state
+
+    def __update_state(self):
+        with self.state_lock:
+            self.state = RoundState(self.trump_card.id, self.trump_color, self.round_number)
+
+
+class RoundState:
+    def __init__(self, trump_card: str, trump_color: str, round_number: int):
+        self.trump_card = trump_card
+        self.trump_color = trump_color
+        self.round_number = round_number

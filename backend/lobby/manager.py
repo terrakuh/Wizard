@@ -1,4 +1,4 @@
-from api.types import User
+from game.player import User
 from threading import RLock
 from typing import Dict, List
 from .lobby import Lobby

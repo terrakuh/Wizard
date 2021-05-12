@@ -1,6 +1,9 @@
 from database import Database
 from fastapi import FastAPI, Request
+<<<<<<< HEAD
 from fastapi.staticfiles import StaticFiles
+=======
+>>>>>>> origin/dev-maxi
 from starlette.graphql import GraphQLApp
 from graphene import Schema
 from api.query import Query

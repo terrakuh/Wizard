@@ -1,4 +1,5 @@
-from api.types import LoginInformation, User
+from api.types import LoginInformation
+from game.player import User
 from sqlite3 import connect
 import random
 import string
@@ -53,7 +54,7 @@ class Database:
 			JOIN session ON session.user=user.id
 			WHERE session.cookie=?
 		""", (cookie,)))[0]
-		return User(id=row[0], name=row[1])
+		return User(user_id=row[0], name=row[1])
 
 	async def register_user(self, name: str, password_hash: str, salt: str, hash_type: str):
 		await get_event_loop().run_in_executor(self._pool, self.__execute, """

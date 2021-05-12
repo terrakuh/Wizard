@@ -1,6 +1,6 @@
-from game.game import Game
-from game.player import Player
-import game.game_interface
+from game.game import Game, Settings
+from game.player import User
+from game.game_interaction import GameInteraction
 
 import logging
 import threading
@@ -8,28 +8,32 @@ import time
 
 logging.basicConfig(level=logging.DEBUG)
 
-players = [
-    Player({
-        "name": "Maxi",
-        "id": 1
-    }),
-    Player({
-        "name": "Flo",
-        "id": 2
-    }),
-    Player({
-        "name": "Yunus",
-        "id": 3
-    })
-]
+players = [User("1", "Maxi"), User("2", "Flo"), User("3", "Yunus"),]
 
-g = Game(players, {"mode":2})
+g = Game(players, Settings(1))
 
-threading.Thread(target=g.start_game).start()
+g.start()
+
 time.sleep(2)
-print("Continuing...")
+
+g2 = GameInteraction(g)
+
 while True:
-    for player in g.players:
-        print(player.name + " in test")
-        i = input()
-        print(game.game_interface.call_tricks(int(i), player))
+    for p in g.players.values():
+        print(p)
+        if g2.get_action_required(p):
+            try:
+                g2.complete_action(input(), p)
+            except Exception as e:
+                print(e)
+                print("Lets go on...")
+    time.sleep(2)
+
+# threading.Thread(target=g.start_game).start()
+# time.sleep(2)
+# print("Continuing...")
+# while True:
+#     for player in g.players:
+#         print(player.name + " in test")
+#         i = input()
+#         print(game.game_interface.call_tricks(int(i), player))

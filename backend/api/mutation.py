@@ -1,22 +1,24 @@
 from api.decorators import smart_api, Response
 from graphene import ObjectType, Boolean, NonNull, String, ResolveInfo, Int, ID, List
 from graphql import GraphQLError
-from .types import User, PlayableCard
+from .types import User as UserType, PlayableCard
 from .inputs import LobbySettings
 from database import Database
 from fastapi import Request
+
 from lobby.manager import Manager
 from lobby.lobby import Lobby
-from game.player import Player
-from game.trick import Trick
-from .helpers import *
-import game.game_interface
+
+from game.player import Player, User
+from game.game_interaction import GameInteraction
+
+from .graphene_parser import *
 
 
 class Mutation(ObjectType):
 	# user management
 	register = NonNull(Boolean, name=NonNull(String), password_hash=NonNull(String), salt=NonNull(String), hash_type=NonNull(String), token=NonNull(String))
-	login = NonNull(User, name=NonNull(String), password_hash=NonNull(String))
+	login = NonNull(UserType, name=NonNull(String), password_hash=NonNull(String))
 	logout = NonNull(Boolean)
 
 	@smart_api(access_control=False)
@@ -35,7 +37,7 @@ class Mutation(ObjectType):
 			response.cookies["login"] = cookie
 		except:
 			raise GraphQLError(f"User '{name}' does not exist.")
-		return User(id=0, name=name)
+		return UserType(id=0, name=name)
 
 	@smart_api()
 	async def resolve_logout(root, info: ResolveInfo, db: Database, request: Request, response: Response):
@@ -54,30 +56,30 @@ class Mutation(ObjectType):
 	start_game = NonNull(Boolean)
 
 	@smart_api()
-	def resolve_create_lobby(root, info: ResolveInfo, manager: Manager, user: User):
-		return manager.create_lobby(user)
+	def resolve_create_lobby(root, info: ResolveInfo, manager: Manager, user: UserType):
+		return manager.create_lobby(parse_graphene_user(user))
 
 	@smart_api()
-	def resolve_change_lobby_settings(root, info: ResolveInfo, settings: LobbySettings, lobby: Lobby, user: User):
+	def resolve_change_lobby_settings(root, info: ResolveInfo, settings: LobbySettings, lobby: Lobby, user: UserType):
 		print(settings.mode)
-		if not lobby.is_lobby_master(user):
+		if not lobby.is_lobby_master(parse_graphene_user(user)):
 			raise GraphQLError("not lobby master")
 		lobby.set_settings(settings.mode)
 		return True
 
 	@smart_api()
-	def resolve_join_lobby(root, info: ResolveInfo, code: str, manager: Manager, user: User):
-		manager.join_lobby(user, code)
+	def resolve_join_lobby(root, info: ResolveInfo, code: str, manager: Manager, user: UserType):
+		manager.join_lobby(parse_graphene_user(user), code)
 		return True
 
 	@smart_api()
-	def resolve_leave_lobby(root, info: ResolveInfo, manager: Manager, user: User):
-		manager.leave_lobby(user)
+	def resolve_leave_lobby(root, info: ResolveInfo, manager: Manager, user: UserType):
+		manager.leave_lobby(parse_graphene_user(user))
 		return True
 
 	@smart_api()
-	def resolve_start_game(root, info: ResolveInfo, lobby: Lobby, user: User):
-		if not lobby.is_lobby_master(user):
+	def resolve_start_game(root, info: ResolveInfo, lobby: Lobby, user: UserType):
+		if not lobby.is_lobby_master(parse_graphene_user(user)):
 			raise GraphQLError("not lobby master")
 		lobby.start_game()
 		return True
@@ -86,15 +88,6 @@ class Mutation(ObjectType):
 	# game logic
 	complete_action = NonNull(Boolean, option=NonNull(String))
 
-	# @smart_api()
-	# def resolve_play_card(root, info: ResolveInfo, id: ID, player: Player, trick: Trick):
-	# 	left_cards = game.game_interface.play_card(id, player, trick.lead_color)
-	# 	return cards_to_playable_cards(left_cards)
-
-	# @smart_api()
-	# def resolve_call_tricks(root, info: ResolveInfo, player: Player, amount: int):
-	# 	return game.game_interface.call_tricks(amount, player)
-
 	@smart_api()
-	def resolve_complete_action(root, info: ResolveInfo, player: Player, option: str):
-		return game.game_interface.complete_action(option, player)
+	def resolve_complete_action(root, info: ResolveInfo, player: Player, option: str, game_i: GameInteraction) -> List[PlayableCard]:
+		return parse_hand_cards(game_i.complete_action(player, option))
