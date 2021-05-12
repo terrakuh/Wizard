@@ -1,5 +1,5 @@
 from datetime import timedelta
-from typing import Optional
+from typing import List
 from api.decorators import Cache, smart_api
 from graphene import ObjectType, Field, ID, String, NonNull, ResolveInfo, List, Int
 from graphql import GraphQLError
@@ -69,7 +69,7 @@ class Query(ObjectType):
 		return parse_trick_state(game_i.get_trick_state())
 
 	@smart_api()
-	def resolve_hand(root, info: ResolveInfo, player: Player, game_i: GameInteraction) -> list[PlayableCard]:
+	def resolve_hand(root, info: ResolveInfo, player: Player, game_i: GameInteraction) -> List[PlayableCard]:
 		return parse_hand_cards(game_i.get_hand_cards(player))
 
 	@smart_api()

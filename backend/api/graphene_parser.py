@@ -1,7 +1,9 @@
 from .types import User as UserType, PlayerState as PlayerStateType, RoundState as RoundStateType, TrickState as TrickStateType, PlayedCard, PlayableCard, RequiredAction
-from game.player import PlayerState, PlayerTask, HandCard
+from game.player import PlayerState, PlayerTask, HandCard, User
 from game.trick import TrickState, TrickCard
 from game.round import RoundState
+
+from typing import List
 
 def parse_lobby():
     pass
@@ -33,9 +35,9 @@ def __parse_trick_card(tc: TrickCard) -> PlayedCard:
 def __parse_played_card(pc: PlayedCard) -> TrickCard:
     return TrickCard(pc.id, parse_graphene_user(pc.player), pc.is_winning)
 
-def parse_trick_cards(tcs: list[TrickCard]) -> list[PlayedCard]:
+def parse_trick_cards(tcs: List[TrickCard]) -> List[PlayedCard]:
     return [__parse_trick_card(card) for card in tcs]
-def parse_played_cards(pcs: list[PlayedCard]) -> list[TrickCard]:
+def parse_played_cards(pcs: List[PlayedCard]) -> List[TrickCard]:
     return [__parse_played_card(card) for card in pcs]
 
 def __parse_hand_card(hc: HandCard) -> PlayableCard:
@@ -43,9 +45,9 @@ def __parse_hand_card(hc: HandCard) -> PlayableCard:
 def __parse_playable_card(pc: PlayableCard) -> HandCard:
     return HandCard(pc.id, pc.playable, parse_playable_cards(pc.variants))
 
-def parse_hand_cards(hcs: list[HandCard]) -> list[PlayableCard]:
+def parse_hand_cards(hcs: List[HandCard]) -> List[PlayableCard]:
     return [__parse_hand_card(card) for card in hcs]
-def parse_playable_cards(pcs: list[PlayableCard]) -> list[HandCard]:
+def parse_playable_cards(pcs: List[PlayableCard]) -> List[HandCard]:
     return [__parse_playable_card(card) for card in pcs]
 
 def parse_trick_state(ts: TrickState) -> TrickStateType:
