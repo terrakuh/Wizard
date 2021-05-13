@@ -1,7 +1,8 @@
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, makeStyles, Typography } from "@material-ui/core";
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, makeStyles, Paper, PaperProps, Typography } from "@material-ui/core";
 import { Maximize, Minimize as MinimizeIcon } from "@material-ui/icons";
 import { useSnackbar } from "notistack";
 import { ReactNode, useState, useEffect, useCallback } from "react";
+import Draggable from "react-draggable";
 
 interface Props {
 	open: boolean
@@ -38,7 +39,10 @@ export default function DialogTemplate(props: Props) {
 	}, [props.open])
 
 	return (
-		<Dialog open={props.open && !minimize} fullWidth>
+		<Dialog
+			open={props.open && !minimize}
+			PaperComponent={PaperComponent}
+			fullWidth>
 			<DialogTitle className={classes.title} disableTypography>
 				<Typography variant="h6" className={classes.titleText}>{props.title}</Typography>
 
@@ -67,6 +71,15 @@ const useStyles = makeStyles({
 	},
 	title: {
 		display: "flex",
-		alignItems: "center"
+		alignItems: "center",
+		cursor: "move"
 	}
 })
+
+function PaperComponent(props: PaperProps) {
+	return (
+		<Draggable cancel={'[class*="MuiDialogContent-root"]'}>
+			<Paper {...props} />
+		</Draggable>
+	)
+}

@@ -54,6 +54,7 @@ ReactDOM.render(
 					<SettingsProvider>
 						<SnackbarProvider
 							ref={notistackRef}
+							preventDuplicate
 							action={key => (
 								<IconButton size="small" onClick={() => notistackRef.current?.closeSnackbar(key)}>
 									<CancelIcon />

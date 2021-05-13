@@ -22,6 +22,7 @@ import { Loading } from "../util"
 import Action from "./actions"
 import Deck from "./Deck"
 import Hand from "./Hand"
+import ScoreBoard from "./ScoreBoard"
 
 // export default function Game() {
 // 	const classes = useStyles()
@@ -112,11 +113,15 @@ export default function Game() {
 		return <Redirect to="/lobby" />
 	}
 
-	const { gameInfo: { hand }, requiredAction } = data
+	const { gameInfo: { hand, trickState }, requiredAction } = data
 
 	return (
 		<div className={classes.root}>
 			<Deck />
+
+			<ScoreBoard
+				className={classes.scoreBoard}
+				trickState={trickState} />
 
 			<Hand cards={hand ?? []} />
 
@@ -131,6 +136,10 @@ const useStyles = makeStyles({
 		flexDirection: "column",
 		height: "100%",
 		width: "100%"
+	},
+	scoreBoard: {
+		position: "absolute",
+		right: 0
 	}
 })
 
