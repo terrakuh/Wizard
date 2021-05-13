@@ -37,7 +37,7 @@ export default function SettingsDialog(props: Props) {
 					<Typography variant="h6" className={classes.title}>Einstellungen</Typography>
 
 					<Button
-						color="secondary"
+						color="inherit"
 						onClick={props.onClose}>
 						Abbrechen
 					</Button>

@@ -7,6 +7,7 @@ import RequiresLogin from "./util/RequiresLogin"
 import { Login, Register } from "./login"
 import Lobby from "./lobby"
 import Game from "./game"
+import Deck from "./game/Deck"
 
 export default function App() {
 	const classes = useStyles()
@@ -56,10 +57,10 @@ export default function App() {
 						<Game />
 					</RequiresLogin>
 
-					{/* <Route exact path="/game"><Board /></Route>
 					<Route exact path="/test">
-						<SettingsDialog open={true} onClose={() => console.log("hi")} />
-					</Route> */}
+
+					</Route>
+
 					<Route path="/"><Redirect to="/lobby" /></Route>
 				</Switch>
 			</div>

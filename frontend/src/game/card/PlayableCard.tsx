@@ -5,14 +5,15 @@ import gql from "graphql-tag"
 import { useSnackbar } from "notistack"
 import { useState } from "react"
 import { useDrag } from "react-dnd"
-import { PlayableCard } from "../types"
+import { PlayableCard as PlayableCardSchema } from "../../types"
+import { cardStyle } from "./styles"
 
 interface Props {
-	card: PlayableCard
+	card: PlayableCardSchema
 	style?: React.CSSProperties
 }
 
-export default function Card(props: Props) {
+export default function PlayableCard(props: Props) {
 	const classes = useStyles()
 	const { enqueueSnackbar } = useSnackbar()
 	const [playCard] = useMutation(PLAY_CARD)
@@ -26,10 +27,9 @@ export default function Card(props: Props) {
 			console.error(err)
 			enqueueSnackbar("Die Karte konnte nicht gespielt werden.", { variant: "error" })
 		}
-
 	}
 	const [hovering, setHovering] = useState(false)
-	const [{ isDragging }, drag] = useDrag({
+	const [, drag] = useDrag({
 		item: {
 			type: "card",
 			id: props.card.id
@@ -38,10 +38,7 @@ export default function Card(props: Props) {
 			if (item && monitor.getDropResult() != null) {
 				await handlePlay(item.id)
 			}
-		},
-		collect: (monitor) => ({
-			isDragging: monitor.isDragging(),
-		}),
+		}
 	})
 
 	return (
@@ -53,7 +50,7 @@ export default function Card(props: Props) {
 			onMouseLeave={() => setHovering(false)}
 			style={props.style}>
 			<img
-				className={classes.card}
+				style={cardStyle}
 				alt=""
 				src={`/cards/${props.card.id}.jpg`} />
 		</div>
@@ -74,9 +71,6 @@ const useStyles = makeStyles({
 	root: {
 		// width: "fit-content"
 		// background: "linear-gradient(235deg,#89ff0066,#060c2166,#00bcd466)"
-	},
-	card: {
-		borderRadius: 16
 	},
 	hover: {
 		animation: "$onHoverEnter .2s ease-in-out",

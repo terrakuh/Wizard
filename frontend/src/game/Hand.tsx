@@ -1,10 +1,10 @@
 import { makeStyles } from "@material-ui/core"
-import { PlayableCard } from "../types"
-import Card from "./Card"
+import { PlayableCard as PlayableCardSchema } from "../types"
+import { PlayableCard } from "./card"
 import AutoSizer from "react-virtualized-auto-sizer"
 
 interface Props {
-	cards: PlayableCard[]
+	cards: PlayableCardSchema[]
 }
 
 export default function Hand(props: Props) {
@@ -26,7 +26,7 @@ export default function Hand(props: Props) {
 							const x = (index + 1) * step
 							const y = foo(x)
 
-							return <Card
+							return <PlayableCard
 								style={{
 									position: "absolute",
 									bottom: y * 150 - 200,
@@ -50,7 +50,6 @@ const useStyles = makeStyles({
 		position: "relative",
 		height: 300,
 		backgroundColor: "white",
-		overflow: "hidden",
-		bottom: 0
+		overflow: "hidden"
 	}
 })

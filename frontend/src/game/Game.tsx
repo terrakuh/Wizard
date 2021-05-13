@@ -1,111 +1,19 @@
-// import React from "react"
-// import { createStyles, makeStyles, Theme, withStyles, WithStyles } from "@material-ui/core"
-// import ScoreBoard from "../score/ScoreBoard"
-// import { Card, Score, TrickCalling } from "../types"
-// import { Loading } from "../util"
-// import Deck from "./Deck"
-// import Hand from "./Hand"
-// import { gql, useQuery } from "@apollo/client"
-// import { Redirect, RouteComponentProps, useHistory, withRouter } from "react-router-dom"
-// import TrickCallDialog from "./TrickCallDialog"
-// import { useSnackbar, withSnackbar, WithSnackbarProps } from "notistack"
-// import { useSettings } from "../settings"
-// import useTurnSound from "./useTurnSound"
-
 import { useQuery } from "@apollo/client"
 import { makeStyles } from "@material-ui/core"
 import gql from "graphql-tag"
-import { useDrag } from "react-dnd"
+import { useDrop } from "react-dnd"
 import { Redirect } from "react-router"
-import { PlayableCard, RequiredAction, TrickState, RoundState, GameInfo } from "../types"
+import { RequiredAction, GameInfo } from "../types"
 import { Loading } from "../util"
 import Action from "./actions"
 import Deck from "./Deck"
 import Hand from "./Hand"
 import ScoreBoard from "./ScoreBoard"
 
-// export default function Game() {
-// 	const classes = useStyles()
-// 	const history = useHistory()
-// 	const {enqueueSnackbar} = useSnackbar()
-// 	const { settings, setSettings } = useSettings()
-// 	const { data: gameInfo } = useQuery<GameInfo>(GAME_INFO, { pollInterval: 1000 })
-
-// 	useTurnSound({
-// 		settings,
-// 		setSettings,
-// 		playerTurn: gameInfo?.playerTurn
-// 	})
-
-// 	if (gameInfo?.gameInProgress === false) {
-// 		return <Redirect to="/" />
-// 	} else if (gameInfo === undefined || gameInfo.scores === null || gameInfo.hand === null) {
-// 		return <Loading loading={true} />
-// 	}
-
-// 	return (
-// 		<div className={classes.root}>
-// 			<TrickCallDialog
-// 				clearContext={() => { }}
-// 				context={gameInfo?.trickCallRequired ?? undefined} />
-
-// 			<ScoreBoard
-// 				className={classes.scoreBoard}
-// 				turn={gameInfo.playerTurn}
-// 				scores={gameInfo.scores} />
-// 			<Deck
-// 				deckColor={gameInfo.deckColor}
-// 				deck={gameInfo.deck}
-// 				trickColor={gameInfo.trickColor} />
-// 			<Hand hand={gameInfo.hand} />
-// 		</div>
-// 	)
-// }
-
-// const useStyles = makeStyles((theme: Theme) => ({
-// 	root: {
-// 		position: "relative",
-// 		display: "flex",
-// 		flexDirection: "column",
-// 		gap: theme.spacing()
-// 	},
-// 	scoreBoard: {
-// 		position: "absolute",
-// 		right: 0,
-// 		top: 0
-// 	}
-// }))
-
-// interface GameInfo {
-// 	scores: Score[] | null
-// 	playerTurn: string | null
-// 	trickColor: string | null
-// 	deck: string[] | null
-// 	deckColor: string | null
-// 	gameInProgress: boolean
-// 	trickCallRequired: TrickCalling | null
-// 	hand: Card[] | null
-// }
-
-// const GAME_INFO = gql`
-// 	query {
-// 		hand {
-// 			id
-// 			playable
-// 			variants {
-// 				id
-// 				playable
-// 			}
-// 		}
-// 		roundState {
-// 			round
-// 			trumpColor
-// 		}
-// 	}
-// `
 export default function Game() {
 	const classes = useStyles()
 	const { data } = useQuery<Info>(GET_INFO, { pollInterval: 1000 })
+	const [, drop] = useDrop({ accept: "card" })
 
 	if (data == null) {
 		return <Loading loading={true} />
@@ -117,7 +25,9 @@ export default function Game() {
 
 	return (
 		<div className={classes.root}>
-			<Deck />
+			<div className={classes.dropArea} ref={drop}>
+				<Deck cards={trickState.deck ?? []} />
+			</div>
 
 			<ScoreBoard
 				className={classes.scoreBoard}
@@ -140,6 +50,9 @@ const useStyles = makeStyles({
 	scoreBoard: {
 		position: "absolute",
 		right: 0
+	},
+	dropArea: {
+		flexGrow: 1
 	}
 })
 
