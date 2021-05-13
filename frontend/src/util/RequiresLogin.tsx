@@ -14,6 +14,9 @@ export default function RequiresLogin(props: Props) {
 	useQuery<Whoami>(WHOAMI, {
 		onCompleted(data) {
 			setIsLoggedIn(data.whoami != null)
+		},
+		onError() {
+			setIsLoggedIn(false)
 		}
 	})
 

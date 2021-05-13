@@ -1,5 +1,4 @@
 import { makeStyles } from "@material-ui/core"
-import { useRef, useState } from "react"
 import { PlayableCard } from "../types"
 import Card from "./Card"
 import AutoSizer from "react-virtualized-auto-sizer"

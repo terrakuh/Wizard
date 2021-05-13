@@ -1,5 +1,5 @@
 import React from "react"
-import { Button, makeStyles, Paper, TextField } from "@material-ui/core"
+import { Button, makeStyles, Paper, TextField, Theme } from "@material-ui/core"
 import gql from "graphql-tag"
 import { useLazyQuery, useMutation } from "@apollo/client"
 import { Loading } from "../util"
@@ -9,6 +9,7 @@ import { generatePasswordHash } from "../util/security"
 import { useHistory } from "react-router"
 
 export default function Login() {
+	const classes = useStyles()
 	const history = useHistory()
 	const { enqueueSnackbar } = useSnackbar()
 	const [loggingIn, setLogginIn] = React.useState(false)
@@ -26,7 +27,6 @@ export default function Login() {
 				enqueueSnackbar(err, { variant: "error" })
 				return
 			}
-			console.log({ passwordHash })
 
 			login({ variables: { name, passwordHash } })
 				.then(() => enqueueSnackbar("Erfolgreich eingeloggt", { variant: "success" }))
@@ -41,36 +41,49 @@ export default function Login() {
 	})
 
 	return (
-		<Paper>
-			<Loading loading={loading || loggingIn} />
+		<div className={classes.root}>
+			<Paper className={classes.paper}>
+				<Loading loading={loading || loggingIn} />
 
-			<TextField
-				label="Benutzer"
-				value={name}
-				onChange={ev => setName(ev.target.value)}
-				fullWidth />
+				<TextField
+					label="Benutzer"
+					value={name}
+					onChange={ev => setName(ev.target.value)}
+					fullWidth />
 
-			<TextField
-				label="Passwort"
-				value={password}
-				type="password"
-				onChange={ev => setPassword(ev.target.value)}
-				fullWidth />
+				<TextField
+					label="Passwort"
+					value={password}
+					type="password"
+					onChange={ev => setPassword(ev.target.value)}
+					fullWidth />
 
-			<Button
-				disabled={name === "" || password === ""}
-				onClick={() => fetchLoginInformation({ variables: { name } })}
-				variant="contained"
-				color="primary">
-				Einloggen
+				<Button
+					disabled={name === "" || password === ""}
+					onClick={() => fetchLoginInformation({ variables: { name } })}
+					variant="contained"
+					color="primary">
+					Einloggen
 			</Button>
-		</Paper>
+			</Paper>
+		</div>
 	)
 }
 
-const useStyles = makeStyles({
-
-})
+const useStyles = makeStyles((theme: Theme) => ({
+	root: {
+		display: "flex",
+		alignItems: "center",
+		justifyContent: "center",
+		height: "100%"
+	},
+	paper: {
+		display: "flex",
+		flexDirection: "column",
+		gap: theme.spacing(2),
+		padding: theme.spacing(2)
+	}
+}))
 
 interface GetLoginInformation {
 	loginInformation: {
