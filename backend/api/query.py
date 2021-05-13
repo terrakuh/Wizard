@@ -4,7 +4,7 @@ from api.decorators import Cache, smart_api
 from graphene import ObjectType, Field, ID, String, NonNull, ResolveInfo, List
 from graphql import GraphQLError
 
-from .types import Lobby as LobbyType, LoginInformation, PlayableCard, RequiredAction, RoundState, TrickState, User as UserType
+from .types import GameInfo, Lobby as LobbyType, LoginInformation, PlayableCard, RequiredAction, RoundState, TrickState, User as UserType
 from database import Database
 
 from lobby.manager import Manager
@@ -58,28 +58,17 @@ class Query(ObjectType):
 
 
 	# game logic
-	round_state = Field(RoundState)
-	trick_state = Field(TrickState)
-	hand = List(NonNull(PlayableCard))
+	game_info = Field(GameInfo)
 	required_action = Field(RequiredAction)
 
 	@smart_api()
-	def resolve_round_state(root, info: ResolveInfo, game_i: Optional[GameInteraction]):
-		if game_i is None:
-			return None
-		return graphene_parser.parse_round_state(game_i.get_round_state())
-
-	@smart_api()
-	def resolve_trick_state(root, info: ResolveInfo, game_i: Optional[GameInteraction]):
-		if game_i is None:
-			return None
-		return graphene_parser.parse_trick_state(game_i.get_trick_state())
-
-	@smart_api()
-	def resolve_hand(root, info: ResolveInfo, user: User, game_i: Optional[GameInteraction]):
-		if game_i is None:
-			return None
-		return graphene_parser.parse_hand_cards(game_i.get_hand_cards(user))
+	def resolve_game_info(root, info, user: User, game_i: Optional[GameInteraction]):
+		if game_i is None: return None
+		return GameInfo(
+			round_state=graphene_parser.parse_round_state(game_i.get_round_state()),
+			trick_state=graphene_parser.parse_trick_state(game_i.get_trick_state()),
+			hand=graphene_parser.parse_hand_cards(game_i.get_hand_cards(user))
+		)
 
 	@smart_api()
 	def resolve_required_action(root, info: ResolveInfo, user: User, game_i: Optional[GameInteraction]):

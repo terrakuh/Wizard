@@ -52,3 +52,9 @@ export interface RequiredAction {
 	type: string
 	options: string[]
 }
+
+export interface GameInfo {
+	hand: PlayableCard[]
+	roundState: RoundState
+	trickState: TrickState
+}

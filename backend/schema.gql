@@ -54,6 +54,12 @@ type RequiredAction {
 	options: [String!]!
 }
 
+type GameInfo {
+	roundState: RoundState!
+	trickState: TrickState!
+	hand: [PlayableCard!]!
+}
+
 # TODO
 # type Appointment {
 # 	start: DateTime!
@@ -70,9 +76,7 @@ type Query {
 	lobby: Lobby
 
 	# game logic
-	roundState: RoundState
-	trickState: TrickState
-	hand: [PlayableCard!]
+	gameInfo: GameInfo
 	requiredAction: RequiredAction
 }
 

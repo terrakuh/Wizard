@@ -4,10 +4,9 @@ import { Lobby as LobbyType } from "../types"
 import LobbyConnection from "./LobbyConnection"
 import PlayerList from "./PlayerList"
 import { Grid } from "@material-ui/core"
-import { useHistory } from "react-router-dom"
+import { Redirect } from "react-router-dom"
 
 export default function Lobby() {
-	const history = useHistory()
 	const { data: info, stopPolling, startPolling } = useQuery<Info>(INFO)
 
 	React.useEffect(() => {
@@ -16,11 +15,9 @@ export default function Lobby() {
 	}, [startPolling, stopPolling])
 
 	// redirect to game page when game started
-	React.useEffect(() => {
-		if (info?.roundState) {
-			history.push("/game")
-		}
-	}, [info, history])
+	if (info?.gameInfo != null) {
+		return <Redirect to="/game" />
+	}
 
 	return (
 		<Grid container spacing={2}>
@@ -40,7 +37,7 @@ export default function Lobby() {
 
 interface Info {
 	lobby: LobbyType | null
-	roundState: {} | null
+	gameInfo: {} | null
 }
 
 const INFO = gql`
@@ -54,8 +51,8 @@ const INFO = gql`
 			}
 			canStart
 		}
-		roundState {
-			round
+		gameInfo {
+			__typename
 		}
 	}
 `

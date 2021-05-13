@@ -16,7 +16,8 @@ import { useQuery } from "@apollo/client"
 import { makeStyles } from "@material-ui/core"
 import gql from "graphql-tag"
 import { useDrag } from "react-dnd"
-import { PlayableCard, RequiredAction, TrickState, RoundState } from "../types"
+import { Redirect } from "react-router"
+import { PlayableCard, RequiredAction, TrickState, RoundState, GameInfo } from "../types"
 import { Loading } from "../util"
 import Action from "./actions"
 import Deck from "./Deck"
@@ -105,18 +106,21 @@ export default function Game() {
 	const classes = useStyles()
 	const { data } = useQuery<Info>(GET_INFO, { pollInterval: 1000 })
 
+	if (data == null) {
+		return <Loading loading={true} />
+	} else if (data.gameInfo == null) {
+		return <Redirect to="/lobby" />
+	}
+
+	const { gameInfo: { hand }, requiredAction } = data
+
 	return (
 		<div className={classes.root}>
 			<Deck />
 
-			<Hand cards={data?.hand ?? []} />
+			<Hand cards={hand ?? []} />
 
-			<Action
-				info={data?.requiredAction != null && data.roundState != null && data.trickState != null ? {
-					requiredAction: data.requiredAction,
-					roundState: data.roundState,
-					trickState: data.trickState
-				} : null} />
+			<Action info={requiredAction != null ? { requiredAction, ...data.gameInfo } : null} />
 		</div>
 	)
 }
@@ -131,54 +135,54 @@ const useStyles = makeStyles({
 })
 
 interface Info {
-	hand: PlayableCard[] | null
+	gameInfo: GameInfo | null
 	requiredAction: RequiredAction | null
-	trickState: TrickState | null
-	roundState: RoundState | null
 }
 
 const GET_INFO = gql`
 	query {
-		hand {
-			id
-			playable
-			variants {
+		gameInfo {
+			hand {
 				id
 				playable
+				variants {
+					id
+					playable
+				}
+			}
+			trickState {
+				playerStates {
+					player {
+						id
+						name
+					}
+				score
+				tricksCalled
+				tricksMade
+				}
+				leadColor
+				round
+				turn {
+					id
+					name
+				}
+				deck {
+					id
+					player {
+						id
+						name
+					}
+					isWinning
+				}
+			}
+			roundState {
+				trumpColor
+				round
 			}
 		}
 		requiredAction {
 			type
 			options
-		}
-		trickState {
-			playerStates {
-				player {
-					id
-					name
-				}
-			score
-			tricksCalled
-			tricksMade
-			}
-			leadColor
-			round
-			turn {
-				id
-				name
-			}
-			deck {
-				id
-				player {
-					id
-					name
-				}
-				isWinning
-			}
-		}
-		roundState {
-			trumpColor
-			round
 		}
 	}
 `

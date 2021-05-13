@@ -54,3 +54,9 @@ class RoundState(ObjectType):
 class RequiredAction(ObjectType):
 	type = NonNull(String)
 	options = NonNull(List(NonNull(String)))
+
+
+class GameInfo(ObjectType):
+	round_state = NonNull(RoundState)
+	trick_state = NonNull(TrickState)
+	hand = NonNull(List(NonNull(PlayableCard)))
