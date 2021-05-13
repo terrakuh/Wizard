@@ -52,7 +52,7 @@ export default function PlayableCard(props: Props) {
 			<img
 				style={cardStyle}
 				alt=""
-				src={`/cards/${props.card.id}.jpg`} />
+				src={`/private/${props.card.id}.jpg`} />
 		</div>
 	)
 }

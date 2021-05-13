@@ -1,5 +1,6 @@
 from database import Database
 from fastapi import FastAPI, Request
+from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.graphql import GraphQLApp
 from graphene import Schema
@@ -9,6 +10,7 @@ from api.security import UserAuthentication
 from api.decorators import Response
 from graphql.execution.executors.asyncio import AsyncioExecutor
 from lobby.manager import Manager
+from pathlib import Path
 
 app = FastAPI()
 schema = Schema(query=Query, mutation=Mutation)
@@ -32,5 +34,18 @@ async def handle_gql(request: Request):
 		else:
 			real_response.set_cookie(key, value)
 	return real_response
+
+absolute_private_path = Path("static/private").absolute()
+
+@app.get("/private/{name}")
+async def handle_files(request: Request, name: str):
+	try:
+		await user_authentication.authenticate(request)
+	except:
+		return HTMLResponse(status_code=401)
+	path = Path(absolute_private_path, name)
+	if path.parent.absolute() == absolute_private_path and path.exists():
+		return FileResponse(path)
+	return HTMLResponse(status_code=404)
 
 app.mount("/", StaticFiles(directory="static"))
