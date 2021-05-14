@@ -1,7 +1,7 @@
 import { useMutation } from "@apollo/client"
 import { Button, makeStyles, Paper, TextField, Theme } from "@material-ui/core"
 import gql from "graphql-tag"
-import React from "react"
+import { useState } from "react"
 import { useHistory, useParams } from "react-router"
 import CryptoJS from "crypto-js"
 import { generatePasswordHash } from "../util/security"
@@ -13,11 +13,11 @@ export default function Register() {
 	const { enqueueSnackbar } = useSnackbar()
 	const history = useHistory()
 	const urlToken = useParams<{ token?: string }>().token
-	const [token, setToken] = React.useState(urlToken ?? "")
-	const [name, setName] = React.useState("")
-	const [password, setPassword] = React.useState("")
-	const [repeatPassword, setRepeatPassword] = React.useState("")
-	const [loading, setLoading] = React.useState(false)
+	const [token, setToken] = useState(urlToken ?? "")
+	const [name, setName] = useState("")
+	const [password, setPassword] = useState("")
+	const [repeatPassword, setRepeatPassword] = useState("")
+	const [loading, setLoading] = useState(false)
 	const [registerUser] = useMutation(REGISTER_USER)
 
 	return (
@@ -59,6 +59,12 @@ export default function Register() {
 					onClick={async () => {
 						setLoading(true)
 						try {
+							const pwnedCount = await checkIfPwned(password)
+							if (pwnedCount) {
+								enqueueSnackbar(`Dieses Passwort wurde ${pwnedCount} gepwnt.`, { "variant": "error" })
+								return
+							}
+
 							const salt = CryptoJS.lib.WordArray.random(8)
 							const passwordHash = generatePasswordHash(password, salt, "sha512")
 							await registerUser({
@@ -109,3 +115,13 @@ const REGISTER_USER = gql`
 		register(name: $name, passwordHash: $passwordHash, salt: $salt, hashType: "sha512", token: $token)
 	}
 `
+
+async function checkIfPwned(password: string) {
+	try {
+		password = CryptoJS.enc.Hex.stringify(CryptoJS.SHA1(password))
+		const resp = await fetch(`https://api.pwnedpasswords.com/range/${password.substring(0, 5)}`)
+		const match = new RegExp(`${password.substring(5)}:(\\d+)`, "i").exec(await resp.text())
+		return parseInt(match?.[1] ?? "0")
+	} catch (err) { }
+	return 0
+}
