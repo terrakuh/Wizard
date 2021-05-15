@@ -24,7 +24,8 @@ export interface PlayerState {
 }
 
 export interface RoundState {
-	trumpColor: number | null
+	trumpColor: string | null
+	trumpCard: string | null
 	round: number
 }
 

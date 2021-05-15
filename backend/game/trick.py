@@ -59,8 +59,8 @@ class Trick:
         curr_winning_card = None
         curr_max_value = -10
 
-        for player, card in self.card_stack_by_player.items():
-            is_trump_color = (card.color == self.trump_color)
+        for card in self.card_stack_by_player.values():
+            is_trump_color = False if (self.trump_color is None or card.color is None) else (card.color == self.trump_color)
 
             if card.color == self.lead_color or is_trump_color or not card.color_bound:
                 if is_trump_color:
@@ -76,7 +76,7 @@ class Trick:
         logging.info("Trick: " + str(self.card_stack_by_player) + "; trump: " + str(self.trump_color))
         logging.info("Trick was won by " + str(self.card_stack_by_card[curr_winning_card]))
 
-        return self.players.index(self.card_stack_by_card[curr_winning_card])
+        return self.card_stack_by_card[curr_winning_card]
 
     def get_after_effect(self):
         after_effect = None

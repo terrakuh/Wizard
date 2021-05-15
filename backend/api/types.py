@@ -47,7 +47,7 @@ class PlayableCard(ObjectType):
 
 class RoundState(ObjectType):
 	trump_color = String()
-	trump_card = NonNull(PlayableCard)
+	trump_card = NonNull(String)
 	round = NonNull(Int)
 
 

@@ -9,6 +9,7 @@ import Action from "./actions"
 import Deck from "./Deck"
 import Hand from "./Hand"
 import ScoreBoard from "./ScoreBoard"
+import TrumpCard from "./card/TrumpCard"
 
 export default function Game() {
 	const classes = useStyles()
@@ -21,7 +22,7 @@ export default function Game() {
 		return <Redirect to="/lobby" />
 	}
 
-	const { gameInfo: { hand, trickState }, requiredAction } = data
+	const { gameInfo: { hand, trickState, roundState }, requiredAction } = data
 
 	return (
 		<div className={classes.root}>
@@ -32,6 +33,8 @@ export default function Game() {
 			<ScoreBoard
 				className={classes.scoreBoard}
 				trickState={trickState} />
+
+			<TrumpCard card={roundState.trumpCard} trumpColor={roundState.trumpColor} className={classes.trumpCard}/>
 
 			<Hand cards={hand ?? []} />
 
@@ -53,6 +56,9 @@ const useStyles = makeStyles({
 	},
 	dropArea: {
 		flexGrow: 1
+	},
+	trumpCard: {
+		position: "absolute"
 	}
 })
 
@@ -99,6 +105,7 @@ const GET_INFO = gql`
 			}
 			roundState {
 				trumpColor
+				trumpCard
 				round
 			}
 		}

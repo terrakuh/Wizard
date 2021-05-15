@@ -70,6 +70,7 @@ class Player:
 
     def set_cards(self, cards: List[Card]):
         with self.card_lock:
+            logging.info(self.name + " got cards: " + str(cards))
             self.cards = {card.id: card for card in cards}
 
     def replace_card(self, card_to_replace_id: str, new_card: Card) -> Card:
@@ -125,6 +126,10 @@ class Player:
             self.current_task = PlayerTask("choose_" + select_type, self, options)
         return self.current_task.do_task()
 
+    def select_trump_color(self):
+        color = self.select_input("trump_color", CardDecks.CARD_COLORS + ["none"])
+        return None if color == "none" else color
+
     def reset(self):
         with self.card_lock:
             self.cards = None
@@ -132,7 +137,7 @@ class Player:
         self.tricks_made = None
         self.__update_state()
 
-    def __get_playable_cards(self, lead_color):
+    def __get_playable_cards(self, lead_color) -> list[str]:
         if not lead_color:
             return self.cards.keys()
 
@@ -163,9 +168,11 @@ class Player:
             self.state = PlayerState(self.user, self.score, self.tricks_called, self.tricks_made)
 
     def __get_hand_card(self, card: Card, lead_color: str=None):
+        playable_cards = self.__get_playable_cards(lead_color)
+
         card_id = card.id
-        playable = card.is_playable(lead_color)
-        variants = [self.get_hand_card(v_card, lead_color) for v_card in card.variants]
+        playable = card_id in playable_cards
+        variants = [self.__get_hand_card(v_card, lead_color) for v_card in card.variants]
         return HandCard(card_id, playable, variants)
 
     def __str__(self):

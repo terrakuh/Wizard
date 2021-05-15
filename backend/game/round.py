@@ -7,6 +7,7 @@ from typing import List
 import random
 import logging
 import threading
+from contextlib import ExitStack
 
 class Round:
     """
@@ -26,7 +27,12 @@ class Round:
         self.tricks_called = 0
         self.curr_trick = None
 
-        self.__init_trump()
+        unhanded_cards = self.__handout_cards()
+        self.trump_card = random.choice(unhanded_cards)
+        self.trump_color = None if not self.trump_card.color_bound else self.trump_card.color
+
+        print("Trump is: " + str(self.trump_card) + " - " + str(self.trump_color))
+        logging.info("Trump is: " + str(self.trump_card) + " - " + str(self.trump_color))
 
         self.state_lock = threading.Lock()
         self.__update_state()
@@ -36,11 +42,9 @@ class Round:
 
         card_giver = self.players[(self.first_player - 1 + len(self.players)) % len(self.players)]
 
-        unhanded_cards = self.__handout_cards()
-
-        # Set trump
-        self.trump_card = random.choice(unhanded_cards)
-        self.trump_color = None if self.trump_card.card_type in CardDecks.NO_TRUMP_CARDS else (card_giver.select_input("trump_color", CardDecks.CARD_COLORS) if self.trump_card.card_type in CardDecks.TRUMP_SELECTION_CARDS else self.trump_card.color)
+        logging.info("Trump is for selection: " + str(self.trump_card.card_type in CardDecks.TRUMP_SELECTION_CARDS))
+        
+        self.trump_color = None if self.trump_card.card_type in CardDecks.NO_TRUMP_CARDS else (card_giver.select_trump_color() if self.trump_card.card_type in CardDecks.TRUMP_SELECTION_CARDS else self.trump_card.color)
 
         logging.info("Trump is " + str(self.trump_card) + " -> " + str(self.trump_color))
 
@@ -49,10 +53,13 @@ class Round:
             for player in self.players:
                 if "werewolf" in player.cards:
                     self.trump_card = player.replace_card("werewolf", self.trump_card)                    
-                    self.trump_color = player.select_input("trump_color", CardDecks.CARD_COLORS)
+                    self.trump_color = player.select_trump_color()
+
+        self.__update_state()
 
     def start_round(self):
         logging.info("Starting round " + str(self.round_number))
+        self.__init_trump()
 
         print("Curr first player is: " + str(self.first_player) + " from: " + str(self.players))
         self.__get_estimations()
@@ -61,22 +68,25 @@ class Round:
             print("Curr first player is: " + str(self.first_player) + " from: " + str(self.players))
             self.curr_trick = Trick(mode=self.game_mode, players=self.players, first_player=self.first_player, trump_color=self.trump_color, trick_number=i)
             
-            self.first_player = self.curr_trick.do_trick()
-            winning_player = self.players[self.first_player]
+            winning_player = self.curr_trick.do_trick()
+            self.first_player  = self.players.index(winning_player)
 
             after_effect = self.curr_trick.get_after_effect()
 
             logging.info("Trick winner is " + str(self.first_player) + " - " + str(winning_player))
 
-            if after_effect:
-                logging.info("Got after effect " + after_effect)
-                if after_effect == "cloud":
-                    trick_modification = 1 if winning_player.select_input("cloud_effect", ["+", "-"]) == "+" else -1
-                    winning_player.add_tricks_called(trick_modification)
+            # After effects
+            if after_effect == "cloud":
+                trick_modification = 1 if winning_player.select_input("cloud_effect", ["cloud_add", "cloud_sub"]) == "cloud_add" else -1
+                winning_player.add_tricks_called(trick_modification)
 
-                if after_effect == "juggler" and i < self.round_number - 1:
+            if after_effect != "bomb": winning_player.inc_tricks_made()
+
+            if after_effect == "juggler" and i < self.round_number - 1:
                     passed_cards = [player.select_input("juggler_effect", player.cards.keys()) for player in self.players]
-                    with [player.card_lock for player in self.players]:
+                    with ExitStack() as stack:
+                        [stack.enter_context(player.card_lock) for player in self.players]
+                            
                         for index, card in enumerate(passed_cards):
                             next_index = (index + 1) % len(self.players)
 
@@ -86,7 +96,6 @@ class Round:
                             given_card = remove_from.cards.pop(card)
                             give_to.cards[given_card.id] = given_card
 
-            if after_effect != "bomb": winning_player.inc_tricks_made()
             logging.info("Trick completed")
         
         self.__calculate_points()
