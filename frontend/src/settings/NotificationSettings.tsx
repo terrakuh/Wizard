@@ -1,6 +1,6 @@
 import React from "react"
 import { FormControl, FormControlLabel, FormHelperText, InputLabel, MenuItem, Select, Switch } from "@material-ui/core"
-import { Settings } from "./types"
+import { Settings, AudioTrack, notificationSpriteMap } from "./types"
 
 interface Props {
 	settings: Settings["notifications"]
@@ -58,11 +58,13 @@ export default function NotificationSettings({ settings, onChange }: Props) {
 				<Select
 					disabled={!settings.enabled || !settings.audio || settings.desktop}
 					value={settings.audioTrack}
-					onChange={ev => onChange({ ...settings, audioTrack: ev.target.value as string })}
+					onChange={ev => onChange({ ...settings, audioTrack: ev.target.value as AudioTrack })}
 					labelId="select-audio">
-					<MenuItem value="turn_0.mp3">Klang 1</MenuItem>
-					<MenuItem value="turn_1.mp3">Klang 2</MenuItem>
-					<MenuItem value="alarm.mp3">Alarm</MenuItem>
+					{
+						Object.keys(notificationSpriteMap).map(track =>
+							<MenuItem key={track} value={track}>{track}</MenuItem>
+						)
+					}
 				</Select>
 				<FormHelperText>Benutzerdefinierte Töne funktionieren nur mit den eingebauten Benachrichtigungen und nicht mit Desktop-Benachrichtigungen.</FormHelperText>
 			</FormControl>

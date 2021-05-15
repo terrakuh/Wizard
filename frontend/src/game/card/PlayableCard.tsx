@@ -45,7 +45,7 @@ export default function PlayableCard(props: Props) {
 		<div
 			ref={drag}
 			onDoubleClick={() => handlePlay(props.card.id)}
-			className={`${classes.root} ${hovering ? classes.hover : ""}`}
+			className={hovering ? classes.hover : undefined}
 			onMouseEnter={() => setHovering(true)}
 			onMouseLeave={() => setHovering(false)}
 			style={props.style}>
@@ -67,10 +67,6 @@ const useStyles = makeStyles({
 			bottom: 50,
 			transform: "translateY(15%)"
 		}
-	},
-	root: {
-		// width: "fit-content"
-		// background: "linear-gradient(235deg,#89ff0066,#060c2166,#00bcd466)"
 	},
 	hover: {
 		animation: "$onHoverEnter .2s ease-in-out",

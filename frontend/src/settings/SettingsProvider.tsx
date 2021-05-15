@@ -1,4 +1,4 @@
-import React from "react"
+import { createContext, ReactNode, useContext, useEffect, useState } from "react"
 import { deepMerge } from "../util"
 import { Settings } from "./types"
 
@@ -11,25 +11,25 @@ const initialSettings = deepMerge<Settings>({
 	notifications: {
 		enabled: true,
 		audio: true,
-		audioTrack: "turn_0.mp3",
+		audioTrack: "Klang 1",
 		desktop: true,
 		playerTurn: true
 	}
 }, JSON.parse(localStorage.getItem("settings") || "{}"))
 
-const context = React.createContext<Context>({
+const context = createContext<Context>({
 	settings: initialSettings,
 	setSettings(_) { }
 })
 
 interface Props {
-	children: React.ReactNode
+	children: ReactNode
 }
 
 export default function SettingsProvider(props: Props) {
-	const [settings, setSettings] = React.useState<Settings>(initialSettings)
+	const [settings, setSettings] = useState<Settings>(initialSettings)
 
-	React.useEffect(() => {
+	useEffect(() => {
 		localStorage.setItem("settings", JSON.stringify(settings))
 	}, [settings])
 
@@ -40,4 +40,4 @@ export default function SettingsProvider(props: Props) {
 	)
 }
 
-export const useSettings = () => React.useContext(context)
+export const useSettings = () => useContext(context)

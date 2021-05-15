@@ -1,6 +1,7 @@
 import { useQuery } from "@apollo/client"
 import { makeStyles } from "@material-ui/core"
 import gql from "graphql-tag"
+import { useMemo } from "react"
 import { useDrop } from "react-dnd"
 import { Redirect } from "react-router"
 import { RequiredAction, GameInfo } from "../types"
@@ -15,13 +16,24 @@ export default function Game() {
 	const { data } = useQuery<Info>(GET_INFO, { pollInterval: 1000 })
 	const [, drop] = useDrop({ accept: "card" })
 
+	// prevents redraws
+	const actionInfo = useMemo(() => {
+		if (data?.gameInfo == null || data.requiredAction == null) {
+			return null
+		}
+		return {
+			...data.gameInfo,
+			requiredAction: data.requiredAction
+		}
+	}, [data])
+
 	if (data == null) {
 		return <Loading loading={true} />
 	} else if (data.gameInfo == null) {
 		return <Redirect to="/lobby" />
 	}
 
-	const { gameInfo: { hand, trickState }, requiredAction } = data
+	const { gameInfo: { hand, trickState } } = data
 
 	return (
 		<div className={classes.root}>
@@ -35,7 +47,7 @@ export default function Game() {
 
 			<Hand cards={hand ?? []} />
 
-			<Action info={requiredAction != null ? { requiredAction, ...data.gameInfo } : null} />
+			<Action info={actionInfo} />
 		</div>
 	)
 }

@@ -49,7 +49,7 @@ export interface PlayableCard {
 }
 
 export interface RequiredAction {
-	type: string
+	type: "call_tricks" | "play_card"
 	options: string[]
 }
 
