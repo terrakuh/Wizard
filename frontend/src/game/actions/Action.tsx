@@ -2,6 +2,7 @@ import { useEffect } from "react"
 import { RequiredAction, RoundState, TrickState } from "../../types"
 import TrickCalling from "./TrickCalling"
 import useNotification from "../../settings/useNotification"
+import Selection from "./Selection"
 
 interface Props {
 	info: {
@@ -20,15 +21,26 @@ export default function Action(props: Props) {
 		}
 	}, [notify, props.info])
 
-	switch (props.info?.requiredAction.type) {
-		case "call_tricks": return (
-			<TrickCalling
+	if (props.info) {
+		const reqAction = props.info?.requiredAction.type
+
+		if (reqAction === "call_tricks") {
+			return (<TrickCalling
 				open={true}
 				roundState={props.info.roundState}
 				trickState={props.info.trickState}
 				options={props.info.requiredAction.options}
 				onClose={() => { }} />
-		)
-		default: return null
+			)
+		} else if (reqAction.startsWith("choose_")) {
+			return (
+				<Selection
+					infoText={reqAction}
+					onClose={() => { }}
+					open={true}
+					options={props.info.requiredAction.options} />
+			)
+		}
 	}
+	return null
 }

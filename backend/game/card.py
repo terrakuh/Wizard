@@ -15,9 +15,6 @@ class Card:
 
         self.variants = variants
 
-    def is_playable(self, lead_color: Optional[str]):
-        return not self.color_bound or lead_color is None or self.color == lead_color
-
     def __str__(self):
         return self.id
 
