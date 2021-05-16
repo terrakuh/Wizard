@@ -49,7 +49,6 @@ const useStyles = makeStyles({
 	root: {
 		position: "relative",
 		height: 300,
-		backgroundColor: "white",
 		overflow: "hidden"
 	}
 })
