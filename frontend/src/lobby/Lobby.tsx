@@ -4,16 +4,20 @@ import { Lobby as LobbyType } from "../types"
 import LobbyConnection from "./LobbyConnection"
 import PlayerList from "./PlayerList"
 import { Grid } from "@material-ui/core"
-import { RouteComponentProps, withRouter } from "react-router-dom"
+import { Redirect } from "react-router-dom"
 
-function Lobby(props: RouteComponentProps) {
-	const { data: info } = useQuery<Info>(INFO, { pollInterval: 1000 })
+export default function Lobby() {
+	const { data: info, stopPolling, startPolling } = useQuery<Info>(INFO)
 
 	React.useEffect(() => {
-		if (info?.gameInProgress) {
-			props.history.push("/game")
-		}
-	}, [info, props.history])
+		startPolling(1000)
+		return stopPolling
+	}, [startPolling, stopPolling])
+
+	// redirect to game page when game started
+	if (info?.gameInfo != null) {
+		return <Redirect to="/game" />
+	}
 
 	return (
 		<Grid container spacing={2}>
@@ -24,7 +28,7 @@ function Lobby(props: RouteComponentProps) {
 			{
 				info?.lobby == null ? null :
 					<Grid item xs={12}>
-						<PlayerList players={info.lobby.playerNames} />
+						<PlayerList players={info.lobby.players} />
 					</Grid>
 			}
 		</Grid>
@@ -33,18 +37,22 @@ function Lobby(props: RouteComponentProps) {
 
 interface Info {
 	lobby: LobbyType | null
-	gameInProgress: boolean
+	gameInfo: {} | null
 }
 
 const INFO = gql`
 	query {
 		lobby {
-			id
-			playerNames
+			code
+			mode
+			players {
+				id
+				name
+			}
 			canStart
 		}
-		gameInProgress
+		gameInfo {
+			__typename
+		}
 	}
 `
-
-export default withRouter(Lobby)

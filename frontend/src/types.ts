@@ -1,27 +1,61 @@
-export interface Lobby {
-	id: string
-	playerNames: string[]
-	canStart: boolean
-}
 
-export interface Score {
-	name: string
-	points: number
-	trick: {
-		called: number
-		actual: number
-	} | null
-}
-
-export interface Card {
+export interface User {
 	id: number
-	location: string
-	playable: boolean
+	name: string
 }
 
-export interface TrickCalling {
-	playersLeft: number
-	called: number
+export interface LoginInformation {
+	salt: string
+	hashType: string
+}
+
+export interface Lobby {
+	code: string
+	mode: number
+	players: User[]
+	canStart: boolean | null
+}
+
+export interface PlayerState {
+	player: User
+	score: number
+	tricksCalled: number | null
+	tricksMade: number | null
+}
+
+export interface RoundState {
+	trumpColor: string | null
+	trumpCard: string | null
 	round: number
-	yourTurn: boolean
+}
+
+export interface PlayedCard {
+	id: string
+	player: User
+	isWinning: boolean
+}
+
+export interface TrickState {
+	playerStates: PlayerState[]
+	leadColor: number | null
+	round: number | null
+	turn: User | null
+	deck: PlayedCard[] | null
+}
+
+export interface PlayableCard {
+	id: string
+	playable: boolean
+	variants: PlayableCard[] | null
+}
+
+export interface RequiredAction {
+	type: "call_tricks" | "play_card"
+	options: string[]
+}
+
+export interface GameInfo {
+	hand: PlayableCard[]
+	roundState: RoundState
+	trickState: TrickState
 }

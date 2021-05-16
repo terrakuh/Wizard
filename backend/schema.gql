@@ -1,56 +1,111 @@
 scalar DateTime
 
-type Card {
+type User {
 	id: ID!
-	location: String!
-	playable: Boolean!
+	name: String!
+}
+
+type LoginInformation {
+	salt: String! # base64 encoded
+	hashType: String! # sha256, sha512
 }
 
 type Lobby {
-	id: String!
-	playerNames: [String!]!
-	canStart: Boolean!
+	code: String!
+	mode: Int!
+	players: [User!]!
+	canStart: Boolean
 }
 
-type Trick {
-	actual: Int!
-	called: Int!
+type PlayerState {
+	player: User!
+	score: Int!
+	tricksCalled: Int
+	tricksMade: Int
 }
 
-type TrickCalling {
-	playersLeft: Int!
-	called: Int!
+type RoundState {
+	trumpColor: String
 	round: Int!
-	yourTurn: Boolean!
 }
 
-type Score {
-	name: String!
-	points: Int!
-	trick: Trick
+type PlayedCard {
+	id: ID!
+	player: User!
+	isWinning: Boolean!
 }
+
+type TrickState {
+	playerStates: [PlayerState!]!
+	leadColor: String
+	round: Int
+	turn: User
+	deck: [PlayedCard!]
+}
+
+type PlayableCard {
+	id: ID!
+	playable: Boolean!
+	variants: [PlayableCard!]
+}
+
+type RequiredAction {
+	type: String!
+	options: [String!]!
+}
+
+type GameInfo {
+	roundState: RoundState!
+	trickState: TrickState!
+	hand: [PlayableCard!]!
+}
+
+# TODO
+# type Appointment {
+# 	start: DateTime!
+# 	end: DateTime
+# }
 
 type Query {
+	# user management
+	loginInformation(name: String!): LoginInformation
+	user(id: ID!): User
+	whoami: User
+
+	# lobby management
 	lobby: Lobby
-	hand: [Card!]
-	scores: [Score!]
-	deck: [String!]
-	deckColor: String
-	trickColor: String
-	gameInProgress: Boolean!
-	playerTurn: String
-	trickCallRequired: TrickCalling
+
+	# game logic
+	gameInfo: GameInfo
+	requiredAction: RequiredAction
+}
+
+########################################
+############### MUTATION ###############
+########################################
+
+input LobbySettings {
+	mode: Int!
 }
 
 type Mutation {
-	createLobby(playerName: String!): Lobby
-	joinLobby(id: ID!, playerName: String!) Lobby
-	playCard(cardID: ID!) [Card!]
-	startGame: DateTime
-	callTricks(count: Int!) TrickCalling
+	# user management
+	register(name: String!, passwordHash: String!, salt: String!, hashType: String!, token: String!): Boolean!
+	login(name: String!, passwordHash: String!): User
+	logout: Boolean!
+
+	# lobby management
+	createLobby: String!
+	changeLobbySettings(settings: LobbySettings!): Boolean!
+	joinLobby(code: String!): Boolean!
+	leaveLobby: Boolean!
+	startGame: Boolean!
+
+	# game logic
+	completeAction(option: String!): Boolean!
 }
 
-schema: {
+schema {
 	query: Query
 	mutation: Mutation
 }

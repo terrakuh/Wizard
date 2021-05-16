@@ -1,102 +1,109 @@
 import React from "react"
-import { Button, createStyles, Grid, IconButton, Paper, TextField, Theme, WithStyles, withStyles } from "@material-ui/core"
+import { Button, createStyles, Grid, IconButton, makeStyles, Paper, TextField, Theme, WithStyles, withStyles } from "@material-ui/core"
 import { FileCopy as FileCopyIcon } from "@material-ui/icons"
 import { ApolloError, gql, useMutation } from "@apollo/client"
 import { Lobby } from "../types"
 import { useParams } from "react-router-dom"
 import { Loading } from "../util"
-import { withSnackbar, WithSnackbarProps } from "notistack"
+import { useSnackbar, withSnackbar, WithSnackbarProps } from "notistack"
 
-interface Props extends WithStyles<typeof styles>, WithSnackbarProps {
+interface Props {
 	lobbyInfo?: Lobby
 }
 
-function LobbyConnection(props: Props) {
-	const [name, setName] = React.useState(localStorage.getItem("name") ?? "")
-	const [lobby, setLobby] = React.useState(useParams<{ id?: string }>().id || "")
+export default function LobbyConnection(props: Props) {
+	const classes = useStyles()
+	const { enqueueSnackbar } = useSnackbar()
+	const codeParam = useParams<{ code?: string }>().code
+	const [code, setCode] = React.useState(codeParam || "")
 	const [createLobby, { loading: creatingLobby }] = useMutation(CREATE_LOBBY)
 	const [joinLobby, { loading: joiningLobby }] = useMutation(JOIN_LOBBY)
 	const [startGame, { loading: startingGame }] = useMutation(START_GAME)
 
-	React.useEffect(() => {
-		if (props.lobbyInfo) {
-			setLobby(props.lobbyInfo.id)
+	const handleMainAction = (join: boolean) => async () => {
+		try {
+			if (join) {
+				await joinLobby({ variables: { code } })
+			} else {
+				await createLobby()
+			}
+		} catch (err) {
+			console.error(err)
+			enqueueSnackbar((err as ApolloError).message, { variant: "error" })
 		}
-	}, [props.lobbyInfo])
+	}
+
+	// React.useEffect(() => {
+	// 	if (props.lobbyInfo) {
+	// 		setLobby(props.lobbyInfo.id)
+	// 	}
+	// }, [props.lobbyInfo])
 
 	return (
-		<Paper className={props.classes.inputPaper}>
-			<Loading open={creatingLobby || joiningLobby || startingGame} />
+		<Paper className={classes.inputPaper}>
+			<Loading loading={creatingLobby || joiningLobby || startingGame} />
 
 			<Grid container spacing={2}>
-				<Grid item xs={12} md={6}>
+				<Grid item xs={10} md={11}>
 					<TextField
 						fullWidth
-						disabled={props.lobbyInfo !== undefined}
-						value={name}
-						onChange={x => setName(x.target.value)}
-						label="Spielername" />
-				</Grid>
-
-				<Grid item xs={10} md={5}>
-					<TextField
-						fullWidth
-						disabled={props.lobbyInfo !== undefined}
-						value={lobby}
-						onChange={x => setLobby(x.target.value)}
+						disabled={props.lobbyInfo !== undefined || codeParam != null}
+						value={props.lobbyInfo?.code ?? code}
+						onChange={x => setCode(x.target.value)}
 						label="Lobby Code" />
 				</Grid>
 				<Grid item xs={2} md={1}>
 					<IconButton
-						disabled={lobby === ""}
+						disabled={!props.lobbyInfo?.code}
 						color="secondary"
-						onClick={() => {
-							navigator.clipboard.writeText(`${window.location.origin}/lobby/${lobby}`)
-								.then(() => props.enqueueSnackbar("Kopiert.", { variant: "success" }))
-								.catch(e => {
-									console.error(e)
-									props.enqueueSnackbar(e, { variant: "error" })
-								})
+						onClick={async () => {
+							try {
+								await navigator.clipboard.writeText(`${window.location.origin}/lobby/${props.lobbyInfo?.code}`)
+								enqueueSnackbar("In die Zwischenablage kopiert.", { variant: "success" })
+							} catch (err) {
+								console.error(err)
+								enqueueSnackbar("URL konnte nicht kopiert werden.", { variant: "error" })
+							}
 						}}>
 						<FileCopyIcon />
 					</IconButton>
 				</Grid>
 
 				<Grid item xs={4} md={1}>
-					<Button
-						disabled={props.lobbyInfo !== undefined || name === "" || lobby === ""}
-						color="primary"
-						variant="contained"
-						onClick={() => {
-							localStorage.setItem("name", name)
-							joinLobby({ variables: { name, lobby } })
-								.catch(e => {
-									console.error(e)
-									props.enqueueSnackbar((e as ApolloError).message, { variant: "error" })
-								})
-						}}>
-						Beitreten
-						</Button>
+					{
+						props.lobbyInfo == null ?
+							codeParam == null && code === "" ?
+								<Button
+									onClick={handleMainAction(false)}
+									variant="contained"
+									color="primary">
+									Erstellen
+								</Button> :
+								<Button
+									onClick={handleMainAction(true)}
+									variant="contained"
+									color="primary">
+									Beitreten
+								</Button> :
+							props.lobbyInfo.canStart == null ? null :
+								<Button
+									variant="contained"
+									color="primary"
+									onClick={async () => {
+										try {
+											await startGame()
+										} catch (err) {
+											console.error(err)
+											enqueueSnackbar("Konnte das Spiel nicht starten.", { variant: "error" })
+										}
+									}}
+									disabled={!props.lobbyInfo.canStart}>
+									Starten
+								</Button>
+					}
 				</Grid>
 
-				<Grid item xs={4} md={1}>
-					<Button
-						disabled={props.lobbyInfo !== undefined || name === ""}
-						color="primary"
-						variant="contained"
-						onClick={() => {
-							localStorage.setItem("name", name)
-							createLobby({ variables: { name } })
-								.catch(e => {
-									console.error(e)
-									props.enqueueSnackbar((e as ApolloError).message, { variant: "error" })
-								})
-						}}>
-						Erstellen
-						</Button>
-				</Grid>
-
-				{
+				{/* {
 					!props.lobbyInfo?.canStart ? null :
 						<Grid item xs={4} md={1}>
 							<Button
@@ -112,31 +119,27 @@ function LobbyConnection(props: Props) {
 								Starten
 								</Button>
 						</Grid>
-				}
+				} */}
 			</Grid>
-		</Paper>
+		</Paper >
 	)
 }
 
-const styles = (theme: Theme) => createStyles({
+const useStyles = makeStyles((theme: Theme) => ({
 	inputPaper: {
 		padding: theme.spacing()
 	}
-})
+}))
 
 const CREATE_LOBBY = gql`
-	mutation ($name: String!) {
-		createLobby(playerName: $name) {
-			id
-		}
+	mutation {
+		createLobby
 	}
 `
 
 const JOIN_LOBBY = gql`
-	mutation ($name: String!, $lobby: ID!) {
-		joinLobby(id: $lobby, playerName: $name) {
-			id
-		}
+	mutation ($code: String!) {
+		joinLobby(code: $code)
 	}
 `
 
@@ -145,5 +148,3 @@ const START_GAME = gql`
 		startGame
 	}
 `
-
-export default withStyles(styles)(withSnackbar(LobbyConnection))

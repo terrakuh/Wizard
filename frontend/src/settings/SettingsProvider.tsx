@@ -1,31 +1,38 @@
-import React from "react"
+import { createContext, ReactNode, useContext, useEffect, useState } from "react"
 import { deepMerge } from "../util"
-import Settings from "./type"
+import { Settings } from "./types"
+
+interface Context {
+	settings: Settings
+	setSettings(settings: Settings): void
+}
 
 const initialSettings = deepMerge<Settings>({
 	notifications: {
 		enabled: true,
 		audio: true,
-		audioTrack: "turn_0.mp3",
+		audioTrack: "Klang 1",
 		desktop: true,
 		playerTurn: true
 	}
 }, JSON.parse(localStorage.getItem("settings") || "{}"))
 
-const context = React.createContext<{
-	settings: Settings
-	setSettings: (settings: Settings) => void
-}>({ settings: initialSettings, setSettings(_) { } })
+const context = createContext<Context>({
+	settings: initialSettings,
+	setSettings(_) { }
+})
 
 interface Props {
-	children: React.ReactNode
+	children: ReactNode
 }
 
-function SettingsProvider(props: Props) {
-	const [settings, setSettings] = React.useState<Settings>(initialSettings)
-	React.useEffect(() => {
+export default function SettingsProvider(props: Props) {
+	const [settings, setSettings] = useState<Settings>(initialSettings)
+
+	useEffect(() => {
 		localStorage.setItem("settings", JSON.stringify(settings))
 	}, [settings])
+
 	return (
 		<context.Provider value={{ settings, setSettings }}>
 			{props.children}
@@ -33,5 +40,4 @@ function SettingsProvider(props: Props) {
 	)
 }
 
-export const useSettings = () => React.useContext(context)
-export default SettingsProvider
+export const useSettings = () => useContext(context)

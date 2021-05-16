@@ -1,20 +1,21 @@
 import React from "react"
 import { List, ListItem, Paper, Typography } from "@material-ui/core"
+import { User } from "../types"
 
 interface Props {
-	players: string[]
+	players: User[]
 }
 
-function PlayerList(props: Props) {
+export default function PlayerList(props: Props) {
 	return (
 		<Paper>
 			<List>
 				{
-					props.players.map((name, i) =>
+					props.players.map((user, i) =>
 						<ListItem 
 							selected={i % 2 === 0}
-							key={name}>
-							<Typography variant="body1" color="textPrimary">{name}</Typography>
+							key={user.id}>
+							<Typography variant="body1" color="textPrimary">{user.name}</Typography>
 						</ListItem>
 					)
 				}
@@ -22,5 +23,3 @@ function PlayerList(props: Props) {
 		</Paper>
 	)
 }
-
-export default PlayerList
