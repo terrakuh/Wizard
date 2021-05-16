@@ -1,9 +1,10 @@
-import { makeStyles } from "@material-ui/core"
+import { makeStyles, Paper, Popper } from "@material-ui/core"
 import { Skeleton } from "@material-ui/lab"
 import { PlayedCard } from "./card"
 import { PlayedCard as PlayedCardSchema } from "../types"
 import { cardStyle } from "./card/styles"
-import { useState } from "react"
+import { useRef, useState } from "react"
+import { ReferenceObject } from "popper.js"
 
 interface Props {
 	cards: PlayedCardSchema[]
@@ -12,6 +13,7 @@ interface Props {
 export default function Deck({ cards }: Props) {
 	const classes = useStyles()
 	const [rotations, setRotations] = useState<number[]>([])
+	const [anchor, setAnchor] = useState<ReferenceObject>()
 
 	if (rotations.length < cards.length) {
 		const copy = [...rotations]
@@ -24,7 +26,9 @@ export default function Deck({ cards }: Props) {
 	}
 
 	return (
-		<div className={classes.root}>
+		<div
+			onClick={ev => setAnchor(anchor == null ? ev.currentTarget : undefined)}
+			className={classes.root}>
 			{
 				cards.length === 0 ?
 					<Skeleton variant="rect" style={cardStyle} /> :
@@ -38,6 +42,18 @@ export default function Deck({ cards }: Props) {
 							card={card} />
 					)
 			}
+
+			<Popper
+				anchorEl={anchor}
+				open={anchor != null}>
+				<Paper>
+					{
+						cards.map(card =>
+							<PlayedCard key={card.id} card={card} />
+						)
+					}
+				</Paper>
+			</Popper>
 		</div>
 	)
 }
