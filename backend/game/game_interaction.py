@@ -1,7 +1,7 @@
 from .game import Game
 from .round import Round, RoundState
 from .trick import Trick, TrickState
-from .player import Player, PlayerState, TaskState, HandCard, User
+from .player import PlayerState, TaskState, HandCard, User
 
 from typing import List, Optional
 

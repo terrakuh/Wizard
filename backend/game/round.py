@@ -52,8 +52,8 @@ class Round:
         if self.game_mode > 0:
             for player in self.players:
                 if "werewolf" in player.cards:
-                    self.trump_card = player.replace_card("werewolf", self.trump_card)                    
                     self.trump_color = player.select_trump_color()
+                    self.trump_card = player.replace_card("werewolf", self.trump_card)
 
         self.__update_state()
 
@@ -105,6 +105,7 @@ class Round:
         Returns: left cards
         """
         random.shuffle(self.card_deck)
+
         player_count = len(self.players)
 
         for i in range(player_count):

@@ -21,9 +21,9 @@ g2 = GameInteraction(g)
 while True:
     for p in g.players.values():
         print(p)
-        if g2.get_action_required(p):
+        if g2.get_action_required(p.user):
             try:
-                g2.complete_action(input(), p)
+                g2.complete_action(input(), p.user)
             except Exception as e:
                 print(e)
                 print("Lets go on...")
