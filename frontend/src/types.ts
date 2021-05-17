@@ -19,6 +19,7 @@ export interface Lobby {
 export interface PlayerState {
 	player: User
 	score: number
+	isActive: boolean
 	tricksCalled: number | null
 	tricksMade: number | null
 }

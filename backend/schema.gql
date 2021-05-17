@@ -21,6 +21,7 @@ type Lobby {
 type PlayerState {
 	player: User!
 	score: Int!
+	isActive: Boolean!
 	tricksCalled: Int
 	tricksMade: Int
 }

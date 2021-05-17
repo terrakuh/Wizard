@@ -21,6 +21,7 @@ class LoginInformation(ObjectType):
 class PlayerState(ObjectType):
 	player = NonNull(User)
 	score = NonNull(Int)
+	is_active = NonNull(Boolean)
 	tricks_called = Int()
 	tricks_made = Int()
 
