@@ -1,6 +1,5 @@
 import threading
 import random
-import copy
 import logging
 from typing import List
 from time import sleep
@@ -37,7 +36,7 @@ class Game(threading.Thread):
         while self.round_counter <= len(self.card_deck)//len(self.players):
             self.round_counter += 1
 
-            self.curr_round = Round(mode=self.settings.mode, players=list(self.players.values()), first_player=self.first_player, card_deck=copy.deepcopy(self.card_deck), round_counter=self.round_counter)
+            self.curr_round = Round(mode=self.settings.mode, players=list(self.players.values()), first_player=self.first_player, card_deck=self.card_deck, round_counter=self.round_counter)
             self.curr_round.start_round()
 
             self.first_player = (self.first_player + 1) % len(self.players)
