@@ -68,8 +68,4 @@ def parse_required_action(ra: RequiredAction) -> PlayerTask:
     return PlayerTask(ra.type, ra.options)
 
 def parse_round_state(rs: RoundState) -> RoundStateType:
-    past_tricks = [parse_trick_cards(trick_cards) for trick_cards in rs.past_tricks]
-    return RoundStateType(trump_color=rs.trump_color, trump_card=CardDecks.CARDS.get(rs.trump_card), round=rs.round_number, past_tricks=past_tricks)
-def parse_graphene_round_state(rs: RoundStateType) -> RoundState:
-    past_tricks = [parse_played_cards(played_cards) for played_cards in rs.past_tricks] 
-    return RoundState(rs.trump_card, rs.trump_color, rs.round, past_tricks)
+    return RoundStateType(trump_color=rs.trump_color, trump_card=CardDecks.CARDS.get(rs.trump_card), round=rs.round_number, past_trick=None if rs.past_trick is None else parse_trick_cards(rs.past_trick))

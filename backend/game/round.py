@@ -2,7 +2,7 @@ from .card_decks import CardDecks
 from .trick import Trick, TrickCard
 from .player import Player
 from .card import Card
-from typing import List
+from typing import List, Optional
 
 import random
 import logging
@@ -26,7 +26,7 @@ class Round:
 
         self.tricks_called = 0
         self.curr_trick = None
-        self.past_tricks = []
+        self.past_trick: Optional[List[TrickCard]] = None
 
         unhanded_cards = self.__handout_cards()
         self.trump_card = random.choice(unhanded_cards)
@@ -71,7 +71,7 @@ class Round:
             
             winning_player = self.curr_trick.do_trick()
 
-            self.past_tricks.append(self.curr_trick.get_card_states())
+            self.past_trick = self.curr_trick.get_card_states()
             self.__update_state()
 
             self.first_player  = self.players.index(winning_player)
@@ -148,12 +148,12 @@ class Round:
 
     def __update_state(self):
         with self.state_lock:
-            self.state = RoundState(self.trump_card.id, self.trump_color, self.round_number, self.past_tricks)
+            self.state = RoundState(self.trump_card.id, self.trump_color, self.round_number, self.past_trick)
 
 
 class RoundState:
-    def __init__(self, trump_card: str, trump_color: str, round_number: int, past_tricks: List[List[TrickCard]]):
+    def __init__(self, trump_card: str, trump_color: str, round_number: int, past_trick: Optional[List[TrickCard]]):
         self.trump_card = trump_card
         self.trump_color = trump_color
         self.round_number = round_number
-        self.past_tricks = past_tricks
+        self.past_trick = past_trick

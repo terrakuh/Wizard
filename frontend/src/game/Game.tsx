@@ -1,7 +1,7 @@
 import { useQuery } from "@apollo/client"
 import { makeStyles } from "@material-ui/core"
 import gql from "graphql-tag"
-import { useMemo } from "react"
+import { useMemo, useState } from "react"
 import { useDrop } from "react-dnd"
 import { Redirect } from "react-router"
 import { RequiredAction, GameInfo } from "../types"
@@ -11,11 +11,13 @@ import Deck from "./Deck"
 import Hand from "./Hand"
 import ScoreBoard from "./ScoreBoard"
 import TrumpCard from "./card/TrumpCard"
+import PastTrick from "./PastTrick"
 
 export default function Game() {
 	const classes = useStyles()
 	const { data } = useQuery<Info>(GET_INFO, { pollInterval: 1000 })
 	const [, drop] = useDrop({ accept: "card" })
+	const [rootRef, setRootRef] = useState<HTMLDivElement | null>(null)
 
 	// prevents redraws
 	const actionInfo = useMemo(() => {
@@ -37,7 +39,7 @@ export default function Game() {
 	const { gameInfo: { hand, trickState, roundState } } = data
 
 	return (
-		<div className={classes.root}>
+		<div className={classes.root} ref={setRootRef}>
 			<div className={classes.dropArea} ref={drop}>
 				<Deck cards={trickState.deck ?? []} />
 
@@ -49,10 +51,14 @@ export default function Game() {
 					className={classes.trumpCard} />
 			</div>
 
+			<PastTrick
+				boundary={rootRef}
+				className={classes.pastTrick}
+				pastTrick={roundState.pastTrick} />
+
 			<ScoreBoard
 				className={classes.scoreBoard}
 				trickState={trickState} />
-
 
 			<Hand cards={hand ?? []} />
 
@@ -66,7 +72,8 @@ const useStyles = makeStyles({
 		display: "flex",
 		flexDirection: "column",
 		height: "100%",
-		width: "100%"
+		width: "100%",
+		position: "relative"
 	},
 	scoreBoard: {
 		position: "absolute",
@@ -80,6 +87,11 @@ const useStyles = makeStyles({
 		position: "absolute",
 		top: "50%",
 		transform: "translateY(-50%)"
+	},
+	pastTrick: {
+		position: "absolute",
+		left: 0,
+		top: 0
 	}
 })
 
@@ -89,6 +101,19 @@ interface Info {
 }
 
 const GET_INFO = gql`
+	fragment UserFragment on User {
+		id
+		name
+	}
+
+	fragment PlayedCardFragment on PlayedCard {
+		id
+		player {
+			...UserFragment
+		}
+		isWinning
+	}
+
 	query {
 		gameInfo {
 			hand {
@@ -102,8 +127,7 @@ const GET_INFO = gql`
 			trickState {
 				playerStates {
 					player {
-						id
-						name
+						...UserFragment
 					}
 				score
 				tricksCalled
@@ -111,31 +135,23 @@ const GET_INFO = gql`
 				}
 				leadColor
 				leadCard {
-					id
-					player {
-						id
-						name
-					}
-					isWinning
+					...PlayedCardFragment
 				}
 				round
 				turn {
-					id
-					name
+					...UserFragment
 				}
 				deck {
-					id
-					player {
-						id
-						name
-					}
-					isWinning
+					...PlayedCardFragment
 				}
 			}
 			roundState {
 				trumpColor
 				trumpCard
 				round
+				pastTrick {
+					...PlayedCardFragment
+				}
 			}
 		}
 		requiredAction {

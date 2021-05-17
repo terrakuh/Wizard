@@ -27,7 +27,7 @@ export interface RoundState {
 	trumpColor: string | null
 	trumpCard: string | null
 	round: number
-	pastTricks: PlayedCard[][]
+	pastTrick: PlayedCard[] | null
 }
 
 export interface PlayedCard {

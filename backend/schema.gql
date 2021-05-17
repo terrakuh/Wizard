@@ -29,7 +29,7 @@ type RoundState {
 	trumpColor: String
 	trumpCard: String
 	round: Int!
-	pastTricks: [[PlayedCard!]!]!
+	pastTrick: [PlayedCard!]
 }
 
 type PlayedCard {
