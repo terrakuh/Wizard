@@ -1,12 +1,18 @@
 # Change Log
 
-## [Unreleased]
+## [v0.5] - 2021-05-17
 ### Added
-- Database for backend
+- History for last trick
+- Cool animations for selection
+- Lobby settings for game mode
+- Lead color display
 
-### Changed
-- Load upper player limit from options
-- Use secure random to mitigate time attacks
+### Fixed
+- Trick winner calculation bug
+- Turn display bug
+
+## [v0.4] - 2021-05-16
+Rewrite in Python.
 
 ## [v0.3.1] - 2020-02-27
 ### Fixed
@@ -44,6 +50,7 @@
 - Frontend
 - Backend
 
-[Unreleased]: https://github.com/terrakuh/wizard/compare/v0.3.0...dev
+[v0.5]: https://github.com/terrakuh/wizard/compare/v0.4...v0.5
+[v0.4]: https://github.com/terrakuh/wizard/compare/v0.3.0...v0.4
 [v0.3.0]: https://github.com/terrakuh/wizard/compare/v0.2.0...v0.3.0
 [v0.2.0]: https://github.com/terrakuh/wizard/compare/v0.1.0...v0.2.0
