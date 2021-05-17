@@ -88,7 +88,7 @@ class Round:
 
             if after_effect != "bomb": winning_player.inc_tricks_made()
 
-            if after_effect == "juggler" and i < self.round_number - 1:
+            if after_effect == "juggler" and i < self.round_number:
                     # passed_cards = [player.select_input("juggler_effect", player.cards.keys()) for player in self.players]
 
                     with concurrent.futures.ThreadPoolExecutor() as executor:
@@ -116,8 +116,6 @@ class Round:
         Returns: left cards
         """
         random.shuffle(self.card_deck)
-
-        self.card_deck[0] = CardDecks.CARDS["juggler"]
 
         player_count = len(self.players)
 

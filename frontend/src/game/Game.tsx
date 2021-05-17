@@ -57,6 +57,7 @@ export default function Game() {
 				pastTrick={roundState.pastTrick} />
 
 			<ScoreBoard
+				roundState={roundState}
 				className={classes.scoreBoard}
 				trickState={trickState} />
 

@@ -3,6 +3,11 @@
 ## [Unreleased]
 ### Added
 - Dockerfile
+- Parallel juggler action
+- Winning player to scoreboard
+
+### Fixed
+- Missing notification
 
 ## [v0.5] - 2021-05-17
 ### Added

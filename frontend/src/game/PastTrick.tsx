@@ -1,5 +1,5 @@
-import { Grid, makeStyles, Paper, Popper } from "@material-ui/core"
-import { useState } from "react"
+import { Grid, makeStyles, Paper, Popper, Typography } from "@material-ui/core"
+import { useEffect, useState } from "react"
 import { PlayedCard } from "../types"
 import { ReferenceObject } from "popper.js"
 import { cardStyle } from "./card/styles"
@@ -14,6 +14,8 @@ interface Props {
 export default function PastTrick(props: Props) {
 	const classes = useStyles()
 	const [anchor, setAnchor] = useState<ReferenceObject>()
+
+	useEffect(() => setAnchor(undefined), [props.pastTrick])
 
 	return (
 		!props.pastTrick?.length ? null :
@@ -42,7 +44,7 @@ export default function PastTrick(props: Props) {
 						<Grid container spacing={1}>
 							{
 								props.pastTrick?.map(card =>
-									<Grid item key={card.id}>
+									<Grid item key={card.id} className={classes.item}>
 										<img
 											style={{
 												...cardStyle,
@@ -51,6 +53,16 @@ export default function PastTrick(props: Props) {
 											}}
 											alt=""
 											src={`/private/${card.id}.jpg`} />
+
+										<Typography
+											variant="body1"
+											color="textPrimary">
+											{
+												card.isWinning ?
+													<u><b>{card.player.name}</b></u> :
+													card.player.name
+											}
+										</Typography>
 									</Grid>
 								)
 							}
@@ -73,5 +85,10 @@ const useStyles = makeStyles(theme => ({
 	},
 	content: {
 		padding: theme.spacing(2)
+	},
+	item: {
+		display: "flex",
+		flexDirection: "column",
+		gap: theme.spacing(1)
 	}
 }))

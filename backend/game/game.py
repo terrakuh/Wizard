@@ -33,7 +33,7 @@ class Game(threading.Thread):
     def run(self):
         logging.info("Starting Game...")
 
-        limit = min(len(self.card_deck)//len(self.players), 12)
+        limit = min(len(self.card_deck)//len(self.players), 11)
 
         while self.round_counter <= limit:
             self.round_counter += 1

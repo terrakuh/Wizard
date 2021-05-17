@@ -1,6 +1,8 @@
 import { RequiredAction, RoundState, TrickState } from "../../types"
 import TrickCalling from "./TrickCalling"
 import Selection from "./Selection"
+import { useNotification } from "../../settings"
+import { useEffect } from "react"
 
 interface Props {
 	info: {
@@ -11,6 +13,14 @@ interface Props {
 }
 
 export default function Action(props: Props) {
+	const notify = useNotification()
+
+	useEffect(() => {
+		if (props.info?.requiredAction.type != null) {
+			notify("Du bist am Zug. Tschu-tschu")
+		}
+	}, [notify, props.info])
+
 	if (props.info) {
 		const reqAction = props.info?.requiredAction.type
 
