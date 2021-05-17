@@ -7,6 +7,7 @@ from typing import List, Optional
 import random
 import logging
 import threading
+import concurrent
 from contextlib import ExitStack
 
 class Round:
@@ -88,7 +89,12 @@ class Round:
             if after_effect != "bomb": winning_player.inc_tricks_made()
 
             if after_effect == "juggler" and i < self.round_number - 1:
-                    passed_cards = [player.select_input("juggler_effect", player.cards.keys()) for player in self.players]
+                    # passed_cards = [player.select_input("juggler_effect", player.cards.keys()) for player in self.players]
+
+                    with concurrent.futures.ThreadPoolExecutor() as executor:
+                        futures = [executor.submit(player.select_input, "juggler_effect", player.cards.keys()) for player in self.players]
+                        passed_cards = [future.result() for future in futures]
+
                     with ExitStack() as stack:
                         [stack.enter_context(player.card_lock) for player in self.players]
                             
@@ -110,6 +116,8 @@ class Round:
         Returns: left cards
         """
         random.shuffle(self.card_deck)
+
+        self.card_deck[0] = CardDecks.CARDS["juggler"]
 
         player_count = len(self.players)
 
