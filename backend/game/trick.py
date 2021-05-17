@@ -66,12 +66,13 @@ class Trick:
             is_trump_color = False if (self.trump_color is None or card.color is None or not card.color_bound) else (card.color == self.trump_color)
 
             if card.color == self.lead_color or is_trump_color or not card.color_bound:
+                cmp_value = card.value
                 if is_trump_color:
-                    card.round_value = card.value + 13
+                    cmp_value += 13
                 if card.card_type == "fairy" and "dragon" in self.card_stack_by_card.keys():
-                    card.round_value = 52
-                if card.round_value > curr_max_value:
-                    curr_max_value = card.round_value
+                    cmp_value = 52
+                if cmp_value > curr_max_value:
+                    curr_max_value = cmp_value
                     curr_winning_card = card.id
                 
             logging.info(f"Curr card: {card}, curr max: {curr_max_value}, curr Winner: {curr_winning_card}")

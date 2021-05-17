@@ -1,20 +1,18 @@
 import { useMutation } from "@apollo/client";
-import { DialogContentText, FormControlLabel, Radio, RadioGroup } from "@material-ui/core";
+import { DialogContentText, GridList, makeStyles } from "@material-ui/core";
 import gql from "graphql-tag";
 import { useMemo, useState } from "react";
 import { Loading } from "../../util";
-import { cardStyle } from "../card/styles";
 import DialogTemplate from "./DialogTemplate";
+import SelectCard from "./SelectCard";
 
-function getOptionElements(options: string[]): JSX.Element[]{
-    return options.map(option => <div>
-            <img
-                style={cardStyle}
-                alt=""
-                src={`/private/${option}.jpg`} />
-            <Radio value={option} />
-        </div>
+function getOptionElements(options: OptionDict, updateSelection: (s: string) => void): JSX.Element[]{
+    return Object.keys(options).map(option => <SelectCard key={option} card={option} selected={options[option]} onClick={updateSelection} />
     )
+}
+
+interface OptionDict {
+	[key: string]: boolean
 }
 
 interface Props {
@@ -26,12 +24,22 @@ interface Props {
 
 export default function Selection(props: Props) {
     const [selection, setSelection] = useState(props.options[0])
+	const [options, setOptions] = useState(props.options.reduce<OptionDict>((dict, value) => { dict[value] = false; return dict; }, {}))
+
+	const updateSelection = (s: string) => {
+		options[selection] = false
+		options[s] = true
+		setSelection(s)
+		setOptions(options)
+	}
 	// const info = useMemo(() => ({
 	// 	called: props.trickState.playerStates.reduce((prev, curr) => prev + (curr.tricksCalled ?? 0), 0),
 	// 	playersLeft: props.trickState.playerStates.reduce((prev, curr) => prev + (curr.tricksCalled == null ? 1 : 0), 0)
 	// }), [props.trickState])
 	const [selectOption] = useMutation(COMPLETE_ACTION)
 	const [loading, setLoading] = useState(false)
+
+	const classes = useStyles();
 
 	return (
 		<>
@@ -57,16 +65,31 @@ export default function Selection(props: Props) {
 					{props.infoText}
 				</DialogContentText>
 
-				<RadioGroup row
-                    value={selection}
-                    onChange={(_, x) => setSelection(x)}
-                >
-                    {getOptionElements(props.options)}
-                </RadioGroup>
+				<div className={classes.root}>
+					<GridList className={classes.gridList}>
+						{getOptionElements(options, updateSelection)}
+					</GridList>
+				</div>
+
 			</DialogTemplate>
 		</>
 	)
 }
+
+const useStyles = makeStyles((theme) => ({
+	root: {
+	  display: 'flex',
+	  flexWrap: 'wrap',
+	  justifyContent: 'space-around',
+	  overflow: 'hidden',
+	  backgroundColor: theme.palette.background.paper,
+	},
+	gridList: {
+	  flexWrap: 'nowrap',
+	  // Promote the list into his own layer on Chrome. This cost memory but helps keeping high FPS.
+	  transform: 'translateZ(0)',
+	}
+  }));
 
 const COMPLETE_ACTION = gql`
 	mutation ($option: String!) {
