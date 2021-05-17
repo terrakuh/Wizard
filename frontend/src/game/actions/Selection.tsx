@@ -1,5 +1,7 @@
 import { Grid, makeStyles } from "@material-ui/core"
 import { useState } from "react"
+import { idToBorderColor } from "../../util"
+import { cardStyle } from "../card/styles"
 import DialogTemplate from "./DialogTemplate"
 
 interface Props {
@@ -23,7 +25,7 @@ export default function Selection(props: Props) {
 							<div
 								className={classes.item}
 								style={selected === option ? {
-									border: `solid 4px ${toBorderColor(option)}`,
+									border: `solid 4px ${idToBorderColor(option)}`,
 									borderRadius: 14,
 									animation: `onSelectItem420 1s`,
 									animationIterationCount: "infinite",
@@ -72,10 +74,10 @@ const useStyles = makeStyles(theme => ({
 		padding: theme.spacing(4)
 	},
 	item: {
-		height: 150,
+		height: cardStyle.height / 2,
 	},
 	image: {
-		height: 150,
+		height: cardStyle.height / 2,
 		borderRadius: 10
 	},
 	selected: {
@@ -84,10 +86,3 @@ const useStyles = makeStyles(theme => ({
 		animationTimingFunction: "linear"
 	}
 }))
-
-function toBorderColor(option: string) {
-	switch (option = option.split("_")[0]) {
-		case "red": case "blue": case "green": case "yellow": return option
-		default: return "white"
-	}
-}

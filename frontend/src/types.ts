@@ -38,7 +38,7 @@ export interface PlayedCard {
 
 export interface TrickState {
 	playerStates: PlayerState[]
-	leadColor: number | null
+	leadColor: string | null
 	leadCard: PlayedCard | null
 	round: number | null
 	turn: User | null

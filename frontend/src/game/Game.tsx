@@ -40,13 +40,19 @@ export default function Game() {
 		<div className={classes.root}>
 			<div className={classes.dropArea} ref={drop}>
 				<Deck cards={trickState.deck ?? []} />
+
+				<TrumpCard
+					trumpCard={roundState.trumpCard}
+					trumpColor={roundState.trumpColor}
+					leadCard={trickState.leadCard?.id ?? null}
+					leadColor={trickState.leadColor}
+					className={classes.trumpCard} />
 			</div>
 
 			<ScoreBoard
 				className={classes.scoreBoard}
 				trickState={trickState} />
 
-			<TrumpCard card={roundState.trumpCard} trumpColor={roundState.trumpColor} className={classes.trumpCard}/>
 
 			<Hand cards={hand ?? []} />
 
@@ -67,10 +73,13 @@ const useStyles = makeStyles({
 		right: 0
 	},
 	dropArea: {
-		flexGrow: 1
+		flexGrow: 1,
+		position: "relative"
 	},
 	trumpCard: {
-		position: "absolute"
+		position: "absolute",
+		top: "50%",
+		transform: "translateY(-50%)"
 	}
 })
 
