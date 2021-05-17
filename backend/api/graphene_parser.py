@@ -48,16 +48,19 @@ def parse_playable_cards(pcs: List[PlayableCard]) -> List[HandCard]:
 
 def parse_trick_state(ts: TrickState) -> TrickStateType:
     player_states = [parse_player_state(player_state) for player_state in ts.players_states]
+    if ts.lead_card is not None: lead_card = __parse_trick_card(ts.lead_card)
+    else: lead_card = None
     if ts.turn is not None: turn = parse_user(ts.turn)
     else: turn = None
     if ts.cards is not None: deck = parse_trick_cards(ts.cards)
     else: deck = None
-    return TrickStateType(player_states=player_states, lead_color=ts.lead_color, round=ts.trick_number, turn=turn, deck=deck)
+    return TrickStateType(player_states=player_states, lead_color=ts.lead_color, lead_card=lead_card, round=ts.trick_number, turn=turn, deck=deck)
 def parse_graphene_trick_state(ts: TrickStateType) -> TrickState:
     player_states = [parse_graphene_player_state(player_state) for player_state in ts.player_states]
+    lead_card = __parse_played_card(ts.lead_card)
     turn = parse_graphene_user(ts.turn)
     cards = parse_played_cards(ts.deck)
-    return TrickState(player_states, ts.lead_color, ts.round, turn, cards)
+    return TrickState(player_states, ts.lead_color, lead_card, ts.round, turn, cards)
 
 def parse_player_task(pt: PlayerTask) -> RequiredAction:
     return RequiredAction(type=pt.task_type, options=pt.options)
@@ -65,6 +68,8 @@ def parse_required_action(ra: RequiredAction) -> PlayerTask:
     return PlayerTask(ra.type, ra.options)
 
 def parse_round_state(rs: RoundState) -> RoundStateType:
-    return RoundStateType(trump_color=rs.trump_color, trump_card=CardDecks.CARDS.get(rs.trump_card), round=rs.round_number)
+    past_tricks = [parse_trick_cards(trick_cards) for trick_cards in rs.past_tricks]
+    return RoundStateType(trump_color=rs.trump_color, trump_card=CardDecks.CARDS.get(rs.trump_card), round=rs.round_number, past_tricks=past_tricks)
 def parse_graphene_round_state(rs: RoundStateType) -> RoundState:
-    return RoundState(rs.trump_card, rs.trump_color, rs.round)
+    past_tricks = [parse_played_cards(played_cards) for played_cards in rs.past_tricks] 
+    return RoundState(rs.trump_card, rs.trump_color, rs.round, past_tricks)

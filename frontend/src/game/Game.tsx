@@ -101,6 +101,14 @@ const GET_INFO = gql`
 				tricksMade
 				}
 				leadColor
+				leadCard {
+					id
+					player {
+						id
+						name
+					}
+					isWinning
+				}
 				round
 				turn {
 					id

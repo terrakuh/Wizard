@@ -19,6 +19,7 @@ class Trick:
         self.players = players
 
         self.lead_color = None
+        self.lead_card = None
         self.curr_player = self.first_player
         self.card_stack_by_player = {}
         self.card_stack_by_card = {}
@@ -51,6 +52,7 @@ class Trick:
 
         if not self.lead_color and card_played.color_bound:
             self.lead_color = card_played.color
+            self.lead_card = card_played
             logging.info("New lead color: " + self.lead_color)
 
         self.curr_player = (self.curr_player + 1) % player_count
@@ -102,24 +104,33 @@ class Trick:
         with self.state_lock:
             players =  [player.get_state() for player in self.players]
             lead_color = self.lead_color
+
+            lead_card = None
+            if self.lead_color:
+                lead_card_id = self.lead_card.id
+                lead_card_player = self.card_stack_by_card[lead_card_id]
+                lead_card = TrickCard(lead_card_id, lead_card_player.user, (lead_card_player == self.get_current_winner()))
+
             trick_number = self.trick_number
             turn = self.players[self.curr_player].user
-            cards = self.__get_card_states()
-            self.state = TrickState(players, lead_color, trick_number, turn, cards)
+            cards = self.get_card_states()
+            self.state = TrickState(players, lead_color, lead_card, trick_number, turn, cards)
 
-    def __get_card_states(self):
+    def get_card_states(self):
         return [TrickCard(card.id, player.user, (player == self.get_current_winner())) for card, player in zip(self.card_stack_by_player.values(), self.card_stack_by_card.values())]
 
-class TrickState:
-    def __init__(self, player_states: List[PlayerState], lead_color: Optional[str] = None, trick_number: Optional[int] = None, turn: Optional[User] = None, cards: Optional[List[HandCard]] = None):
-        self.players_states = player_states
-        self.lead_color = lead_color
-        self.trick_number = trick_number
-        self.turn = turn
-        self.cards = cards
 
 class TrickCard:
     def __init__(self, card_id: str, player: User, is_winning: bool):
         self.card_id = card_id
         self.player = player
         self.is_winning = is_winning
+
+class TrickState:
+    def __init__(self, player_states: List[PlayerState], lead_color: Optional[str] = None, lead_card: Optional[TrickCard] = None, trick_number: Optional[int] = None, turn: Optional[User] = None, cards: Optional[List[HandCard]] = None):
+        self.players_states = player_states
+        self.lead_color = lead_color
+        self.lead_card = lead_card
+        self.trick_number = trick_number
+        self.turn = turn
+        self.cards = cards
