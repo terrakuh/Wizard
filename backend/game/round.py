@@ -2,7 +2,7 @@ from .card_decks import CardDecks
 from .trick import Trick, TrickCard
 from .player import Player
 from .card import Card
-from typing import Dict, List
+from typing import List
 
 import random
 import logging

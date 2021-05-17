@@ -10,7 +10,7 @@ from .player import Player, User
 from .card_decks import CardDecks
 
 class Settings:
-    def __init__(self, mode: int):
+    def __init__(self, mode: str):
         self.mode = mode
 
 
@@ -36,7 +36,8 @@ class Game(threading.Thread):
         while self.round_counter <= len(self.card_deck)//len(self.players):
             self.round_counter += 1
 
-            self.curr_round = Round(mode=self.settings.mode, players=list(self.players.values()), first_player=self.first_player, card_deck=self.card_deck, round_counter=self.round_counter)
+            mode = 0 if self.settings.mode == "Standard" else 1
+            self.curr_round = Round(mode=mode, players=list(self.players.values()), first_player=self.first_player, card_deck=self.card_deck, round_counter=self.round_counter)
             self.curr_round.start_round()
 
             self.first_player = (self.first_player + 1) % len(self.players)

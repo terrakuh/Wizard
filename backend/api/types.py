@@ -8,7 +8,7 @@ class User(ObjectType):
 
 class Lobby(ObjectType):
 	code = NonNull(String)
-	mode = NonNull(Int)
+	mode = NonNull(String)
 	players = NonNull(List(NonNull(User)))
 	can_start = Boolean()
 
