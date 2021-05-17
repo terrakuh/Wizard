@@ -130,6 +130,7 @@ const GET_INFO = gql`
 						...UserFragment
 					}
 				score
+				isActive
 				tricksCalled
 				tricksMade
 				}

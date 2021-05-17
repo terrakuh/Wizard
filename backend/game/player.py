@@ -16,11 +16,12 @@ class User:
 
 
 class PlayerState:
-    def __init__(self, player: User, score: int, tricks_called: Optional[int], tricks_made: Optional[int]):
+    def __init__(self, player: User, score: int, is_active: bool, tricks_called: Optional[int], tricks_made: Optional[int]):
         self.player = player
         self.score = score
         self.tricks_called = tricks_called
         self.tricks_made = tricks_made
+        self.is_active = is_active
 
     def __str__(self) -> str:
         return f"[User={self.player}]"
@@ -50,6 +51,7 @@ class Player:
         self.cards = None
 
         self.current_task = None
+        self.is_active = False
 
         self.card_lock = threading.Lock()
         self.task_lock = threading.Lock()
@@ -73,21 +75,14 @@ class Player:
             logging.info(self.name + " got cards: " + str(cards))
             self.cards = {card.id: card for card in sorted(cards, key=lambda c: c.sort_value)}
 
-    def __card_sorter(self, c1: Card, c2: Card) -> int:
-        print(type(c1))
-        if not c1.color_bound and c2.color_bound:
-            return -1
-        if c1.color_bound and not c2.color_bound:
-            return 1
-        if (not c1.color_bound and not c2.color_bound) or (c1.color == c2.color):
-            return c2.value - c1.value
-        else:
-            return CardDecks.CARD_COLORS.index(c1.color) - CardDecks.CARD_COLORS.index(c1.color)
-
     def replace_card(self, card_to_replace_id: str, new_card: Card) -> Card:
         with self.card_lock:
             self.cards[new_card.id] = new_card
             return self.cards.pop(card_to_replace_id)
+
+    def toggle_is_active(self):
+        self.is_active = not self.is_active
+        self.__update_state()
 
 
     def call_tricks(self, called_tricks: int, max_tricks: int, is_last: bool) -> int:
@@ -176,7 +171,7 @@ class Player:
 
     def __update_state(self):
         with self.state_lock:
-            self.state = PlayerState(self.user, self.score, self.tricks_called, self.tricks_made)
+            self.state = PlayerState(self.user, self.score, self.is_active, self.tricks_called, self.tricks_made)
 
     def __get_hand_card(self, card: Card, lead_color: str=None):
         playable_cards = self.__get_playable_cards(lead_color)
@@ -194,9 +189,10 @@ class Player:
 
 class PlayerTask:
 
-    def __init__(self, task_type, player, options):
+    def __init__(self, task_type: str, player: Player, options: List[str]):
         self.task_type = task_type
         self.player = player
+        self.player.toggle_is_active()
 
         self.options = options
         self.selected = None
@@ -226,6 +222,8 @@ class PlayerTask:
 
             print("Receiving input: " + str(user_input))
             self.selected = user_input
+
             self.player.current_task = None
+            self.player.toggle_is_active()
 
             self.input_event.set()

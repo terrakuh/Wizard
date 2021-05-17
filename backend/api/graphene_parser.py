@@ -22,9 +22,9 @@ def parse_graphene_user(user: UserType) -> User:
     return User(user.id, user.name)
 
 def parse_player_state(ps: PlayerState) -> PlayerStateType:
-    return PlayerStateType(player=parse_user(ps.player), score=ps.score, tricks_called=ps.tricks_called, tricks_made=ps.tricks_made)
+    return PlayerStateType(player=parse_user(ps.player), score=ps.score, is_active=ps.is_active, tricks_called=ps.tricks_called, tricks_made=ps.tricks_made)
 def parse_graphene_player_state(ps: PlayerStateType) -> PlayerState:
-    return PlayerState(parse_graphene_user(ps.player), ps.score, ps.tricks_called, ps.tricks_made)
+    return PlayerState(parse_graphene_user(ps.player), ps.score, ps.is_active, ps.tricks_called, ps.tricks_made)
 
 def __parse_trick_card(tc: TrickCard) -> PlayedCard:
     return PlayedCard(id=tc.card_id, player=parse_user(tc.player), is_winning=tc.is_winning)
