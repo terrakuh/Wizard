@@ -111,8 +111,6 @@ class Round:
         """
         random.shuffle(self.card_deck)
 
-        self.card_deck[0] = CardDecks.CARDS["cloud"]
-
         player_count = len(self.players)
 
         for i in range(player_count):

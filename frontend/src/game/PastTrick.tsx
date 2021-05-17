@@ -1,4 +1,4 @@
-import { Grid, makeStyles, Paper, Popper, ThemeProvider } from "@material-ui/core"
+import { Grid, makeStyles, Paper, Popper } from "@material-ui/core"
 import { useState } from "react"
 import { PlayedCard } from "../types"
 import { ReferenceObject } from "popper.js"
@@ -42,7 +42,7 @@ export default function PastTrick(props: Props) {
 						<Grid container spacing={1}>
 							{
 								props.pastTrick?.map(card =>
-									<Grid item>
+									<Grid item key={card.id}>
 										<img
 											style={{
 												...cardStyle,
