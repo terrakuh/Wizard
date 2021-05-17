@@ -1,12 +1,15 @@
+import { useMutation } from "@apollo/client";
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, makeStyles, Paper, PaperProps, Typography } from "@material-ui/core";
-import { Maximize, Minimize as MinimizeIcon } from "@material-ui/icons";
+import { Minimize as MinimizeIcon } from "@material-ui/icons";
+import gql from "graphql-tag";
 import { useSnackbar } from "notistack";
-import { ReactNode, useState, useEffect, useCallback } from "react";
+import { ReactNode, useState, useCallback } from "react";
 import Draggable from "react-draggable";
+import { Loading } from "../../util";
 
 interface Props {
-	open: boolean
-	onCommit(): void
+	onCommit(): CompleteActionVariables
+	canCommit: boolean
 	title: string
 	children?: ReactNode
 }
@@ -15,6 +18,7 @@ export default function DialogTemplate(props: Props) {
 	const classes = useStyles()
 	const { enqueueSnackbar, closeSnackbar } = useSnackbar()
 	const [minimize, setMinimize] = useState(false)
+	const [completeAction, { loading }] = useMutation<any, CompleteActionVariables>(COMPLETE_ACTION)
 	const handleMinimize = useCallback(() => {
 		setMinimize(true)
 		const key = enqueueSnackbar("Aktion verfügbar.", {
@@ -31,37 +35,42 @@ export default function DialogTemplate(props: Props) {
 		})
 	}, [enqueueSnackbar, closeSnackbar])
 
-	// reset
-	useEffect(() => {
-		if (props.open) {
-			setMinimize(false)
-		}
-	}, [props.open])
-
 	return (
-		<Dialog
-			open={props.open && !minimize}
-			PaperComponent={PaperComponent}
-			fullWidth>
-			<DialogTitle className={classes.title} disableTypography>
-				<Typography variant="h6" className={classes.titleText}>{props.title}</Typography>
+		<>
+			<Dialog
+				open={!minimize}
+				PaperComponent={PaperComponent}
+				fullWidth>
+				<DialogTitle className={classes.title} disableTypography>
+					<Typography variant="h6" className={classes.titleText}>{props.title}</Typography>
 
-				<IconButton onClick={handleMinimize}>
-					<MinimizeIcon />
-				</IconButton>
-			</DialogTitle>
+					<IconButton onClick={handleMinimize}>
+						<MinimizeIcon />
+					</IconButton>
+				</DialogTitle>
 
-			<DialogContent>{props.children}</DialogContent>
+				<DialogContent>{props.children}</DialogContent>
 
-			<DialogActions>
-				<Button
-					onClick={props.onCommit}
-					variant="contained"
-					color="primary">
-					Bestätigen
+				<DialogActions>
+					<Button
+						disabled={!props.canCommit}
+						onClick={async () => {
+							try {
+								await completeAction({ variables: props.onCommit() })
+							} catch (err) {
+								console.error(err)
+								enqueueSnackbar("Stiche konnten nicht angesagt werden.", { variant: "error" })
+							}
+						}}
+						variant="contained"
+						color="primary">
+						Bestätigen
 				</Button>
-			</DialogActions>
-		</Dialog>
+				</DialogActions>
+			</Dialog>
+
+			<Loading loading={loading} />
+		</>
 	)
 }
 
@@ -83,3 +92,13 @@ function PaperComponent(props: PaperProps) {
 		</Draggable>
 	)
 }
+
+interface CompleteActionVariables {
+	option: string
+}
+
+const COMPLETE_ACTION = gql`
+	mutation ($option: String!) {
+		completeAction(option: $option)
+	}
+`
