@@ -50,10 +50,11 @@ class Trick:
 
         logging.info("New stack: " + str(self.card_stack_by_player))
 
-        if not self.lead_color and card_played.color_bound:
-            self.lead_color = card_played.color
+        if not self.lead_color:
             self.lead_card = card_played
-            logging.info("New lead color: " + self.lead_color)
+            if card_played.color_bound:
+                self.lead_color = card_played.color
+                logging.info("New lead color: " + self.lead_color)
 
         self.curr_player = (self.curr_player + 1) % player_count
 

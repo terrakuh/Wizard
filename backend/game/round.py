@@ -65,7 +65,7 @@ class Round:
         print("Curr first player is: " + str(self.first_player) + " from: " + str(self.players))
         self.__get_estimations()
         
-        for i in range(self.round_number):
+        for i in range(1, self.round_number+1):
             print("Curr first player is: " + str(self.first_player) + " from: " + str(self.players))
             self.curr_trick = Trick(mode=self.game_mode, players=self.players, first_player=self.first_player, trump_color=self.trump_color, trick_number=i)
             
