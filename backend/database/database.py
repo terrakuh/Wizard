@@ -6,7 +6,9 @@ import string
 from os.path import join, dirname
 from asyncio import get_event_loop, run
 from concurrent.futures import ThreadPoolExecutor
-from typing import Any, Iterable, Tuple
+from typing import Any, Iterable
+from hashlib import new
+from base64 import b64encode
 
 
 with open(join(dirname(__file__), "schema.sql")) as f:
@@ -56,7 +58,16 @@ class Database:
 		""", (cookie,)))[0]
 		return User(user_id=row[0], name=row[1])
 
+	@staticmethod
+	def __hash_key(password_hash: str, salt: str, hash_type: str) -> str:
+		hasher = new(hash_type)
+		hasher.update(salt.encode("utf8"))
+		hasher.update(password_hash.encode("utf8"))
+		hasher.update(salt.encode("utf8"))
+		return b64encode(hasher.digest()).decode("utf8")
+
 	async def register_user(self, name: str, password_hash: str, salt: str, hash_type: str):
+		password_hash = Database.__hash_key(password_hash, salt, hash_type)
 		await get_event_loop().run_in_executor(self._pool, self.__execute, """
 			INSERT INTO user(name, password, salt, hash_type)
 			VALUES(?, ?, ?, ?)
@@ -66,8 +77,10 @@ class Database:
 		cookie = "".join(random.choices(string.ascii_letters, k=cookie_length))
 		def func():
 			with self._db:
-				id = self._db.execute("SELECT id FROM user WHERE name=? AND password=?", (name, password_hash)).fetchone()
-				self._db.execute("INSERT INTO session(user, cookie, expires) VALUES(?, ?, DATETIME('now', ?))", (id[0], cookie, "{} days".format(expires_days)))
+				row = self._db.execute("SELECT id, salt, hash_type, password FROM user WHERE name=?", (name,)).fetchone()
+				if Database.__hash_key(password_hash, row[1], row[2]) != row[3]:
+					raise Exception()
+				self._db.execute("INSERT INTO session(user, cookie, expires) VALUES(?, ?, DATETIME('now', ?))", (row[0], cookie, "{} days".format(expires_days)))
 		await get_event_loop().run_in_executor(self._pool, func)
 		return cookie
 

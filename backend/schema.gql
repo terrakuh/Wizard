@@ -12,7 +12,8 @@ type LoginInformation {
 
 type Lobby {
 	code: String!
-	mode: Int!
+	mode: String!
+	roundLimit: Int
 	players: [User!]!
 	canStart: Boolean
 }
@@ -26,7 +27,9 @@ type PlayerState {
 
 type RoundState {
 	trumpColor: String
+	trumpCard: String
 	round: Int!
+	pastTrick: [PlayedCard!]
 }
 
 type PlayedCard {
@@ -38,6 +41,7 @@ type PlayedCard {
 type TrickState {
 	playerStates: [PlayerState!]!
 	leadColor: String
+	leadCard: PlayedCard
 	round: Int
 	turn: User
 	deck: [PlayedCard!]
@@ -74,6 +78,7 @@ type Query {
 
 	# lobby management
 	lobby: Lobby
+	modes: [String!]!
 
 	# game logic
 	gameInfo: GameInfo
@@ -84,10 +89,6 @@ type Query {
 ############### MUTATION ###############
 ########################################
 
-input LobbySettings {
-	mode: Int!
-}
-
 type Mutation {
 	# user management
 	register(name: String!, passwordHash: String!, salt: String!, hashType: String!, token: String!): Boolean!
@@ -96,7 +97,7 @@ type Mutation {
 
 	# lobby management
 	createLobby: String!
-	changeLobbySettings(settings: LobbySettings!): Boolean!
+	setLobbySettings(mode: String): Boolean!
 	joinLobby(code: String!): Boolean!
 	leaveLobby: Boolean!
 	startGame: Boolean!

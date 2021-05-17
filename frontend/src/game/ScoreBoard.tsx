@@ -26,7 +26,7 @@ export default function ScoreBoard(props: Props) {
 
 						<TableRow>
 							<TableCell></TableCell>
-							<TableCell>{props.trickState.round == null ? null : `Stich: ${props.trickState.round + 1}`}</TableCell>
+							<TableCell>{props.trickState.round == null ? null : `Stich: ${props.trickState.round}`}</TableCell>
 							<TableCell>{props.trickState.playerStates.reduce((prev, curr) => prev + (curr.tricksMade ?? 0), 0)} / {props.trickState.playerStates.reduce((prev, curr) => prev + (curr.tricksCalled ?? 0), 0)}</TableCell>
 						</TableRow>
 					</TableBody>

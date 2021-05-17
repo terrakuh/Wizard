@@ -8,7 +8,7 @@ class User(ObjectType):
 
 class Lobby(ObjectType):
 	code = NonNull(String)
-	mode = NonNull(Int)
+	mode = NonNull(String)
 	players = NonNull(List(NonNull(User)))
 	can_start = Boolean()
 
@@ -34,6 +34,7 @@ class PlayedCard(ObjectType):
 class TrickState(ObjectType):
 	player_states = NonNull(List(NonNull(PlayerState)))
 	lead_color = String()
+	lead_card = Field(PlayedCard)
 	round = Int()
 	turn = Field(User)
 	deck = List(NonNull(PlayedCard))
@@ -49,6 +50,7 @@ class RoundState(ObjectType):
 	trump_color = String()
 	trump_card = NonNull(String)
 	round = NonNull(Int)
+	past_trick = List(NonNull(PlayedCard))
 
 
 class RequiredAction(ObjectType):

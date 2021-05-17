@@ -9,9 +9,10 @@ export default function Loading({ loading }: Props) {
 	const classes = useStyles()
 
 	return (
-		<Backdrop open={loading} className={classes.backdrop}>
-			<CircularProgress hidden={!loading} color="primary" />
-		</Backdrop>
+		!loading ? null :
+			<Backdrop open className={classes.backdrop}>
+				<CircularProgress color="primary" />
+			</Backdrop>
 	)
 }
 

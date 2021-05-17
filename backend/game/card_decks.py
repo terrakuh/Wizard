@@ -18,9 +18,9 @@ class CardDecks:
     __SPECIAL_CARDS_2 = [Card(0, "foozard", variants=[Card(50, "foozard", "wizard", False), Card(0, "foozard", "fool", False)])]
     __VARIANTS = [Card(9.5, "cloud", color) for color in CARD_COLORS] + [Card(7.5, "juggler", color) for color in CARD_COLORS] + [Card(50, "foozard", "wizard", False), Card(0, "foozard", "fool", False)]
     MODES = {
-        0: __STANDARD_CARDS,
-        1: __STANDARD_CARDS +  __SPECIAL_CARDS_1,
-        2: __STANDARD_CARDS + __SPECIAL_CARDS_1 + __SPECIAL_CARDS_2,
+        "Standard": __STANDARD_CARDS,
+        "Jubiläum20": __STANDARD_CARDS +  __SPECIAL_CARDS_1,
+        "Jubiläum25": __STANDARD_CARDS + __SPECIAL_CARDS_1 + __SPECIAL_CARDS_2,
     }
 
     CARDS = { card.id: card for card in (__STANDARD_CARDS + __SPECIAL_CARDS_1 + __SPECIAL_CARDS_2 + __VARIANTS) }

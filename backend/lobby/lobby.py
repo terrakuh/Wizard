@@ -11,7 +11,7 @@ from game.player import User
 class Lobby:
 	def __init__(self, code: str) -> None:
 		self.code = code
-		self._settings = Settings(2)
+		self._settings = Settings("Jubiläum25")
 		self._lock = Lock()
 		self._players: List[User] = []
 		self.created = datetime.now()
@@ -42,7 +42,7 @@ class Lobby:
 		with self._lock:
 			return self._players[0].user_id == user.user_id
 
-	def set_settings(self, mode: int) -> None:
+	def set_settings(self, mode: str) -> None:
 		with self._lock:
 			self._settings.mode = mode
 

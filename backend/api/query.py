@@ -12,6 +12,7 @@ from lobby.lobby import Lobby
 
 from game.player import Player, User
 from game.game_interaction import GameInteraction
+from game.card_decks import CardDecks
 
 from . import graphene_parser
 
@@ -43,6 +44,7 @@ class Query(ObjectType):
 
 	# lobby management
 	lobby = Field(LobbyType)
+	modes = List(String)
 
 	@smart_api()
 	async def resolve_lobby(root, info: ResolveInfo, lobby: Optional[Lobby], user: User):
@@ -55,6 +57,9 @@ class Query(ObjectType):
 			return result
 		except:
 			return None
+
+	def resolve_modes(root, info: ResolveInfo):
+		return CardDecks.MODES.keys()
 
 
 	# game logic

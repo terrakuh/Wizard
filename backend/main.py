@@ -1,7 +1,6 @@
 from database import Database
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, status
 from fastapi.responses import HTMLResponse, FileResponse
-from fastapi.staticfiles import StaticFiles
 from starlette.graphql import GraphQLApp
 from graphene import Schema
 from api.query import Query
@@ -36,17 +35,22 @@ async def handle_gql(request: Request):
 			real_response.set_cookie(key, value, max_age=timedelta(days=365).total_seconds())
 	return real_response
 
-absolute_private_path = Path("static/private").absolute()
 
-@app.get("/private/{name}")
-async def handle_files(request: Request, name: str):
-	try:
-		await user_authentication.authenticate(request)
-	except:
-		return HTMLResponse(status_code=401)
-	path = Path(absolute_private_path, name)
-	if path.parent.absolute() == absolute_private_path and path.exists():
+ABSOLUTE_PRIVATE_PATH = Path("static/private").absolute()
+ABSOLUTE_STATIC_PATH = Path("static").absolute()
+INDEX_PATH = Path(ABSOLUTE_STATIC_PATH, "index.html")
+
+@app.get("/{full_path:path}")
+async def handle_static_files(request: Request, full_path: str):
+	path = Path(ABSOLUTE_STATIC_PATH, full_path)
+	parents = path.parents
+	if ABSOLUTE_PRIVATE_PATH in parents:
+		try:
+			await user_authentication.authenticate(request)
+		except:
+			return HTMLResponse(status_code=status.HTTP_401_UNAUTHORIZED)
+	elif ABSOLUTE_STATIC_PATH not in parents and ABSOLUTE_STATIC_PATH != path:
+		return HTMLResponse(status_code=status.HTTP_403_FORBIDDEN)
+	if path.is_file():
 		return FileResponse(path)
-	return HTMLResponse(status_code=404)
-
-app.mount("/", StaticFiles(directory="static"))
+	return FileResponse(INDEX_PATH)

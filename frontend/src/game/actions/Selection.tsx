@@ -1,74 +1,90 @@
-import { useMutation } from "@apollo/client";
-import { DialogContentText, FormControlLabel, Radio, RadioGroup } from "@material-ui/core";
-import gql from "graphql-tag";
-import { useMemo, useState } from "react";
-import { Loading } from "../../util";
-import { cardStyle } from "../card/styles";
-import DialogTemplate from "./DialogTemplate";
-
-function getOptionElements(options: string[]): JSX.Element[] {
-	return options.map(option => <div key={option}>
-		<img
-			style={cardStyle}
-			alt=""
-			src={`/private/${option}.jpg`} />
-		<Radio value={option} />
-	</div>
-	)
-}
+import { Grid, makeStyles } from "@material-ui/core"
+import { useEffect, useState } from "react"
+import { idToBorderColor } from "../../util"
+import { cardStyle } from "../card/styles"
+import DialogTemplate from "./DialogTemplate"
 
 interface Props {
 	infoText: string
 	options: string[]
-	onClose(): void
-	open: boolean
 }
 
 export default function Selection(props: Props) {
-	const [selection, setSelection] = useState(props.options[0])
-	// const info = useMemo(() => ({
-	// 	called: props.trickState.playerStates.reduce((prev, curr) => prev + (curr.tricksCalled ?? 0), 0),
-	// 	playersLeft: props.trickState.playerStates.reduce((prev, curr) => prev + (curr.tricksCalled == null ? 1 : 0), 0)
-	// }), [props.trickState])
-	const [selectOption] = useMutation(COMPLETE_ACTION)
-	const [loading, setLoading] = useState(false)
+	const classes = useStyles()
+	const [selected, setSelected] = useState<string>()
+
+	useEffect(() => setSelected(undefined), [props.options])
 
 	return (
-		<>
-			<Loading loading={loading} />
-
-			<DialogTemplate
-				title="Wähle aus"
-				onCommit={async () => {
-					setLoading(true)
-					try {
-						await selectOption({
-							variables: {
-								option: String(selection)
-							}
-						})
-					} finally {
-						setLoading(false)
-						props.onClose()
-					}
-				}}
-				open={props.open}>
-				<DialogContentText>
-					{props.infoText}
-				</DialogContentText>
-
-				<RadioGroup row
-					value={selection}
-					onChange={(_, x) => setSelection(x)}>
-					{getOptionElements(props.options)}
-				</RadioGroup>
-			</DialogTemplate>
-		</>
+		<DialogTemplate
+			title={`Wähle aus: ${props.infoText}`}
+			canCommit={selected != null}
+			onCommit={() => ({ option: selected ?? "" })}>
+			<Grid container spacing={2} className={classes.container}>
+				{
+					props.options.map(option =>
+						<Grid item key={option}>
+							<div
+								className={classes.item}
+								style={selected === option ? {
+									border: `solid 4px ${idToBorderColor(option)}`,
+									borderRadius: 14,
+									animation: `onSelectItem420 1s`,
+									animationIterationCount: "infinite",
+									animationTimingFunction: "linear"
+								} : undefined}>
+								<img
+									className={`${classes.image} ${selected === option ? classes.selected : ""}`}
+									onClick={() => setSelected(option)}
+									alt=""
+									src={`/private/${option}.jpg`} />
+							</div>
+						</Grid>
+					)
+				}
+			</Grid>
+		</DialogTemplate>
 	)
 }
 
-const COMPLETE_ACTION = gql`
-	mutation ($option: String!) {
-		completeAction(option: $option)
+const useStyles = makeStyles(theme => ({
+	"@keyframes onSelect": {
+		to: {
+			filter: "hue-rotate(360deg)"
+		}
+	},
+	"@global": {
+		"@keyframes onSelectItem420": {
+			"25%": {
+				transform: "rotate(90deg) scale(1.3)"
+			},
+			"50%": {
+				transform: "rotate(180deg) scale(1)"
+			},
+			"75%": {
+				transform: "rotate(270deg) scale(1.3)"
+			},
+			"100%": {
+				transform: "rotate(360deg) scale(1)"
+			}
+		}
+	},
+	container: {
+		justifyContent: "space-around",
+		alignItems: "center",
+		overflow: "hidden",
+		padding: theme.spacing(4)
+	},
+	item: {
+		height: cardStyle.height / 2,
+	},
+	image: {
+		height: cardStyle.height / 2,
+		borderRadius: 10
+	},
+	selected: {
+		animation: "$onSelect 1s",
+		animationIterationCount: "infinite",
+		animationTimingFunction: "linear"
 	}
-`
+}))
