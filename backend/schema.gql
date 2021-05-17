@@ -13,6 +13,7 @@ type LoginInformation {
 type Lobby {
 	code: String!
 	mode: String!
+	roundLimit: Int
 	players: [User!]!
 	canStart: Boolean
 }
@@ -77,6 +78,7 @@ type Query {
 
 	# lobby management
 	lobby: Lobby
+	modes: [String!]!
 
 	# game logic
 	gameInfo: GameInfo
@@ -87,10 +89,6 @@ type Query {
 ############### MUTATION ###############
 ########################################
 
-input LobbySettings {
-	mode: String!
-}
-
 type Mutation {
 	# user management
 	register(name: String!, passwordHash: String!, salt: String!, hashType: String!, token: String!): Boolean!
@@ -99,7 +97,7 @@ type Mutation {
 
 	# lobby management
 	createLobby: String!
-	changeLobbySettings(settings: LobbySettings!): Boolean!
+	setLobbySettings(mode: String): Boolean!
 	joinLobby(code: String!): Boolean!
 	leaveLobby: Boolean!
 	startGame: Boolean!

@@ -1,7 +1,7 @@
 import threading
 import random
 import logging
-from typing import List
+from typing import List, Optional
 from time import sleep
 
 from .round import Round
@@ -32,8 +32,10 @@ class Game(threading.Thread):
 
     def run(self):
         logging.info("Starting Game...")
-        
-        while self.round_counter <= len(self.card_deck)//len(self.players):
+
+        limit = min(len(self.card_deck)//len(self.players), 12)
+
+        while self.round_counter <= limit:
             self.round_counter += 1
 
             mode = 0 if self.settings.mode == "Standard" else 1

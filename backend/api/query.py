@@ -58,7 +58,7 @@ class Query(ObjectType):
 		except:
 			return None
 
-	async def resolve_modes(root, info: ResolveInfo):
+	def resolve_modes(root, info: ResolveInfo):
 		return CardDecks.MODES.keys()
 
 

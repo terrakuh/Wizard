@@ -1,8 +1,8 @@
+from typing import Optional
 from api.decorators import smart_api, Response
 from graphene import ObjectType, Boolean, NonNull, String, ResolveInfo, Int, ID, List
 from graphql import GraphQLError
 from .types import User as UserType, PlayableCard
-from .inputs import LobbySettings
 from database import Database
 from fastapi import Request
 
@@ -51,7 +51,7 @@ class Mutation(ObjectType):
 
 	# lobby management
 	create_lobby = NonNull(String)
-	change_lobby_settings = NonNull(Boolean, settings=NonNull(LobbySettings))
+	set_lobby_settings = NonNull(Boolean, mode=String())
 	join_lobby = NonNull(Boolean, code=NonNull(String))
 	leave_lobby = NonNull(Boolean)
 	start_game = NonNull(Boolean)
@@ -61,11 +61,11 @@ class Mutation(ObjectType):
 		return manager.create_lobby(user)
 
 	@smart_api()
-	def resolve_change_lobby_settings(root, info: ResolveInfo, settings: LobbySettings, lobby: Lobby, user: User):
-		print(settings.mode)
+	def resolve_set_lobby_settings(root, info: ResolveInfo, mode: Optional[str], lobby: Lobby, user: User):
 		if not lobby.is_lobby_master(user):
 			raise GraphQLError("not lobby master")
-		lobby.set_settings(settings.mode)
+		if mode is not None:
+			lobby.set_settings(mode)
 		return True
 
 	@smart_api()
