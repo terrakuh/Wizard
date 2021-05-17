@@ -50,7 +50,7 @@ class RoundState(ObjectType):
 	trump_color = String()
 	trump_card = NonNull(String)
 	round = NonNull(Int)
-	past_tricks = NonNull(List(List(PlayedCard)))
+	past_tricks = NonNull(List(NonNull(List(NonNull(PlayedCard)))))
 
 
 class RequiredAction(ObjectType):

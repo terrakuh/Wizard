@@ -12,7 +12,7 @@ type LoginInformation {
 
 type Lobby {
 	code: String!
-	mode: Int!
+	mode: String!
 	players: [User!]!
 	canStart: Boolean
 }
@@ -26,7 +26,9 @@ type PlayerState {
 
 type RoundState {
 	trumpColor: String
+	trumpCard: String
 	round: Int!
+	pastTricks: [[PlayedCard!]!]!
 }
 
 type PlayedCard {
@@ -38,6 +40,7 @@ type PlayedCard {
 type TrickState {
 	playerStates: [PlayerState!]!
 	leadColor: String
+	leadCard: PlayedCard
 	round: Int
 	turn: User
 	deck: [PlayedCard!]
@@ -85,7 +88,7 @@ type Query {
 ########################################
 
 input LobbySettings {
-	mode: Int!
+	mode: String!
 }
 
 type Mutation {

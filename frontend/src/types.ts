@@ -11,7 +11,7 @@ export interface LoginInformation {
 
 export interface Lobby {
 	code: string
-	mode: number
+	mode: string
 	players: User[]
 	canStart: boolean | null
 }
