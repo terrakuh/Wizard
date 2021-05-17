@@ -106,11 +106,14 @@ class Round:
         """
         random.shuffle(self.card_deck)
 
+        self.card_deck[0] = CardDecks.CARDS["cloud"]
+
         player_count = len(self.players)
 
         for i in range(player_count):
             index = (i + self.first_player) % player_count
             player = self.players[index]
+
             player.set_cards(self.card_deck[index:player_count*self.round_number:player_count])
             
             logging.info("Player " + player.name + " got cards: " + str(player.cards))

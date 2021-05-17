@@ -71,7 +71,18 @@ class Player:
     def set_cards(self, cards: List[Card]):
         with self.card_lock:
             logging.info(self.name + " got cards: " + str(cards))
-            self.cards = {card.id: card for card in cards}
+            self.cards = {card.id: card for card in sorted(cards, key=lambda c: c.sort_value)}
+
+    def __card_sorter(self, c1: Card, c2: Card) -> int:
+        print(type(c1))
+        if not c1.color_bound and c2.color_bound:
+            return -1
+        if c1.color_bound and not c2.color_bound:
+            return 1
+        if (not c1.color_bound and not c2.color_bound) or (c1.color == c2.color):
+            return c2.value - c1.value
+        else:
+            return CardDecks.CARD_COLORS.index(c1.color) - CardDecks.CARD_COLORS.index(c1.color)
 
     def replace_card(self, card_to_replace_id: str, new_card: Card) -> Card:
         with self.card_lock:
