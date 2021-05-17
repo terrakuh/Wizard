@@ -1,5 +1,5 @@
 import React from "react"
-import { Button, makeStyles, Paper, TextField, Theme } from "@material-ui/core"
+import { Button, makeStyles, Paper, TextField } from "@material-ui/core"
 import gql from "graphql-tag"
 import { useLazyQuery, useMutation } from "@apollo/client"
 import { Loading } from "../util"
@@ -55,6 +55,11 @@ export default function Login() {
 					label="Passwort"
 					value={password}
 					type="password"
+					onKeyPress={ev => {
+						if (ev.key === "Enter") {
+							fetchLoginInformation({ variables: { name } })
+						}
+					}}
 					onChange={ev => setPassword(ev.target.value)}
 					fullWidth />
 
@@ -70,7 +75,7 @@ export default function Login() {
 	)
 }
 
-const useStyles = makeStyles((theme: Theme) => ({
+const useStyles = makeStyles(theme => ({
 	root: {
 		display: "flex",
 		alignItems: "center",

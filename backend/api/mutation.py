@@ -26,7 +26,8 @@ class Mutation(ObjectType):
 		await db.consume_token(token)
 		try:
 			await db.register_user(name, password_hash, salt, hash_type)
-		except:
+		except Exception as e:
+			print(e)
 			raise GraphQLError(f"User '{name}' already exists.")
 		return True
 

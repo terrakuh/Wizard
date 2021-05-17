@@ -1,5 +1,5 @@
 import { Grid, makeStyles } from "@material-ui/core"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { idToBorderColor } from "../../util"
 import { cardStyle } from "../card/styles"
 import DialogTemplate from "./DialogTemplate"
@@ -12,6 +12,8 @@ interface Props {
 export default function Selection(props: Props) {
 	const classes = useStyles()
 	const [selected, setSelected] = useState<string>()
+
+	useEffect(() => setSelected(undefined), [props.options])
 
 	return (
 		<DialogTemplate
