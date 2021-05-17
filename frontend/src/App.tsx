@@ -58,7 +58,40 @@ export default function App() {
 					</RequiresLogin>
 
 					<Route exact path="/test">
-
+						<Deck cards={[
+							{
+								id: "green_9",
+								isWinning: false,
+								player: {
+									id: 1,
+									name: "Yunus"
+								}
+							},
+							{
+								id: "green_4",
+								isWinning: false,
+								player: {
+									id: 1,
+									name: "Yunus"
+								}
+							},
+							{
+								id: "blue_9",
+								isWinning: false,
+								player: {
+									id: 1,
+									name: "Yunus"
+								}
+							},
+							{
+								id: "red_9",
+								isWinning: false,
+								player: {
+									id: 1,
+									name: "Yunus"
+								}
+							}
+						]}/>
 					</Route>
 
 					<Route path="/"><Redirect to="/lobby" /></Route>

@@ -1,9 +1,9 @@
-import { makeStyles, Paper, Popper } from "@material-ui/core"
+import { Grid, makeStyles, Paper, Popper } from "@material-ui/core"
 import { Skeleton } from "@material-ui/lab"
 import { PlayedCard } from "./card"
 import { PlayedCard as PlayedCardSchema } from "../types"
 import { cardStyle } from "./card/styles"
-import { useRef, useState } from "react"
+import { useState } from "react"
 import { ReferenceObject } from "popper.js"
 
 interface Props {
@@ -27,7 +27,23 @@ export default function Deck({ cards }: Props) {
 
 	return (
 		<div
-			onClick={ev => setAnchor(anchor == null ? ev.currentTarget : undefined)}
+			onClick={ev => {
+				if (anchor == null) {
+					let rect = ev.currentTarget.getBoundingClientRect()
+					rect = new DOMRect(rect.x + rect.width / 2, rect.y + rect.height / 2 - 140, 1, 1)
+					setAnchor({
+						clientHeight: ev.currentTarget.clientHeight,
+						clientWidth: ev.currentTarget.clientWidth,
+						getBoundingClientRect() {
+
+							return rect
+						}
+					})
+				} else {
+					setAnchor(undefined)
+				}
+				setAnchor(anchor == null ? ev.currentTarget : undefined)
+			}}
 			className={classes.root}>
 			{
 				cards.length === 0 ?
@@ -45,14 +61,23 @@ export default function Deck({ cards }: Props) {
 
 			<Popper
 				anchorEl={anchor}
+				placement="top"
+				modifiers={{
+					preventOverflow: {
+						enabled: true,
+						boundariesElement: "viewport",
+					}
+				}}
 				open={anchor != null}>
-				<Paper>
+				<Grid container component={Paper} spacing={2}>
 					{
 						cards.map(card =>
-							<PlayedCard key={card.id} card={card} />
+							<Grid item key={card.id} >
+								<PlayedCard card={card} />
+							</Grid>
 						)
 					}
-				</Paper>
+				</Grid>
 			</Popper>
 		</div>
 	)

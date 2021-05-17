@@ -1,12 +1,14 @@
 import React from "react"
 import { gql, useQuery } from "@apollo/client"
 import { Lobby as LobbyType } from "../types"
-import LobbyConnection from "./LobbyConnection"
+import Connection from "./Connection"
 import PlayerList from "./PlayerList"
-import { Grid } from "@material-ui/core"
+import { Divider, makeStyles, Paper, Theme } from "@material-ui/core"
 import { Redirect } from "react-router-dom"
+import Settings from "./Settings"
 
 export default function Lobby() {
+	const classes = useStyles()
 	const { data: info, stopPolling, startPolling } = useQuery<Info>(INFO)
 
 	React.useEffect(() => {
@@ -20,20 +22,40 @@ export default function Lobby() {
 	}
 
 	return (
-		<Grid container spacing={2}>
-			<Grid item xs={12}>
-				<LobbyConnection lobbyInfo={info?.lobby ?? undefined} />
-			</Grid>
+		<div className={classes.root}>
+			<Paper className={classes.meta}>
+				<Connection lobbyInfo={info?.lobby ?? undefined} />
+
+				<Divider />
+
+				{
+					info?.lobby == null ? null : <Settings lobby={info.lobby} />
+				}
+			</Paper>
 
 			{
-				info?.lobby == null ? null :
-					<Grid item xs={12}>
+				!info?.lobby?.players.length ? null :
+					<Paper>
 						<PlayerList players={info.lobby.players} />
-					</Grid>
+					</Paper>
 			}
-		</Grid>
+		</div>
 	)
 }
+
+const useStyles = makeStyles((theme: Theme) => ({
+	root: {
+		display: "flex",
+		flexDirection: "column",
+		gap: theme.spacing(1)
+	},
+	meta: {
+		display: "flex",
+		flexDirection: "column",
+		padding: theme.spacing(2),
+		gap: theme.spacing(1)
+	}
+}))
 
 interface Info {
 	lobby: LobbyType | null
