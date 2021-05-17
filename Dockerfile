@@ -1,21 +1,19 @@
-FROM golang:alpine AS backend
-
-COPY backend /tmp/backend
-RUN cd /tmp/backend && go build .
-
-
 FROM node:alpine AS frontend
 
 COPY frontend /tmp/frontend
 RUN cd /tmp/frontend && yarn && yarn build
 
 
-FROM alpine
+FROM python:3.9-alpine
 
-EXPOSE 8080/tcp
-
-COPY --from=backend /tmp/backend/wizard /app/
-COPY --from=frontend /tmp/frontend/build /app/static
-
+EXPOSE 8000/tcp
 WORKDIR /app
-ENTRYPOINT ["./wizard"]
+VOLUME [ "/data" ]
+
+COPY --from=frontend /tmp/frontend/build /app/static
+ADD wizard-assets.zip /app/static/private
+
+COPY backend /app/
+RUN pip install -r requirements.txt
+
+CMD ["python3", "main.py", "--wizard-db", "/data/wizard.db"]

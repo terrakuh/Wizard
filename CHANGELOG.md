@@ -1,5 +1,9 @@
 # Change Log
 
+## [Unreleased]
+### Added
+- Dockerfile
+
 ## [v0.5] - 2021-05-17
 ### Added
 - History for last trick

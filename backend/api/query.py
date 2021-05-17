@@ -53,7 +53,7 @@ class Query(ObjectType):
 			result = LobbyType(code=lobby.code, mode=settings.mode, players=[graphene_parser.parse_user(user) for user in lobby.get_players()])
 			if lobby.is_lobby_master(user):
 				result.can_start = len(result.players) >= 3
-			result.can_start = True
+				result.can_start = True
 			return result
 		except:
 			return None

@@ -11,11 +11,22 @@ from graphql.execution.executors.asyncio import AsyncioExecutor
 from lobby.manager import Manager
 from pathlib import Path
 from datetime import timedelta
+from argparse import ArgumentParser
+from os import chdir
+
+
+chdir(Path(__file__).parent)
+db_path = Path("wizard.db")
+parser = ArgumentParser()
+parser.add_argument("--wizard-db", type=Path, default=db_path)
+parser.add_argument("--reload", action="store_true")
+args = parser.parse_args()
+
 
 app = FastAPI()
 schema = Schema(query=Query, mutation=Mutation)
 gql_app = GraphQLApp(schema=schema, executor_class=AsyncioExecutor)
-db = Database("wizard.db")
+db = Database(args.wizard_db)
 user_authentication = UserAuthentication(db)
 lobby_manager = Manager()
 
@@ -54,3 +65,8 @@ async def handle_static_files(request: Request, full_path: str):
 	if path.is_file():
 		return FileResponse(path)
 	return FileResponse(INDEX_PATH)
+
+
+if __name__ == "__main__":
+	from uvicorn import run
+	run("main:app", host="0.0.0.0", port=8000, reload=args.reload)
