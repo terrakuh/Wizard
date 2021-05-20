@@ -62,3 +62,10 @@ export interface GameInfo {
 	roundState: RoundState
 	trickState: TrickState
 }
+
+export interface Appointment {
+	id: number
+	start: string
+	end: string | null
+	participants: User[]
+}

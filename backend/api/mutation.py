@@ -1,8 +1,11 @@
+from datetime import datetime
 from typing import Optional
+
+from graphene.types.field import Field
 from api.decorators import smart_api, Response
 from graphene import ObjectType, Boolean, NonNull, String, ResolveInfo, Int, ID, List
 from graphql import GraphQLError
-from .types import User as UserType, PlayableCard
+from .types import Appointment, User as UserType, PlayableCard
 from database import Database
 from fastapi import Request
 
@@ -93,3 +96,28 @@ class Mutation(ObjectType):
 	def resolve_complete_action(root, info: ResolveInfo, user: User, option: str, game_i: GameInteraction):
 		game_i.complete_action(option, user)
 		return True
+
+
+	# misc
+	join_appointment = NonNull(Appointment, id=NonNull(ID))
+	leave_appointment = Field(Appointment, id=NonNull(ID))
+	create_appointment = NonNull(Appointment, start=NonNull(String))
+
+	@smart_api()
+	async def resolve_join_appointment(root, info: ResolveInfo, user: User, id: int, db: Database):
+		await db.join_appointment(id, user.name)
+		return await db.get_appointment(id)
+
+	@smart_api()
+	async def resolve_leave_appointment(root, info: ResolveInfo, user: User, id: int, db: Database):
+		await db.leave_appointment(id, user.name)
+		try:
+			return await db.get_appointment(id)
+		except:
+			return None
+
+	@smart_api()
+	async def resolve_create_appointment(root, info: ResolveInfo, user: User, start: str, db: Database):
+		id = await db.create_appointment(datetime.fromisoformat(start))
+		await db.join_appointment(id, user.name)
+		return await db.get_appointment(id)

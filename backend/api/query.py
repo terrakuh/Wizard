@@ -1,10 +1,11 @@
-from datetime import timedelta
+from datetime import date, timedelta, datetime
 from typing import Optional
+
 from api.decorators import Cache, smart_api
-from graphene import ObjectType, Field, ID, String, NonNull, ResolveInfo, List
+from graphene import ObjectType, Field, ID, String, NonNull, ResolveInfo, List, DateTime
 from graphql import GraphQLError
 
-from .types import GameInfo, Lobby as LobbyType, LoginInformation, PlayableCard, RequiredAction, RoundState, TrickState, User as UserType
+from .types import Appointment, GameInfo, Lobby as LobbyType, LoginInformation, PlayableCard, RequiredAction, RoundState, TrickState, User as UserType
 from database import Database
 
 from lobby.manager import Manager
@@ -83,3 +84,11 @@ class Query(ObjectType):
 		if action is None:
 			return None
 		return graphene_parser.parse_player_task(action)
+
+	
+	# misc
+	appointments = NonNull(List(NonNull(Appointment)))
+
+	@smart_api()
+	async def resolve_appointments(root, info: ResolveInfo, db: Database):
+		return await db.get_appointments()

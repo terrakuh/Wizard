@@ -63,3 +63,9 @@ class GameInfo(ObjectType):
 	round_state = NonNull(RoundState)
 	trick_state = NonNull(TrickState)
 	hand = NonNull(List(NonNull(PlayableCard)))
+
+
+class Appointment(ObjectType):
+	id = NonNull(ID)
+	start = NonNull(String)
+	participants = NonNull(List(NonNull(User)))

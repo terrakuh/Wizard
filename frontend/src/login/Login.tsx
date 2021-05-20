@@ -30,7 +30,7 @@ export default function Login() {
 
 			login({ variables: { name, passwordHash } })
 				.then(() => enqueueSnackbar("Erfolgreich eingeloggt", { variant: "success" }))
-				.then(() => history.push("/game"))
+				.then(() => history.push("/"))
 				.catch(err => enqueueSnackbar(`Login fehlgeschlagen: ${err}`, { variant: "error" }))
 				.finally(() => setLogginIn(false))
 		},
