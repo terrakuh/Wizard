@@ -7,9 +7,10 @@ import Loading from "./Loading"
 
 interface Props extends RouteProps {
 	children?: React.ReactNode | null
+	invertedLogicPath?: string
 }
 
-export default function RequiresLogin(props: Props) {
+export default function RequiresLogin({ children, invertedLogicPath, ...props }: Props) {
 	const [isLoggedIn, setIsLoggedIn] = React.useState<boolean>()
 	useQuery<Whoami>(WHOAMI, {
 		onCompleted(data) {
@@ -24,7 +25,10 @@ export default function RequiresLogin(props: Props) {
 		<>
 			<Loading loading={isLoggedIn === undefined} />
 			<Route {...props}>
-				{isLoggedIn == null ? null : isLoggedIn ? props.children : <Redirect to="/login" />}
+				{
+					isLoggedIn == null ? null :
+						isLoggedIn === (invertedLogicPath == null) ? children : <Redirect to={invertedLogicPath ?? "/login"} />
+				}
 			</Route>
 		</>
 	)

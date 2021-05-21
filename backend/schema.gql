@@ -1,5 +1,3 @@
-scalar DateTime
-
 type User {
 	id: ID!
 	name: String!
@@ -65,11 +63,11 @@ type GameInfo {
 	hand: [PlayableCard!]!
 }
 
-# TODO
-# type Appointment {
-# 	start: DateTime!
-# 	end: DateTime
-# }
+type Appointment {
+	id: ID!
+	start: String!
+	participants: [User!]!
+}
 
 type Query {
 	# user management
@@ -84,6 +82,9 @@ type Query {
 	# game logic
 	gameInfo: GameInfo
 	requiredAction: RequiredAction
+
+	# misc
+	appointments: [Appointment!]!
 }
 
 ########################################
@@ -105,6 +106,11 @@ type Mutation {
 
 	# game logic
 	completeAction(option: String!): Boolean!
+
+	# misc
+	joinAppointment(id: ID!) Appointment!
+	leaveAppointment(id: ID!) Appointment
+	createAppointment(start: String!) Appointment!
 }
 
 schema {
