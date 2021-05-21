@@ -1,0 +1,52 @@
+{
+	"$schema": "http://json-schema.org/draft-07/schema",
+	"type": "object",
+	"properties": {
+		"communicators": {
+			"type": "object",
+			"properties": {
+				"signal": {
+					"type": "object",
+					"properties": {
+						"enabled": {
+							"type": "boolean",
+							"default": false
+						},
+						"number": {
+							"type": "string",
+							"description": "The communicators valid signal phone number in international format.",
+							"pattern": "^\\+\\d+$"
+						},
+						"api": {
+							"type": "string",
+							"description": "The base url for the signal Rest-API (https://github.com/bbernhard/signal-cli-rest-api)."
+						}
+					}
+				},
+				"email": {
+					"type": "object",
+					"properties": {
+						"enabled": {
+							"type": "boolean",
+							"default": false
+						},
+						"host": {
+							"type": "string"
+						},
+						"port": {
+							"type": "integer"
+						},
+						"user": {
+							"type": "string",
+							"description": "The username for login. The password is retrieved from the environment variable WIZARD_EMAIL_PASSWORD."
+						},
+						"from": {
+							"type": "string",
+							"description": "The from email. Sometimes equals to the username."
+						}
+					}
+				}
+			}
+		}
+	}
+}

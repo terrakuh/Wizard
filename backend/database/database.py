@@ -25,7 +25,6 @@ class Database:
 		self._db = connect(filename)
 		with self._db:
 			self._db.executescript(SCHEMA)
-			self._db.execute("DELETE FROM session WHERE expires<=DATETIME('now')")
 
 	def __execute(self, sql: str, parameters: Iterable[Any] = ...):
 		with self._db:
@@ -144,12 +143,11 @@ class Database:
 				""", (name, id))
 				self._db.execute("""
 					DELETE FROM appointment
-					WHERE NOT EXISTS (
-						SELECT 1
+					WHERE id NOT IN (
+						SELECT DISTINCT appointment
 						FROM user_appointment
-						WHERE appointment=?
 					)
-				""", (id,))
+				""")
 		await get_event_loop().run_in_executor(self._pool, func)
 
 	async def get_appointment(self, id: int) -> Appointment:

@@ -15,4 +15,10 @@ export interface Settings {
 		desktop: boolean
 		playerTurn: boolean
 	}
+	messages: {
+		signal: {
+			enabled: boolean
+			number: string
+		}
+	}
 }
