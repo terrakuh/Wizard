@@ -165,6 +165,10 @@ class Database:
 				return appointment
 		return await get_event_loop().run_in_executor(self._pool, func)
 
+	async def commit_game_history(self) -> None:
+		# TODO
+		pass
+
 
 if __name__ == "__main__":
 	async def main():
