@@ -5,6 +5,24 @@ from typing import List, Optional
 
 import logging
 import threading
+import copy
+
+
+class TrickCard:
+    def __init__(self, card_id: str, player: User, is_winning: bool):
+        self.card_id = card_id
+        self.player = player
+        self.is_winning = is_winning
+
+class TrickState:
+    def __init__(self, player_states: List[PlayerState], lead_color: Optional[str] = None, lead_card: Optional[TrickCard] = None, trick_number: Optional[int] = None, turn: Optional[User] = None, cards: Optional[List[HandCard]] = None):
+        self.players_states = player_states
+        self.lead_color = lead_color
+        self.lead_card = lead_card
+        self.trick_number = trick_number
+        self.turn = turn
+        self.cards = cards
+
 
 class Trick:
 
@@ -97,10 +115,10 @@ class Trick:
 
         return after_effect
 
-    def get_state(self):
+    def get_state(self) -> TrickState:
         self.__update_player_states()
         with self.state_lock:
-            return self.state
+            return copy.deepcopy(self.state)
 
     def __update_state(self):
         with self.state_lock:
@@ -124,19 +142,3 @@ class Trick:
 
     def get_card_states(self):
         return [TrickCard(card.id, player.user, (player == self.get_current_winner())) for card, player in zip(self.card_stack_by_player.values(), self.card_stack_by_card.values())]
-
-
-class TrickCard:
-    def __init__(self, card_id: str, player: User, is_winning: bool):
-        self.card_id = card_id
-        self.player = player
-        self.is_winning = is_winning
-
-class TrickState:
-    def __init__(self, player_states: List[PlayerState], lead_color: Optional[str] = None, lead_card: Optional[TrickCard] = None, trick_number: Optional[int] = None, turn: Optional[User] = None, cards: Optional[List[HandCard]] = None):
-        self.players_states = player_states
-        self.lead_color = lead_color
-        self.lead_card = lead_card
-        self.trick_number = trick_number
-        self.turn = turn
-        self.cards = cards

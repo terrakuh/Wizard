@@ -1,5 +1,6 @@
 import logging
 import threading
+import copy
 from typing import List, Optional
 
 from .card import Card
@@ -114,8 +115,6 @@ class Player:
 
                 self.replace_card(user_input, CardDecks.CARDS[variant_selected])
 
-                print("Replaced card: " + str(self.cards))
-
                 return variant_selected
             return user_input
         
@@ -145,7 +144,7 @@ class Player:
 
     def __get_playable_cards(self, lead_color) -> list[str]:
         if not lead_color:
-            return self.cards.keys()
+            return list(self.cards.keys())
 
         lead_cards = [card.id for card in self.cards.values() if card.color_bound and card.color == lead_color]
         playable_cards = [key for key, card in self.cards.items() if not lead_cards or not card.color_bound or card.color == lead_color]
@@ -154,16 +153,16 @@ class Player:
 
     def get_state(self):
         with self.state_lock:
-            return self.state
+            return copy.deepcopy(self.state)
 
     def get_hand_cards(self, lead_color: str) -> List[HandCard]:
         with self.card_lock:
-            return [self.__get_hand_card(card, lead_color) for card in self.cards.values()]
+            return copy.deepcopy([self.__get_hand_card(card, lead_color) for card in self.cards.values()])
 
     def get_task(self):
         with self.task_lock:
             if self.current_task:
-                return TaskState(self.current_task.task_type, self.current_task.options)
+                return copy.deepcopy(TaskState(self.current_task.task_type, self.current_task.options))
 
     def complete_task(self, arg: str):
         with self.task_lock:
@@ -189,7 +188,7 @@ class Player:
 
 class PlayerTask:
 
-    def __init__(self, task_type: str, player: Player, options: List[str]):
+    def __init__(self, task_type: str, player: Player, options: list[str]):
         self.task_type = task_type
         self.player = player
         self.player.set_is_active(True)

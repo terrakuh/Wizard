@@ -7,6 +7,7 @@ from typing import List, Optional
 import random
 import logging
 import time
+import copy
 import threading
 import concurrent
 from contextlib import ExitStack
@@ -151,7 +152,7 @@ class Round:
 
     def get_state(self):
         with self.state_lock:
-            return self.state
+            return copy.deepcopy(self.state)
 
     def __update_state(self):
         with self.state_lock:

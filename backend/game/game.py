@@ -44,6 +44,5 @@ class Game(threading.Thread):
             self.curr_round.start_round()
 
             self.first_player = (self.first_player + 1) % len(self.players)
-            sleep(2)
 
             for p in self.players.values(): p.reset()
