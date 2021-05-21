@@ -6,6 +6,7 @@ from typing import List, Optional
 
 import random
 import logging
+import time
 import threading
 import concurrent
 from contextlib import ExitStack
@@ -74,6 +75,8 @@ class Round:
 
             self.past_trick = self.curr_trick.get_card_states()
             self.__update_state()
+
+            time.sleep(2)
 
             self.first_player  = self.players.index(winning_player)
 
