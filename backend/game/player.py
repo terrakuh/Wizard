@@ -51,6 +51,7 @@ class Player:
         self.cards = None
 
         self.current_task = None
+        self.is_active = False
 
         self.card_lock = threading.Lock()
         self.task_lock = threading.Lock()
@@ -78,6 +79,11 @@ class Player:
         with self.card_lock:
             self.cards[new_card.id] = new_card
             return self.cards.pop(card_to_replace_id)
+
+    def set_is_active(self, a: bool):
+        self.is_active = a
+        self.__update_state()
+
 
     def call_tricks(self, called_tricks: int, max_tricks: int, is_last: bool) -> int:
         logging.debug("Calling call_tricks for " + self.name)
@@ -165,7 +171,7 @@ class Player:
 
     def __update_state(self):
         with self.state_lock:
-            self.state = PlayerState(self.user, self.score, self.current_task is not None, self.tricks_called, self.tricks_made)
+            self.state = PlayerState(self.user, self.score, self.is_active, self.tricks_called, self.tricks_made)
 
     def __get_hand_card(self, card: Card, lead_color: str=None):
         playable_cards = self.__get_playable_cards(lead_color)
@@ -186,6 +192,7 @@ class PlayerTask:
     def __init__(self, task_type: str, player: Player, options: List[str]):
         self.task_type = task_type
         self.player = player
+        self.player.set_is_active(True)
 
         self.options = options
         self.selected = None
@@ -217,5 +224,6 @@ class PlayerTask:
             self.selected = user_input
 
             self.player.current_task = None
+            self.player.set_is_active(False)
 
             self.input_event.set()

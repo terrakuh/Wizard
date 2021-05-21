@@ -17,10 +17,14 @@ class GameInteraction:
         return round_o.get_state()
 
     def get_trick_state(self) -> TrickState:
+        print("Asked for player states")
         try:
             trick = self.__get_trick()
             return trick.get_state()
-        except:
+        except Exception as e:
+            print(str(e))
+            print("Using alternative")
+            print(self.game.players.values())
             return TrickState([player.get_state() for player in self.game.players.values()])
 
     def get_hand_cards(self, user: User) -> List[HandCard]:

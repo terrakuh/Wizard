@@ -40,6 +40,7 @@ class Game(threading.Thread):
 
             mode = 0 if self.settings.mode == "Standard" else 1
             self.curr_round = Round(mode=mode, players=list(self.players.values()), first_player=self.first_player, card_deck=self.card_deck, round_counter=self.round_counter)
+            print("ARE SAME IN GAME: " + str(list(self.players.values())[0] is self.curr_round.players[0]))
             self.curr_round.start_round()
 
             self.first_player = (self.first_player + 1) % len(self.players)

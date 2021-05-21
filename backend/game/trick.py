@@ -98,6 +98,7 @@ class Trick:
         return after_effect
 
     def get_state(self):
+        self.__update_player_states()
         with self.state_lock:
             return self.state
 
@@ -116,6 +117,10 @@ class Trick:
             turn = self.players[self.curr_player].user
             cards = self.get_card_states()
             self.state = TrickState(players, lead_color, lead_card, trick_number, turn, cards)
+
+    def __update_player_states(self):
+        with self.state_lock:
+            self.state.players_states = [player.get_state() for player in self.players]
 
     def get_card_states(self):
         return [TrickCard(card.id, player.user, (player == self.get_current_winner())) for card, player in zip(self.card_stack_by_player.values(), self.card_stack_by_card.values())]
