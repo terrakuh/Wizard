@@ -81,10 +81,8 @@ class Player:
             return self.cards.pop(card_to_replace_id)
 
     def set_is_active(self, a: bool):
-        print("Canging from " + str(self.is_active) + " to " + str(a))
         self.is_active = a
         self.__update_state()
-        print("Now we have: " + str(self.is_active))
 
 
     def call_tricks(self, called_tricks: int, max_tricks: int, is_last: bool) -> int:
@@ -156,7 +154,6 @@ class Player:
 
     def get_state(self):
         with self.state_lock:
-            print(self.state.is_active)
             return self.state
 
     def get_hand_cards(self, lead_color: str) -> List[HandCard]:
@@ -174,7 +171,6 @@ class Player:
 
     def __update_state(self):
         with self.state_lock:
-            print("at creation: ", str(self.is_active))
             self.state = PlayerState(self.user, self.score, self.is_active, self.tricks_called, self.tricks_made)
 
     def __get_hand_card(self, card: Card, lead_color: str=None):
