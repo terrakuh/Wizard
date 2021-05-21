@@ -35,7 +35,6 @@ class Round:
         self.trump_card = random.choice(unhanded_cards)
         self.trump_color = None if not self.trump_card.color_bound else self.trump_card.color
 
-        print("Trump is: " + str(self.trump_card) + " - " + str(self.trump_color))
         logging.info("Trump is: " + str(self.trump_card) + " - " + str(self.trump_color))
 
         self.state_lock = threading.Lock()
@@ -65,11 +64,10 @@ class Round:
         logging.info("Starting round " + str(self.round_number))
         self.__init_trump()
 
-        print("Curr first player is: " + str(self.first_player) + " from: " + str(self.players))
         self.__get_estimations()
         
         for i in range(1, self.round_number+1):
-            print("Curr first player is: " + str(self.first_player) + " from: " + str(self.players))
+            logging.info("Curr first player is: " + str(self.first_player) + " from: " + str(self.players))
             self.curr_trick = Trick(mode=self.game_mode, players=self.players, first_player=self.first_player, trump_color=self.trump_color, trick_number=i)
             
             winning_player = self.curr_trick.do_trick()

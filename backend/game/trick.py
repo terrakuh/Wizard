@@ -53,7 +53,6 @@ class Trick:
         for _ in range(len(self.players)):
             self.__play_card()
 
-        print("Returning curr winner: " + str(self.get_current_winner()))
         return self.get_current_winner()
 
     def __play_card(self):

@@ -219,7 +219,7 @@ class PlayerTask:
             if user_input not in self.options:
                 raise Exception("Invalid value")
 
-            print("Receiving input: " + str(user_input))
+            logging.info("Receiving input: " + str(user_input))
             self.selected = user_input
 
             self.player.current_task = None
