@@ -106,7 +106,12 @@ class Database:
 		def func():
 			with self._db:
 				appointments: list[Appointment] = []
-				for appointment in self._db.execute("SELECT id, start FROM appointment WHERE start>datetime('now', '-1 hour')"):
+				for appointment in self._db.execute("""
+					SELECT id, start
+					FROM appointment
+					WHERE start>datetime('now', '-1 hour')
+					ORDER BY start ASC
+				"""):
 					users: list[UserType] = []
 					for user in self._db.execute("""
 						SELECT user.id, user.name
