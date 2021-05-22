@@ -1,20 +1,21 @@
 import { DialogContentText, Slider } from "@material-ui/core"
 import { useMemo, useState } from "react"
-import { RoundState, TrickState } from "../../types"
+import { PlayerState, RoundState, TrickState } from "../../types"
 import DialogTemplate from "./DialogTemplate"
 
 interface Props {
 	roundState: RoundState
-	trickState: TrickState
+	trickState?: TrickState | null
+	playerStates: PlayerState[]
 	options: string[]
 }
 
 export default function TrickCalling(props: Props) {
 	const [call, setCall] = useState(0)
 	const info = useMemo(() => ({
-		called: props.trickState.playerStates.reduce((prev, curr) => prev + (curr.tricksCalled ?? 0), 0),
-		playersLeft: props.trickState.playerStates.reduce((prev, curr) => prev + (curr.tricksCalled == null ? 1 : 0), 0)
-	}), [props.trickState])
+		called: props.playerStates.reduce((prev, curr) => prev + (curr.tricksCalled ?? 0), 0),
+		playersLeft: props.playerStates.reduce((prev, curr) => prev + (curr.tricksCalled == null ? 1 : 0), 0)
+	}), [props.playerStates])
 
 	return (
 		<DialogTemplate

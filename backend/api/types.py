@@ -33,11 +33,9 @@ class PlayedCard(ObjectType):
 
 
 class TrickState(ObjectType):
-	player_states = NonNull(List(NonNull(PlayerState)))
 	lead_color = String()
 	lead_card = Field(PlayedCard)
 	round = Int()
-	turn = Field(User)
 	deck = List(NonNull(PlayedCard))
 
 
@@ -51,7 +49,7 @@ class RoundState(ObjectType):
 	trump_color = String()
 	trump_card = NonNull(String)
 	round = NonNull(Int)
-	past_trick = List(NonNull(PlayedCard))
+	past_trick = Field(TrickState)
 
 
 class RequiredAction(ObjectType):
@@ -61,7 +59,8 @@ class RequiredAction(ObjectType):
 
 class GameInfo(ObjectType):
 	round_state = NonNull(RoundState)
-	trick_state = NonNull(TrickState)
+	trick_state = Field(TrickState)
+	player_states = NonNull(List(NonNull(PlayerState)))
 	hand = NonNull(List(NonNull(PlayableCard)))
 
 

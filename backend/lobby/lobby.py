@@ -4,8 +4,8 @@ from datetime import datetime
 from copy import deepcopy
 
 from game.game import Game, Settings
-from game.game_interaction import GameInteraction
 from game.player import User
+from game.game_history import GameHistory
 
 
 class Lobby:
@@ -71,8 +71,8 @@ class Lobby:
 				raise Exception("game not started")
 			return self._game
 
-	def get_game_interaction(self) -> GameInteraction:
+	def get_game_interaction(self) -> GameHistory:
 		with self._lock:
 			if self._game is None:
 				raise Exception("game not started")
-			return GameInteraction(self._game)
+			return self._game.history

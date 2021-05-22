@@ -28,7 +28,7 @@ export interface RoundState {
 	trumpColor: string | null
 	trumpCard: string | null
 	round: number
-	pastTrick: PlayedCard[] | null
+	pastTrick: TrickState | null
 }
 
 export interface PlayedCard {
@@ -38,11 +38,9 @@ export interface PlayedCard {
 }
 
 export interface TrickState {
-	playerStates: PlayerState[]
 	leadColor: string | null
 	leadCard: PlayedCard | null
 	round: number | null
-	turn: User | null
 	deck: PlayedCard[] | null
 }
 
@@ -60,7 +58,8 @@ export interface RequiredAction {
 export interface GameInfo {
 	hand: PlayableCard[]
 	roundState: RoundState
-	trickState: TrickState
+	trickState: TrickState | null
+	playerStates: PlayerState[]
 }
 
 export interface Appointment {

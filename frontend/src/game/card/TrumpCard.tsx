@@ -6,7 +6,7 @@ interface Props {
 	trumpCard: string | null
 	trumpColor: string | null
 	leadCard: string | null
-	leadColor: string | null
+	leadColor: string | null | undefined
 }
 
 export default function PlayedCard(props: Props) {

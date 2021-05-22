@@ -5,16 +5,16 @@ from graphene.types.field import Field
 from api.decorators import smart_api, Response
 from graphene import ObjectType, Boolean, NonNull, String, ResolveInfo, Int, ID, List
 from graphql import GraphQLError
-from .types import Appointment, User as UserType, PlayableCard
+
+from .types import Appointment, User as UserType
 from database import Database
 from fastapi import Request
 
 from lobby.manager import Manager
 from lobby.lobby import Lobby
 
-from game.player import Player, User
-from game.game_interaction import GameInteraction
-
+from game.player import User
+from game.game import Game
 from .graphene_parser import *
 
 
@@ -93,8 +93,8 @@ class Mutation(ObjectType):
 	complete_action = NonNull(Boolean, option=NonNull(String))
 
 	@smart_api()
-	def resolve_complete_action(root, info: ResolveInfo, user: User, option: str, game_i: GameInteraction):
-		game_i.complete_action(option, user)
+	def resolve_complete_action(root, info: ResolveInfo, user: User, option: str, game: Game):
+		game.complete_action(option, user)
 		return True
 
 

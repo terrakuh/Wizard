@@ -1,15 +1,16 @@
 import { Paper, Table, TableBody, TableCell, TableContainer, TableRow } from "@material-ui/core"
 import { useMemo } from "react"
-import { RoundState, TrickState } from "../types"
+import { PlayerState, RoundState, TrickState } from "../types"
 
 interface Props {
-	trickState: TrickState
+	trickState?: TrickState | null
+	playerStates: PlayerState[]
 	roundState: RoundState
 	className?: string
 }
 
 export default function ScoreBoard(props: Props) {
-	const winningPlayer = useMemo(() => props.trickState.deck?.find(card => card.isWinning)?.player, [props.trickState])
+	const winningPlayer = useMemo(() => props.trickState?.deck?.find(card => card.isWinning)?.player, [props.trickState])
 
 	return (
 		<div className={props.className}>
@@ -17,7 +18,7 @@ export default function ScoreBoard(props: Props) {
 				<Table>
 					<TableBody>
 						{
-							props.trickState.playerStates.map(state =>
+							props.playerStates.map(state =>
 								<TableRow
 									key={state.player.id}
 									selected={state.isActive /* state.player.id === props.trickState.turn?.id */}>
@@ -38,9 +39,9 @@ export default function ScoreBoard(props: Props) {
 							<TableCell></TableCell>
 							<TableCell>
 								Runde: {props.roundState.round}<br />
-								{props.trickState.round == null ? null : `Stich: ${props.trickState.round}`}
+								{props.trickState?.round == null ? null : `Stich: ${props.trickState?.round}`}
 							</TableCell>
-							<TableCell>{props.trickState.playerStates.reduce((prev, curr) => prev + (curr.tricksMade ?? 0), 0)} / {props.trickState.playerStates.reduce((prev, curr) => prev + (curr.tricksCalled ?? 0), 0)}</TableCell>
+							<TableCell>{props.playerStates.reduce((prev, curr) => prev + (curr.tricksMade ?? 0), 0)} / {props.playerStates.reduce((prev, curr) => prev + (curr.tricksCalled ?? 0), 0)}</TableCell>
 						</TableRow>
 					</TableBody>
 				</Table>

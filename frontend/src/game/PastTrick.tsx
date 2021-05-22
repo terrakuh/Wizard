@@ -7,7 +7,7 @@ import { History as HistoryIcon } from "@material-ui/icons"
 
 interface Props {
 	className?: string
-	pastTrick: PlayedCard[] | null
+	pastTrick: PlayedCard[] | null | undefined
 	boundary: HTMLElement | null
 }
 

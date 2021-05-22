@@ -28,7 +28,7 @@ type RoundState {
 	trumpColor: String
 	trumpCard: String
 	round: Int!
-	pastTrick: [PlayedCard!]
+	pastTrick: [TrickState!]
 }
 
 type PlayedCard {
@@ -38,11 +38,9 @@ type PlayedCard {
 }
 
 type TrickState {
-	playerStates: [PlayerState!]!
 	leadColor: String
 	leadCard: PlayedCard
 	round: Int
-	turn: User
 	deck: [PlayedCard!]
 }
 
@@ -60,6 +58,7 @@ type RequiredAction {
 type GameInfo {
 	roundState: RoundState!
 	trickState: TrickState!
+	playerStates: [PlayerState!]!
 	hand: [PlayableCard!]!
 }
 

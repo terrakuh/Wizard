@@ -1,5 +1,3 @@
-from game.game_interaction import GameInteraction
-from game.player import Player
 from datetime import datetime, timedelta
 import functools
 from threading import Lock
@@ -12,9 +10,9 @@ from api.security import UserAuthentication
 from inspect import getfullargspec, iscoroutine
 from lobby.manager import Manager
 from lobby.lobby import Lobby
-from game.round import Round
-from game.trick import Trick
+
 from game.player import User
+from game.game_history import GameHistory
 
 
 class Response:
@@ -104,13 +102,13 @@ def smart_api(access_control: bool = True, cache: Cache = None):
 				elif value is Lobby:
 					assert_lobby()
 					additional[key] = lobby
-				elif value is Optional[GameInteraction]:
+				elif value is Optional[GameHistory]:
 					try:
 						assert_lobby()
 						additional[key] = lobby.get_game_interaction()
 					except:
 						additional[key] = None
-				elif value is GameInteraction:
+				elif value is GameHistory:
 					assert_lobby()
 					additional[key] = lobby.get_game_interaction()
 			# execute

@@ -1,4 +1,4 @@
-import { RequiredAction, RoundState, TrickState } from "../../types"
+import { PlayerState, RequiredAction, RoundState, TrickState } from "../../types"
 import TrickCalling from "./TrickCalling"
 import Selection from "./Selection"
 import { useNotification } from "../../settings"
@@ -8,7 +8,8 @@ interface Props {
 	info: {
 		requiredAction: RequiredAction
 		roundState: RoundState
-		trickState: TrickState
+		trickState?: TrickState | null
+		playerStates: PlayerState[]
 	} | null
 }
 
@@ -29,6 +30,7 @@ export default function Action(props: Props) {
 				<TrickCalling
 					roundState={props.info.roundState}
 					trickState={props.info.trickState}
+					playerStates={props.info.playerStates}
 					options={props.info.requiredAction.options} />
 			)
 		} else if (reqAction.startsWith("choose_")) {
