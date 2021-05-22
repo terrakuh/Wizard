@@ -35,7 +35,10 @@ export default function Navigation() {
 					{
 						DRAWER_ACTIONS.map((action, index) =>
 							action == null ? <Divider key={index} /> :
-								<ListItem button key={index} onClick={() => history.push(action.location)}>
+								<ListItem button key={index} onClick={() => {
+									history.push(action.location)
+									setOpenDrawer(false)
+								}}>
 									<ListItemIcon>{action.icon}</ListItemIcon>
 									<ListItemText primary={action.title} />
 								</ListItem>

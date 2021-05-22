@@ -7,6 +7,7 @@ import { useState } from "react"
 import { Appointment } from "../types"
 import { useWhoami } from "../util"
 import NewAppointment from "./NewAppointment"
+import { toPrettyDate } from "./util"
 
 export default function Appointments() {
 	const classes = useStyles()
@@ -26,21 +27,22 @@ export default function Appointments() {
 							<ListItemText
 								primary={appointment.participants.map(p => p.name).join(", ")}
 								primaryTypographyProps={{ color: "textPrimary" }}
-								secondary={`${appointment.start} ${appointment.end == null ? "" : "- " + appointment.end}`} />
+								secondary={toPrettyDate(appointment.start)} />
 
 							<ListItemSecondaryAction>
-								<IconButton onClick={async () => {
-									try {
-										if (appointment.participants.find(p => p.id === user?.id)) {
-											await leaveAppointment({ variables: { id: appointment.id } })
-										} else {
-											await joinAppointment({ variables: { id: appointment.id } })
+								<IconButton
+									onClick={async () => {
+										try {
+											if (appointment.participants.find(p => p.id === user?.id)) {
+												await leaveAppointment({ variables: { id: appointment.id } })
+											} else {
+												await joinAppointment({ variables: { id: appointment.id } })
+											}
+										} catch (err) {
+											console.error(err)
+											enqueueSnackbar("Aktion konnte nicht durchgeführt werden.", { variant: "error" })
 										}
-									} catch (err) {
-										console.error(err)
-										enqueueSnackbar("Aktion konnte nicht durchgeführt werden.", { variant: "error" })
-									}
-								}}>
+									}}>
 									{
 										appointment.participants.find(p => p.id === user?.id) ?
 											<PersonAddDisabledIcon /> :

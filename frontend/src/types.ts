@@ -65,6 +65,5 @@ export interface GameInfo {
 export interface Appointment {
 	id: number
 	start: string
-	end: string | null
 	participants: User[]
 }

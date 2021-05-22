@@ -25,7 +25,6 @@ class Database:
 		self._db = connect(filename)
 		with self._db:
 			self._db.executescript(SCHEMA)
-			self._db.execute("DELETE FROM session WHERE expires<=DATETIME('now')")
 
 	def __execute(self, sql: str, parameters: Iterable[Any] = ...):
 		with self._db:
@@ -107,7 +106,12 @@ class Database:
 		def func():
 			with self._db:
 				appointments: list[Appointment] = []
-				for appointment in self._db.execute("SELECT id, start FROM appointment WHERE start>datetime('now', '-1 hour')"):
+				for appointment in self._db.execute("""
+					SELECT id, start
+					FROM appointment
+					WHERE start>datetime('now', '-1 hour')
+					ORDER BY start ASC
+				"""):
 					users: list[UserType] = []
 					for user in self._db.execute("""
 						SELECT user.id, user.name
@@ -144,12 +148,11 @@ class Database:
 				""", (name, id))
 				self._db.execute("""
 					DELETE FROM appointment
-					WHERE NOT EXISTS (
-						SELECT 1
+					WHERE id NOT IN (
+						SELECT DISTINCT appointment
 						FROM user_appointment
-						WHERE appointment=?
 					)
-				""", (id,))
+				""")
 		await get_event_loop().run_in_executor(self._pool, func)
 
 	async def get_appointment(self, id: int) -> Appointment:
@@ -166,6 +169,10 @@ class Database:
 					appointment.participants.append(UserType(id=user[0], name=user[1]))
 				return appointment
 		return await get_event_loop().run_in_executor(self._pool, func)
+
+	async def commit_game_history(self) -> None:
+		# TODO
+		pass
 
 
 if __name__ == "__main__":

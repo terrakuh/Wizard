@@ -1,6 +1,5 @@
 import { makeStyles, Typography } from "@material-ui/core"
 import { CSSProperties } from "@material-ui/styles"
-import { useMemo } from "react"
 import { PlayedCard as PlayedCardSchema } from "../../types"
 import { cardStyle } from "./styles"
 

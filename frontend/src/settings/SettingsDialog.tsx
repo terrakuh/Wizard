@@ -1,10 +1,11 @@
 import React from "react"
 import { AppBar, Button, Dialog, DialogContent, IconButton, makeStyles, Paper, Slide, Tab, Tabs, Toolbar, Typography } from "@material-ui/core"
 import { TransitionProps } from "@material-ui/core/transitions"
-import { Close as CloseIcon, Notifications as NotificationsIcon, Save as SaveIcon } from "@material-ui/icons"
+import { Close as CloseIcon, Message as MessageIcon, Notifications as NotificationsIcon, Save as SaveIcon } from "@material-ui/icons"
 import SwipeableViews from "react-swipeable-views"
 import { useSettings } from "./SettingsProvider"
 import NotificationSettings from "./NotificationSettings"
+import CommunicationSettings from "./CommunicationSettings"
 
 interface Props {
 	open: boolean
@@ -62,6 +63,7 @@ export default function SettingsDialog(props: Props) {
 						onChange={(_, newIndex) => setIndex(newIndex)}
 						value={index}>
 						<Tab label={<NotificationsIcon />} />
+						<Tab label={<MessageIcon />} />
 					</Tabs>
 				</Paper>
 
@@ -70,6 +72,12 @@ export default function SettingsDialog(props: Props) {
 						<NotificationSettings
 							onChange={notifications => setNewSettings({ ...newSettings, notifications })}
 							settings={newSettings.notifications} />
+					</div>
+
+					<div hidden={index !== 1}>
+						<CommunicationSettings
+							onChange={messages => setNewSettings({ ...newSettings, messages })}
+							settings={newSettings.messages} />
 					</div>
 				</SwipeableViews>
 			</DialogContent>

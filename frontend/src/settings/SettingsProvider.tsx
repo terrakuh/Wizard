@@ -14,6 +14,12 @@ const initialSettings = deepMerge<Settings>({
 		audioTrack: "Klang 1",
 		desktop: true,
 		playerTurn: true
+	},
+	messages: {
+		signal: {
+			enabled: false,
+			number: ""
+		}
 	}
 }, JSON.parse(localStorage.getItem("settings") || "{}"))
 

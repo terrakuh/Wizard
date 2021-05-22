@@ -3,11 +3,11 @@ import { MuiPickersUtilsProvider, KeyboardDateTimePicker } from "@material-ui/pi
 import { useState } from "react"
 import DateFnsUtils from "@date-io/date-fns"
 import deLocale from "date-fns/locale/de"
-import { format } from "date-fns"
 import gql from "graphql-tag"
 import { useMutation } from "@apollo/client"
 import { useSnackbar } from "notistack"
 import { Loading } from "../util"
+import { fromDate } from "./util"
 
 interface Props {
 	open: boolean
@@ -46,7 +46,7 @@ export default function NewAppointment(props: Props) {
 					<Button
 						onClick={async () => {
 							try {
-								await createAppointment({ variables: { start: format(date, "yyyy-MM-dd'T'HH:mm:00") } })
+								await createAppointment({ variables: { start: fromDate(date) } })
 								props.onClose()
 							} catch (err) {
 								console.error(err)
