@@ -1,8 +1,8 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Optional
 
 from graphene.types.field import Field
-from api.decorators import smart_api, Response
+from api.decorators import Cookie, smart_api, Response
 from graphene import ObjectType, Boolean, NonNull, String, ResolveInfo, Int, ID, List
 from graphql import GraphQLError
 from .types import Appointment, User as UserType, PlayableCard
@@ -21,7 +21,7 @@ from .graphene_parser import *
 class Mutation(ObjectType):
 	# user management
 	register = NonNull(Boolean, name=NonNull(String), password_hash=NonNull(String), salt=NonNull(String), hash_type=NonNull(String), token=NonNull(String))
-	login = NonNull(UserType, name=NonNull(String), password_hash=NonNull(String))
+	login = NonNull(UserType, name=NonNull(String), password_hash=NonNull(String), stay_logged_in=NonNull(Boolean))
 	logout = NonNull(Boolean)
 
 	@smart_api(access_control=False)
@@ -35,10 +35,11 @@ class Mutation(ObjectType):
 		return True
 
 	@smart_api(access_control=False)
-	async def resolve_login(root, info: ResolveInfo, name: str, password_hash: str, db: Database, response: Response):
+	async def resolve_login(root, info: ResolveInfo, name: str, password_hash: str, db: Database, response: Response, stay_logged_in: bool = False):
 		try:
-			cookie = await db.login(name, password_hash)
-			response.cookies["login"] = cookie
+			days = 31 if stay_logged_in else 1
+			cookie = await db.login(name, password_hash, expires_days=days)
+			response.cookies["login"] = Cookie(cookie, int(timedelta(days=days).total_seconds()) if stay_logged_in else None)
 		except:
 			raise GraphQLError(f"User '{name}' does not exist.")
 		return UserType(id=0, name=name)

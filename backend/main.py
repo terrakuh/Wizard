@@ -10,7 +10,6 @@ from api.decorators import Response
 from graphql.execution.executors.asyncio import AsyncioExecutor
 from lobby.manager import Manager
 from pathlib import Path
-from datetime import timedelta
 from argparse import ArgumentParser
 from os import chdir
 
@@ -43,7 +42,7 @@ async def handle_gql(request: Request):
 		if value is None:
 			real_response.delete_cookie(key)
 		else:
-			real_response.set_cookie(key, value, max_age=timedelta(days=365).total_seconds())
+			real_response.set_cookie(key, value.value, max_age=value.max_age)
 	return real_response
 
 

@@ -17,9 +17,15 @@ from game.trick import Trick
 from game.player import User
 
 
+class Cookie:
+	def __init__(self, value: str, max_age: Optional[int] = None) -> None:
+		self.value = value
+		self.max_age = max_age
+
+
 class Response:
 	def __init__(self):
-		self.cookies: Dict[str, Union[None, str]] = {}
+		self.cookies: Dict[str, Union[None, Cookie]] = {}
 
 
 class State:

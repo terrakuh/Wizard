@@ -94,7 +94,7 @@ type Query {
 type Mutation {
 	# user management
 	register(name: String!, passwordHash: String!, salt: String!, hashType: String!, token: String!): Boolean!
-	login(name: String!, passwordHash: String!): User
+	login(name: String!, passwordHash: String!, stayLoggedIn: Boolean! = false): User
 	logout: Boolean!
 
 	# lobby management

@@ -6,6 +6,7 @@
 - Parallel juggler action
 - Winning player to scoreboard
 - Appointments
+- Stay logged in option
 
 ### Fixed
 - Missing notification
