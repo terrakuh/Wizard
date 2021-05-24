@@ -5,7 +5,7 @@
 - Dockerfile
 - Parallel juggler action
 - Winning player to scoreboard
-- Appointments
+- Appointments/calendar
 - Stay logged in option
 
 ### Fixed

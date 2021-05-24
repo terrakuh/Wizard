@@ -63,9 +63,14 @@ type GameInfo {
 	hand: [PlayableCard!]!
 }
 
+########################################
+################# MISC #################
+########################################
+
 type Appointment {
 	id: ID!
 	start: String!
+	end: String!
 	participants: [User!]!
 }
 
@@ -108,9 +113,9 @@ type Mutation {
 	completeAction(option: String!): Boolean!
 
 	# misc
-	joinAppointment(id: ID!) Appointment!
-	leaveAppointment(id: ID!) Appointment
-	createAppointment(start: String!) Appointment!
+	joinAppointment(id: ID!) Boolean!
+	leaveAppointment(id: ID!) Boolean!
+	createAppointment(start: String!, end: String!) Boolean!
 }
 
 schema {

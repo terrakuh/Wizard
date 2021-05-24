@@ -9,7 +9,7 @@ from concurrent.futures import ThreadPoolExecutor
 from typing import Any, Iterable
 from hashlib import new
 from base64 import b64encode
-from datetime import datetime
+from datetime import datetime, timezone
 
 
 with open(join(dirname(__file__), "schema.sql")) as f:
@@ -70,7 +70,7 @@ class Database:
 		password_hash = Database.__hash_key(password_hash, salt, hash_type)
 		await get_event_loop().run_in_executor(self._pool, self.__execute, """
 			INSERT INTO user(name, password, salt, hash_type)
-			VALUES(?, ?, ?, ?)
+			VALUES(?1, ?2, ?3, ?4)
 		""", (name, password_hash, salt, hash_type))
 
 	async def login(self, name: str, password_hash: str, expires_days: int = 31, cookie_length: int = 32) -> str:
@@ -80,7 +80,10 @@ class Database:
 				row = self._db.execute("SELECT id, salt, hash_type, password FROM user WHERE name=?", (name,)).fetchone()
 				if Database.__hash_key(password_hash, row[1], row[2]) != row[3]:
 					raise Exception()
-				self._db.execute("INSERT INTO session(user, cookie, expires) VALUES(?, ?, DATETIME('now', ?))", (row[0], cookie, "{} days".format(expires_days)))
+				self._db.execute("""
+					INSERT INTO session(user, cookie, expires)
+					VALUES(?1, ?2, DATETIME('now', ?3))
+				""", (row[0], cookie, "{} days".format(expires_days)))
 		await get_event_loop().run_in_executor(self._pool, func)
 		return cookie
 
@@ -107,7 +110,7 @@ class Database:
 			with self._db:
 				appointments: list[Appointment] = []
 				for appointment in self._db.execute("""
-					SELECT id, start
+					SELECT id, STRFTIME('%Y-%m-%dT%H:%MZ', start), STRFTIME('%Y-%m-%dT%H:%MZ', end)
 					FROM appointment
 					WHERE start>datetime('now', '-1 hour')
 					ORDER BY start ASC
@@ -120,14 +123,16 @@ class Database:
 						WHERE user_appointment.appointment=?
 					""", (appointment[0],)):
 						users.append(UserType(id=user[0], name=user[1]))
-					appointments.append(Appointment(id=appointment[0], start=appointment[1], participants=users))
+					appointments.append(Appointment(id=appointment[0], start=appointment[1], end=appointment[2], participants=users))
 				return appointments
 		return await get_event_loop().run_in_executor(self._pool, func)
 
-	async def create_appointment(self, start: datetime) -> int:
+	async def create_appointment(self, start: datetime, end: datetime) -> int:
 		def func():
 			with self._db:
-				return self._db.execute("INSERT INTO appointment(start) VALUES(?)", (start,)).lastrowid
+				return self._db.execute("""
+					INSERT INTO appointment(start, end) VALUES(?1, ?2)
+				""", (start.astimezone(timezone.utc), end.astimezone(timezone.utc))).lastrowid
 		return await get_event_loop().run_in_executor(self._pool, func)
 
 	async def join_appointment(self, id: int, name: str) -> None:
@@ -135,7 +140,7 @@ class Database:
 			with self._db:
 				self._db.execute("""
 					INSERT INTO user_appointment(user, appointment)
-					VALUES((SELECT id FROM user WHERE name=?), ?)
+					VALUES((SELECT id FROM user WHERE name=?1), ?2)
 				""", (name, id))
 		await get_event_loop().run_in_executor(self._pool, func)
 
@@ -144,7 +149,7 @@ class Database:
 			with self._db:
 				self._db.execute("""
 					DELETE FROM user_appointment
-					WHERE user=(SELECT id FROM user WHERE name=?) AND appointment=?
+					WHERE user=(SELECT id FROM user WHERE name=?1) AND appointment=?2
 				""", (name, id))
 				self._db.execute("""
 					DELETE FROM appointment

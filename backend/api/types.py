@@ -68,4 +68,5 @@ class GameInfo(ObjectType):
 class Appointment(ObjectType):
 	id = NonNull(ID)
 	start = NonNull(String)
+	end = NonNull(String)
 	participants = NonNull(List(NonNull(User)))

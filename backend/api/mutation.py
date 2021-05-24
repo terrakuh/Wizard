@@ -100,25 +100,22 @@ class Mutation(ObjectType):
 
 
 	# misc
-	join_appointment = NonNull(Appointment, id=NonNull(ID))
-	leave_appointment = Field(Appointment, id=NonNull(ID))
-	create_appointment = NonNull(Appointment, start=NonNull(String))
+	join_appointment = NonNull(Boolean, id=NonNull(ID))
+	leave_appointment = NonNull(Boolean, id=NonNull(ID))
+	create_appointment = NonNull(Boolean, start=NonNull(String), end=NonNull(String))
 
 	@smart_api()
 	async def resolve_join_appointment(root, info: ResolveInfo, user: User, id: int, db: Database):
 		await db.join_appointment(id, user.name)
-		return await db.get_appointment(id)
+		return True
 
 	@smart_api()
 	async def resolve_leave_appointment(root, info: ResolveInfo, user: User, id: int, db: Database):
 		await db.leave_appointment(id, user.name)
-		try:
-			return await db.get_appointment(id)
-		except:
-			return None
+		return True
 
 	@smart_api()
-	async def resolve_create_appointment(root, info: ResolveInfo, user: User, start: str, db: Database):
-		id = await db.create_appointment(datetime.fromisoformat(start))
+	async def resolve_create_appointment(root, info: ResolveInfo, user: User, start: str, end: str, db: Database):
+		id = await db.create_appointment(datetime.fromisoformat(start), datetime.fromisoformat(end))
 		await db.join_appointment(id, user.name)
-		return await db.get_appointment(id)
+		return True

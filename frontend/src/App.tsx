@@ -8,8 +8,7 @@ import Lobby from "./lobby"
 import Game from "./game"
 import Deck from "./game/Deck"
 import { PlayedCard } from "./game/card"
-import Calendar from "./calendar/Calendar"
-import Appointments from "./appointments"
+import Calendar from "./calendar"
 import Navigation from "./Navigation"
 
 export default function App() {
@@ -43,8 +42,8 @@ export default function App() {
 						<Game />
 					</RequiresLogin>
 
-					<RequiresLogin path="/appointments">
-						<Appointments />
+					<RequiresLogin path="/calendar">
+						<Calendar />
 					</RequiresLogin>
 
 					<Route exact path="/test">
@@ -98,10 +97,6 @@ export default function App() {
 							}} />
 					</Route>
 
-					<Route path="/test2">
-						<Calendar date={new Date()} />
-					</Route>
-
 					<Route path="/"><Redirect to="/lobby" /></Route>
 				</Switch>
 			</div>
@@ -119,6 +114,7 @@ const useStyles = makeStyles(theme => ({
 	content: {
 		backgroundColor: theme.palette.background.default,
 		flexGrow: 1,
-		padding: theme.spacing(1)
+		padding: theme.spacing(1),
+		overflow: "hidden"
 	}
 }))

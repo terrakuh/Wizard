@@ -82,8 +82,8 @@ const DRAWER_ACTIONS = [
 		icon: <VideogameAssetIcon />
 	},
 	{
-		title: "Events",
-		location: "/appointments",
+		title: "Kalendar",
+		location: "/calendar",
 		icon: <EventIcon />
 	}
 ]
