@@ -1,17 +1,16 @@
-from datetime import date, timedelta, datetime
+from datetime import timedelta
 from typing import Optional
 
 from api.decorators import Cache, smart_api
-from graphene import ObjectType, Field, ID, String, NonNull, ResolveInfo, List, DateTime
+from graphene import ObjectType, Field, ID, String, NonNull, ResolveInfo, List
 from graphql import GraphQLError
 
-from .types import Appointment, GameInfo, Lobby as LobbyType, LoginInformation, PlayableCard, RequiredAction, RoundState, TrickState, User as UserType
+from .types import Appointment, GameInfo, Lobby as LobbyType, LoginInformation, RequiredAction, ResidentSleeper, User as UserType
 from database import Database
 
-from lobby.manager import Manager
 from lobby.lobby import Lobby
 
-from game.player import Player, User
+from game.player import User
 from game.game_interaction import GameInteraction
 from game.card_decks import CardDecks
 
@@ -31,14 +30,15 @@ class Query(ObjectType):
 		except:
 			raise GraphQLError(f"User '{name}' does not exist.")
 
-	@smart_api(cache=Cache(32, timedelta(minutes=30)))
+	# @smart_api(cache=Cache(32, timedelta(minutes=30)))
+	@smart_api()
 	async def resolve_user(root, info: ResolveInfo, id: ID, db: Database):
 		try:
 			return UserType(id=id, name=await db.get_username(id))
 		except:
 			raise GraphQLError(f"User #{id} does not exist.")
 
-	@smart_api(cache=Cache(32, timedelta(minutes=30)))
+	@smart_api()
 	async def resolve_whoami(root, info: ResolveInfo, user: User):
 		return graphene_parser.parse_user(user)
 
@@ -92,3 +92,11 @@ class Query(ObjectType):
 	@smart_api()
 	async def resolve_appointments(root, info: ResolveInfo, db: Database):
 		return await db.get_appointments()
+
+
+	# statistics
+	resident_sleeper = NonNull(ResidentSleeper)
+
+	@smart_api()
+	async def resolve_resident_sleeper(root, info: ResolveInfo, db: Database, user: User):
+		return ResidentSleeper(averages=await db.get_action_averages(user.name))

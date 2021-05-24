@@ -16,6 +16,10 @@ type Lobby {
 	canStart: Boolean
 }
 
+########################################
+############## GAME LOGIC ##############
+########################################
+
 type PlayerState {
 	player: User!
 	score: Int!
@@ -74,6 +78,19 @@ type Appointment {
 	participants: [User!]!
 }
 
+########################################
+############## STATISTICS ##############
+########################################
+
+type ActionDuration {
+	type: String!
+	duration: Float!
+}
+
+type ResidentSleeper {
+	averages: [ActionDuration!]!
+}
+
 type Query {
 	# user management
 	loginInformation(name: String!): LoginInformation
@@ -90,6 +107,9 @@ type Query {
 
 	# misc
 	appointments: [Appointment!]!
+
+	# statistics
+	residentSleeper: ResidentSleeper!
 }
 
 ########################################

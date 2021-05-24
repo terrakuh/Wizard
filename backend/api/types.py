@@ -1,4 +1,4 @@
-from graphene import ObjectType, ID, String, NonNull, List, Int, Boolean, Field
+from graphene import ObjectType, ID, String, NonNull, List, Int, Boolean, Field, Float
 
 
 class User(ObjectType):
@@ -70,3 +70,12 @@ class Appointment(ObjectType):
 	start = NonNull(String)
 	end = NonNull(String)
 	participants = NonNull(List(NonNull(User)))
+
+
+class ActionDuration(ObjectType):
+	type = NonNull(String)
+	duration = NonNull(Float)
+
+
+class ResidentSleeper(ObjectType):
+	averages = NonNull(List(NonNull(ActionDuration)))

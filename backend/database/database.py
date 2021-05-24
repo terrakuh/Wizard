@@ -1,4 +1,4 @@
-from api.types import LoginInformation, Appointment, User as UserType
+from api.types import LoginInformation, Appointment, User as UserType, ActionDuration
 from game.player import User
 from sqlite3 import connect
 import random
@@ -160,24 +160,66 @@ class Database:
 				""")
 		await get_event_loop().run_in_executor(self._pool, func)
 
-	async def get_appointment(self, id: int) -> Appointment:
+	async def commit_game_history(self) -> None:
 		def func():
 			with self._db:
-				appointment = Appointment(id=id, participants=[])
-				appointment.start = self._db.execute("SELECT start FROM appointment WHERE id=?", (id,)).fetchone()[0]
-				for user in self._db.execute("""
-					SELECT user.id, user.name
-					FROM user
-					JOIN user_appointment ON user_appointment.user=user.id
-					WHERE user_appointment.appointment=?
-				""", (id,)):
-					appointment.participants.append(UserType(id=user[0], name=user[1]))
-				return appointment
-		return await get_event_loop().run_in_executor(self._pool, func)
+				# TODO insert cards
+				game_id = self._db.execute("INSERT INTO game(start, end) VALUES(?1, ?2)", (None, None)).lastrowid
+				for i in range(0):
+					round_id = self._db.execute("""
+						INERT INTO round(index, trump)
+						VALUES(?1, (SELECT id FROM card WHERE name=?2))
+					""", (None, None)).lastrowid
+					# pre round things like users and their actions
+					for i in range(0):
+						round_user_id = self._db.execute("""
+							INSERT INTO round_user(score, tricks_made, tricks_called, round, user)
+							VALUES(?1, ?2, ?3, ?4, ?5)
+						""", (None, None, None, round_id, None)).lastrowid
+						for i in range(0):
+							self._db.execute("""
+								INSERT INTO round_action(index, option, type, duration_s, round_user)
+								VALUES(?1, ?2, ?3, ?4, ?5)
+							""", (None, None, None, None, round_user_id))
+					# all trick rounds
+					for i in range(0):
+						trick_id = self._db.execute("""
+							INSERT INTO trick(index, round, winner)
+							VALUES(?1, ?2, (SELECT id FROM round_user WHERE round=?2 AND user=?3))
+						""", (None, round_id, None))
+						for i in range(0):
+							self._db.execute("""
+								INSERT INTO trick_action(round_user, trick, index, type, duration_s, card)
+								VALUES(
+									(SELECT id FROM round_user WHERE round=?1 AND user=?2),
+									?3, ?4, ?5, ?6,
+									(SELECT id FROM card WHERE name=?7)
+								)
+							""", (round_id, None, trick_id, None, None, None, None))
+		await get_event_loop().run_in_executor(self._pool, func)
 
-	async def commit_game_history(self) -> None:
-		# TODO
-		pass
+	async def get_action_averages(self, name: str) -> list[ActionDuration]:
+		def func() -> list[ActionDuration]:
+			durations = []
+			with self._db:
+				for row in self._db.execute("""
+					WITH tmp AS (
+						SELECT type, duration_s, round_user
+						FROM round_action
+						UNION
+						SELECT type, duration_s, round_user
+						FROM trick_action
+					)
+					SELECT tmp.type, AVG(tmp.duration_s)
+					FROM tmp
+					JOIN round_user ON round_user.id=tmp.round_user
+					JOIN user ON user.id=round_user.user
+					WHERE user.name=?1
+					GROUP BY tmp.type
+				""", (name,)):
+					durations.append(ActionDuration(type=row[0], duration=row[1]))
+			return durations
+		return await get_event_loop().run_in_executor(self._pool, func)
 
 
 if __name__ == "__main__":

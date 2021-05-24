@@ -45,10 +45,11 @@ export default function Hand(props: Props) {
 	)
 }
 
-const useStyles = makeStyles({
+const useStyles = makeStyles(theme => ({
 	root: {
 		position: "relative",
 		height: 300,
-		overflow: "hidden"
+		overflow: "hidden",
+		bottom: -theme.spacing(1)
 	}
-})
+}))
