@@ -7,6 +7,7 @@
 - Winning player to scoreboard
 - Appointments/calendar
 - Stay logged in option
+- Manual sorting of own hand cards
 
 ### Fixed
 - Missing notification

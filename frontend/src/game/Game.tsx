@@ -12,11 +12,18 @@ import Hand from "./Hand"
 import ScoreBoard from "./ScoreBoard"
 import TrumpCard from "./card/TrumpCard"
 import PastTrick from "./PastTrick"
+import usePlayCard from "./card/usePlayCard"
 
 export default function Game() {
 	const classes = useStyles()
 	const { data } = useQuery<Info>(GET_INFO, { pollInterval: 1000 })
-	const [, drop] = useDrop({ accept: "card" })
+	const playCard = usePlayCard()
+	const [, drop] = useDrop({
+		accept: "card",
+		drop(item: any) {
+			playCard(item.id)
+		}
+	})
 	const [rootRef, setRootRef] = useState<HTMLDivElement | null>(null)
 
 	// prevents redraws

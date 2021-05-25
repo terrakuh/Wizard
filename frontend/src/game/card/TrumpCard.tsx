@@ -9,7 +9,7 @@ interface Props {
 	leadColor: string | null
 }
 
-export default function PlayedCard(props: Props) {
+export default function TrumpCard(props: Props) {
 	const classes = useStyles()
 
 	return (
