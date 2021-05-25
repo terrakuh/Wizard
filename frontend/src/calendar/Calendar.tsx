@@ -47,7 +47,7 @@ export default function Calendar() {
 						}
 					}
 				}}
-				onDoubleClickEvent={async (appointment) => {
+				onSelectEvent={async (appointment) => {
 					try {
 						await toggleAppointment(appointment)
 					} catch (err) {
