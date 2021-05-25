@@ -2,7 +2,7 @@ import { Calendar as BigCalendar, dateFnsLocalizer } from "react-big-calendar"
 import { format, parse, startOfWeek, getDay, parseISO } from "date-fns"
 import { de, enUS } from "date-fns/locale"
 import "react-big-calendar/lib/css/react-big-calendar.css"
-import { makeStyles } from "@material-ui/core"
+import { darken, makeStyles } from "@material-ui/core"
 import useAppointmentAssistant from "./useAppointmentAssistant"
 import { useSnackbar } from "notistack"
 import { Loading } from "../util"
@@ -32,6 +32,7 @@ export default function Calendar() {
 
 			<BigCalendar
 				localizer={localizer}
+				className={classes.calendar}
 				culture={navigator.language in locales ? navigator.language : "en-US"}
 				views={["week", "day", "agenda"]}
 				defaultView="week"
@@ -62,8 +63,40 @@ export default function Calendar() {
 	)
 }
 
-const useStyles = makeStyles({
+const useStyles = makeStyles(theme => ({
 	root: {
 		height: "100%"
+	},
+	calendar: {
+		"& div, table, tr, th, td": {
+			borderColor: `${theme.palette.divider} !important`
+		},
+		"& .rbc-today": {
+			backgroundColor: theme.palette.background.paper
+		},
+		"& .rbc-event": {
+			backgroundColor: theme.palette.primary.main,
+			borderColor: darken(theme.palette.primary.main, 0.3)
+		},
+		"& span, td, th": {
+			color: theme.palette.text.primary
+		},
+		"& .rbc-current-time-indicator": {
+			backgroundColor: theme.palette.secondary.main,
+			height: 4
+		},
+		"& .rbc-btn-group > *": {
+			borderColor: theme.palette.divider,
+			color: theme.palette.text.secondary,
+			"&:hover": {
+				borderColor: theme.palette.divider,
+				backgroundColor: theme.palette.action.hover,
+				color: theme.palette.text.secondary
+			}
+		},
+		"& .rbc-active": {
+			backgroundColor: theme.palette.action.active,
+			color: theme.palette.primary.contrastText
+		}
 	}
-})
+}))

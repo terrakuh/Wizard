@@ -29,19 +29,19 @@ const client = new ApolloClient({
 })
 
 const theme = createMuiTheme({
-	// palette: {
-	// 	type: "dark",
-	// 	background: {
-	// 		paper: "#303443",
-	// 		default: "#242733"
-	// 	},
-	// 	primary: {
-	// 		main: "#5BB14E"
-	// 	},
-	// 	secondary: {
-	// 		main: "#4E5BB1"
-	// 	}
-	// }
+	palette: {
+		type: "dark",
+		background: {
+			paper: "#303443",
+			default: "#242733"
+		},
+		primary: {
+			main: "#5BB14E"
+		},
+		secondary: {
+			main: "#4E5BB1"
+		}
+	}
 })
 
 const notistackRef = React.createRef<SnackbarProvider>()
