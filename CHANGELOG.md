@@ -1,6 +1,8 @@
 # Change Log
 
 ## [Unreleased]
+
+## [v0.6] - 2021-06-26
 ### Added
 - Dockerfile
 - Parallel juggler action
@@ -65,6 +67,8 @@ Rewrite in Python.
 - Frontend
 - Backend
 
+[Unreleased]: https://github.com/terrakuh/wizard/compare/v0.6...dev
+[v0.6]: https://github.com/terrakuh/wizard/compare/v0.5...v0.6
 [v0.5]: https://github.com/terrakuh/wizard/compare/v0.4...v0.5
 [v0.4]: https://github.com/terrakuh/wizard/compare/v0.3.0...v0.4
 [v0.3.0]: https://github.com/terrakuh/wizard/compare/v0.2.0...v0.3.0
