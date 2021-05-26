@@ -1,6 +1,8 @@
+from datetime import datetime
 import logging
 import threading
 import copy
+from typing import Optional, Union
 
 from .game_history import GameHistory
 from .card import Card
@@ -15,6 +17,15 @@ class User:
     def __str__(self) -> str:
         return f"[id={self.user_id},name={self.name}]"
 
+class TaskInfo:
+
+    def __init__(self, task_type: str, player, options: list[str], selected: str=None, duration: int=None) -> None:
+        self.task_type = task_type
+        self.player = player # Player
+        self.options = options
+        self.selected = selected
+        self.duration = duration
+
 class Player:
     def __init__(self, history: GameHistory,  user: User, pos: int):
         self.history = history
@@ -28,7 +39,7 @@ class Player:
         self.tricks_made: int = None
         self.cards: dict[str, Card] = None
 
-        self.current_task: PlayerTask = None
+        self.current_task: Optional[Union[PlayerTask, TaskInfo]] = None
         self.is_active = False
 
 
@@ -70,6 +81,7 @@ class Player:
             valid_values.remove(str(left_tricks))
 
         self.current_task = PlayerTask("call_tricks", self, valid_values)
+        self.__update_history()
 
         self.tricks_called = int(self.current_task.do_task())
         self.tricks_made = 0
@@ -79,6 +91,7 @@ class Player:
 
     def select_input(self, select_type: str, options: list[str]) -> str:
         self.current_task = PlayerTask("choose_" + select_type, self, options)
+        self.__update_history()
         selected_option = self.current_task.do_task()
 
         self.__update_history()
@@ -104,6 +117,7 @@ class Player:
             return user_input
         
         self.current_task = PlayerTask("play_card", self, valid_values)
+        self.__update_history()
 
         card_selected = self.current_task.do_task(payload)
         card_removed = self.cards.pop(card_selected)
@@ -131,10 +145,11 @@ class Player:
 
 
     def complete_task(self, arg: str):
+        print("Completing...")
         self.current_task.get_input(arg)
 
     def __update_history(self):
-        self.history.update_player(self)
+        self.history.update_player(self.user.user_id)
     
 
     def __str__(self):
@@ -143,18 +158,30 @@ class Player:
     def __repr__(self):
         return self.name
 
+    # def __deepcopy__(self, memo):
+    #     cls = self.__class__
+    #     result = cls.__new__(cls)
+    #     memo[id(self)] = result
+    #     for k, v in self.__dict__.items():
+    #         if k == "history":
+    #             continue
+    #         if k == "current_task" and self.current_task is not None:
+    #             setattr(result, k, copy.deepcopy(v.task_info, memo))
+    #             continue
+    #         setattr(result, k, copy.deepcopy(v, memo))
+    #     return result
+
 class PlayerTask:
 
     def __init__(self, task_type: str, player: Player, options: list[str]):
-        self.task_type = task_type
-        self.player = player
-        self.player.toggle_is_active()
+        self.task_info = TaskInfo(task_type, player, options)
+        player.toggle_is_active()
 
-        self.options = options
         self.selected = None
+        self.duration = datetime.now()
 
     def do_task(self, process_input=None) -> str:
-        logging.info(self.player.name + " is waiting for input on " + self.task_type + ": " + str(self.options))
+        logging.info(self.task_info.player.name + " is waiting for input on " + self.task_info.task_type + ": " + str(self.task_info.options))
 
         self.input_event = threading.Event()
         self.input_lock = threading.Lock()
@@ -168,10 +195,13 @@ class PlayerTask:
         delattr(self, "input_event")
         delattr(self, "input_lock")
 
-        self.player.current_task = None
-        self.player.toggle_is_active()
+        player: Player = self.task_info.player
+        player.current_task = None
+        player.toggle_is_active()
+        self.duration -= datetime.now()
+        player.history.add_action(self.task_info)
 
-        logging.info(self.player.name + "'s input for " + self.task_type + ": " + str(user_input))
+        logging.info(self.task_info.player.name + "'s input for " + self.task_info.task_type + ": " + str(user_input))
 
         if process_input:
             user_input = process_input(user_input)
@@ -180,7 +210,8 @@ class PlayerTask:
 
     def get_input(self, user_input: str):
         with self.input_lock:
-            if user_input not in self.options:
+            print(self.task_info.options)
+            if user_input not in self.task_info.options:
                 raise Exception("Invalid value")
 
             logging.info("Receiving input: " + str(user_input))

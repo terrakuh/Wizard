@@ -8,10 +8,12 @@ from fastapi import Request
 from database import Database
 from api.security import UserAuthentication
 from inspect import getfullargspec, iscoroutine
+
 from lobby.manager import Manager
 from lobby.lobby import Lobby
 
 from game.player import User
+from game.game import Game
 from game.game_history import GameHistory
 
 
@@ -111,6 +113,9 @@ def smart_api(access_control: bool = True, cache: Cache = None):
 				elif value is GameHistory:
 					assert_lobby()
 					additional[key] = lobby.get_game_interaction()
+				elif value is Game:
+					assert_lobby()
+					additional[key] = lobby.get_game()
 			# execute
 			result = func(root, info, **kwargs, **additional)
 			if iscoroutine(result):

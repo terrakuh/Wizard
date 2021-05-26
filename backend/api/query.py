@@ -2,7 +2,7 @@ from datetime import date, timedelta, datetime
 from typing import Optional
 
 from api.decorators import Cache, smart_api
-from graphene import ObjectType, Field, ID, String, NonNull, ResolveInfo, List, DateTime
+from graphene import ObjectType, Field, ID, String, NonNull, ResolveInfo, List, DateTime, Int
 from graphql import GraphQLError
 
 from .types import Appointment, GameInfo, Lobby as LobbyType, LoginInformation, RequiredAction, User as UserType
@@ -46,12 +46,15 @@ class Query(ObjectType):
 	# lobby management
 	lobby = Field(LobbyType)
 	modes = List(String)
+	max_rounds = Int()
 
 	@smart_api()
 	async def resolve_lobby(root, info: ResolveInfo, lobby: Optional[Lobby], user: User):
+		print("Lobby...")
 		try:
+			print("Lobby1...")
 			settings = lobby.get_settings()
-			result = LobbyType(code=lobby.code, mode=settings.mode, players=[graphene_parser.parse_user(user) for user in lobby.get_players()])
+			result = LobbyType(code=lobby.code, mode=settings.mode, max_rounds=settings.max_rounds, players=[graphene_parser.parse_user(user) for user in lobby.get_players()])
 			if lobby.is_lobby_master(user):
 				result.can_start = len(result.players) >= 3
 				result.can_start = True
@@ -61,6 +64,14 @@ class Query(ObjectType):
 
 	def resolve_modes(root, info: ResolveInfo):
 		return CardDecks.MODES.keys()
+
+	@smart_api()
+	async def resolve_max_rounds(root, info: ResolveInfo, lobby: Optional[Lobby]):
+		print("Getting max...")
+		try:
+			return lobby.get_max_rounds()
+		except:
+			return 10
 
 
 	# game logic

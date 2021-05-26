@@ -98,7 +98,7 @@ type Mutation {
 
 	# lobby management
 	createLobby: String!
-	setLobbySettings(mode: String): Boolean!
+	setLobbySettings(mode: String, max_rounds: Int): Boolean!
 	joinLobby(code: String!): Boolean!
 	leaveLobby: Boolean!
 	startGame: Boolean!
