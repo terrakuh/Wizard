@@ -50,11 +50,15 @@ class Query(ObjectType):
 
 	@smart_api()
 	async def resolve_lobby(root, info: ResolveInfo, lobby: Optional[Lobby], user: User):
-		print("Lobby...")
 		try:
-			print("Lobby1...")
 			settings = lobby.get_settings()
-			result = LobbyType(code=lobby.code, mode=settings.mode, max_rounds=settings.max_rounds, players=[graphene_parser.parse_user(user) for user in lobby.get_players()])
+			result = LobbyType(
+				code=lobby.code,
+				mode=settings.mode,
+				round_limit=settings.round_number,
+				max_rounds=lobby.get_max_rounds(),
+				players=[graphene_parser.parse_user(user) for user in lobby.get_players()]
+			)
 			if lobby.is_lobby_master(user):
 				result.can_start = len(result.players) >= 3
 				result.can_start = True
@@ -79,8 +83,8 @@ class Query(ObjectType):
 	required_action = Field(RequiredAction)
 
 	@smart_api()
-	def resolve_game_info(root, info, user: User, history: GameHistory):
-		if history is None or graphene_parser.get_hand(history, user) is None:
+	def resolve_game_info(root, info, user: User, history: Optional[GameHistory]):
+		if history is None:
 			return None
 		return GameInfo(
 			round_state=graphene_parser.get_round_state(history),

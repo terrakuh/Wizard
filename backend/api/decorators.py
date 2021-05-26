@@ -93,35 +93,35 @@ def smart_api(access_control: bool = True, cache: Cache = None):
 			spec = getfullargspec(func)
 			additional = {}
 			for key, value in spec.annotations.items():
-				if value is Database:
-					additional[key] = state.db
-				elif value is Response:
-					additional[key] = state.response
-				elif value is Request:
-					additional[key] = request
-				elif value is Manager:
-					additional[key] = state.lobby_manager
-				elif value is User:
-					additional[key] = user
-				elif value is Optional[Lobby]:
-					try: assert_lobby()
-					except: pass
-					additional[key] = lobby
-				elif value is Lobby:
-					assert_lobby()
-					additional[key] = lobby
-				elif value is Optional[GameHistory]:
-					try:
+				try:
+					if value is Database:
+						additional[key] = state.db
+					elif value is Response:
+						additional[key] = state.response
+					elif value is Request:
+						additional[key] = request
+					elif value is Manager:
+						additional[key] = state.lobby_manager
+					elif value is User:
+						additional[key] = user
+					elif value is Optional[Lobby]:
+						try: assert_lobby()
+						except: pass
+						additional[key] = lobby
+					elif value is Lobby:
 						assert_lobby()
-						additional[key] = lobby.get_game_interaction()
-					except:
-						additional[key] = None
-				elif value is GameHistory:
-					assert_lobby()
-					additional[key] = lobby.get_game_interaction()
-				elif value is Game:
-					assert_lobby()
-					additional[key] = lobby.get_game()
+						additional[key] = lobby
+					elif value is Optional[GameHistory]:
+						try:
+							assert_lobby()
+							additional[key] = lobby.get_game_history()
+						except:
+							additional[key] = None
+					elif value is GameHistory:
+						assert_lobby()
+						additional[key] = lobby.get_game_history()
+				except Exception as e:
+					print("here", key, e)
 			# execute
 			result = func(root, info, **kwargs, **additional)
 			if iscoroutine(result):

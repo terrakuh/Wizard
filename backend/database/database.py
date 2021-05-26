@@ -1,3 +1,6 @@
+from asyncio.futures import Future
+from game.card_decks import CardDecks
+from game.game_history import GameHistory
 from api.types import LoginInformation, Appointment, User as UserType, ActionDuration
 from game.player import User
 from sqlite3 import connect
@@ -25,6 +28,7 @@ class Database:
 		self._db = connect(filename)
 		with self._db:
 			self._db.executescript(SCHEMA)
+			self._db.executemany("INSERT OR IGNORE INTO card(name) VALUES(?)", ((card,) for card in CardDecks.CARDS))
 
 	def __execute(self, sql: str, parameters: Iterable[Any] = ...):
 		with self._db:
@@ -160,43 +164,55 @@ class Database:
 				""")
 		await get_event_loop().run_in_executor(self._pool, func)
 
-	async def commit_game_history(self) -> None:
+	def queue_commit_game_history(self, history: GameHistory) -> Future[None]:
 		def func():
-			with self._db:
-				# TODO insert cards
-				game_id = self._db.execute("INSERT INTO game(start, end) VALUES(?1, ?2)", (None, None)).lastrowid
-				for i in range(0):
-					round_id = self._db.execute("""
-						INERT INTO round(index, trump)
-						VALUES(?1, (SELECT id FROM card WHERE name=?2))
-					""", (None, None)).lastrowid
-					# pre round things like users and their actions
-					for i in range(0):
-						round_user_id = self._db.execute("""
-							INSERT INTO round_user(score, tricks_made, tricks_called, round, user)
-							VALUES(?1, ?2, ?3, ?4, ?5)
-						""", (None, None, None, round_id, None)).lastrowid
-						for i in range(0):
-							self._db.execute("""
-								INSERT INTO round_action(index, option, type, duration_s, round_user)
+			try:
+				print("writing to db=====================================================")
+				with self._db:
+					game_id = self._db.execute("""
+						INSERT INTO game(start, end)
+						VALUES(?1, ?2)
+					""", (history.start_time, history.end_time)).lastrowid
+
+					for round_info in history.rounds:
+						round_id = self._db.execute("""
+							INSERT INTO round([index], trump, game)
+							VALUES(?1, (SELECT id FROM card WHERE name=?2), ?3)
+						""", (round_info.round.round_number-1, round_info.round.trump_card.id, game_id)).lastrowid
+
+						# pre round things like users and their actions
+						for player in round_info.players:
+							round_user_id = self._db.execute("""
+								INSERT INTO round_user(score, tricks_made, tricks_called, round, user)
 								VALUES(?1, ?2, ?3, ?4, ?5)
-							""", (None, None, None, None, round_user_id))
-					# all trick rounds
-					for i in range(0):
-						trick_id = self._db.execute("""
-							INSERT INTO trick(index, round, winner)
-							VALUES(?1, ?2, (SELECT id FROM round_user WHERE round=?2 AND user=?3))
-						""", (None, round_id, None))
-						for i in range(0):
+							""", (player.score, player.tricks_made, player.tricks_called, round_id, player.user.user_id)).lastrowid
+
+						for index, round_action in enumerate(round_info.round_actions):
 							self._db.execute("""
-								INSERT INTO trick_action(round_user, trick, index, type, duration_s, card)
-								VALUES(
-									(SELECT id FROM round_user WHERE round=?1 AND user=?2),
-									?3, ?4, ?5, ?6,
-									(SELECT id FROM card WHERE name=?7)
-								)
-							""", (round_id, None, trick_id, None, None, None, None))
-		await get_event_loop().run_in_executor(self._pool, func)
+								INSERT INTO round_action([index], option, type, duration_s, round_user)
+								VALUES(?1, ?2, ?3, ?4, (SELECT id FROM round_user WHERE user=?5 AND round=?6))
+							""", (index, round_action.selected, round_action.task_type, round_action.duration.total_seconds(), round_action.player.user.user_id, round_id))
+
+						# all trick rounds
+						for index, trick_info in enumerate(round_info.tricks):
+							trick_id = self._db.execute("""
+								INSERT INTO trick([index], round, winner)
+								VALUES(?1, ?2, (SELECT id FROM round_user WHERE round=?2 AND user=?3))
+							""", (index, round_id, trick_info.trick.curr_winner.user.user_id)).lastrowid
+							for index, action in enumerate(trick_info.actions):
+								self._db.execute("""
+									INSERT INTO trick_action(round_user, trick, [index], type, duration_s, card)
+									VALUES(
+										(SELECT id FROM round_user WHERE round=?1 AND user=?2),
+										?3, ?4, ?5, ?6,
+										(SELECT id FROM card WHERE name=?7)
+									)
+								""", (round_id, action.player.user.user_id, trick_id, index, action.task_type, action.duration.total_seconds(), action.selected))
+			except Exception as e:
+				print("writing to db=====================================================", e)
+			finally:
+				print("finished writing to db=====================================================")
+		return self._pool.submit(func)
 
 	async def get_action_averages(self, name: str) -> list[ActionDuration]:
 		def func() -> list[ActionDuration]:

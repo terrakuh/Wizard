@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 import logging
 import threading
 import copy
@@ -19,7 +19,7 @@ class User:
 
 class TaskInfo:
 
-    def __init__(self, task_type: str, player, options: list[str], selected: str=None, duration: int=None) -> None:
+    def __init__(self, task_type: str, player: "Player", options: list[str], selected: str=None, duration: timedelta=None) -> None:
         self.task_type = task_type
         self.player = player # Player
         self.options = options
@@ -158,18 +158,18 @@ class Player:
     def __repr__(self):
         return self.name
 
-    # def __deepcopy__(self, memo):
-    #     cls = self.__class__
-    #     result = cls.__new__(cls)
-    #     memo[id(self)] = result
-    #     for k, v in self.__dict__.items():
-    #         if k == "history":
-    #             continue
-    #         if k == "current_task" and self.current_task is not None:
-    #             setattr(result, k, copy.deepcopy(v.task_info, memo))
-    #             continue
-    #         setattr(result, k, copy.deepcopy(v, memo))
-    #     return result
+    def __deepcopy__(self, memo):
+        cls = self.__class__
+        result = cls.__new__(cls)
+        memo[id(self)] = result
+        for k, v in self.__dict__.items():
+            if k == "history":
+                continue
+            if k == "current_task" and self.current_task is not None:
+                setattr(result, k, copy.deepcopy(v.task_info, memo))
+                continue
+            setattr(result, k, copy.deepcopy(v, memo))
+        return result
 
 class PlayerTask:
 
@@ -178,7 +178,7 @@ class PlayerTask:
         player.toggle_is_active()
 
         self.selected = None
-        self.duration = datetime.now()
+        self.__started = datetime.now()
 
     def do_task(self, process_input=None) -> str:
         logging.info(self.task_info.player.name + " is waiting for input on " + self.task_info.task_type + ": " + str(self.task_info.options))
@@ -198,7 +198,8 @@ class PlayerTask:
         player: Player = self.task_info.player
         player.current_task = None
         player.toggle_is_active()
-        self.duration -= datetime.now()
+        self.task_info.duration = datetime.now() - self.__started
+        self.task_info.selected = user_input
         player.history.add_action(self.task_info)
 
         logging.info(self.task_info.player.name + "'s input for " + self.task_info.task_type + ": " + str(user_input))
@@ -218,4 +219,3 @@ class PlayerTask:
 
             self.selected = user_input
             self.input_event.set()
-

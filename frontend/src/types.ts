@@ -13,6 +13,7 @@ export interface Lobby {
 	code: string
 	mode: string
 	maxRounds: number
+	roundLimit: number
 	players: User[]
 	canStart: boolean | null
 }

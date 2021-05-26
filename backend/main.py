@@ -27,7 +27,7 @@ schema = Schema(query=Query, mutation=Mutation)
 gql_app = GraphQLApp(schema=schema, executor_class=AsyncioExecutor)
 db = Database(args.wizard_db)
 user_authentication = UserAuthentication(db)
-lobby_manager = Manager()
+lobby_manager = Manager(db)
 
 @app.post("/api/gql")
 async def handle_gql(request: Request):

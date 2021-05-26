@@ -68,6 +68,7 @@ const INFO = gql`
 			code
 			mode
 			maxRounds
+			roundLimit
 			players {
 				id
 				name

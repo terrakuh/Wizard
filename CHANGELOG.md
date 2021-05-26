@@ -9,6 +9,8 @@
 - Stay logged in option
 - Manual sorting of own hand cards
 - Customize theme
+- Round limit selection
+- Adding game history to database
 
 ### Fixed
 - Missing notification

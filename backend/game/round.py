@@ -1,4 +1,4 @@
-from copy import copy
+import copy
 from .game_history import GameHistory
 from .card_decks import CardDecks
 from .trick import Trick
@@ -143,7 +143,11 @@ class Round:
             logging.info("New score of " + player.name + " is " + str(player.score))
 
     def __deepcopy__(self, memo):
-        newone = type(self)(None, None, None)
-        newone.__dict__.update(self.__dict__)
-        delattr(newone, "history")
-        return newone
+        cls = self.__class__
+        result = cls.__new__(cls)
+        memo[id(self)] = result
+        for k, v in self.__dict__.items():
+            if k == "history":
+                continue
+            setattr(result, k, copy.deepcopy(v, memo))
+        return result

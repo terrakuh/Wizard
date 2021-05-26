@@ -1,7 +1,7 @@
 import threading
 import random
 import logging
-from typing import List, Optional
+from typing import Callable, List, Optional
 from datetime import datetime
 
 from .round import Round
@@ -18,12 +18,13 @@ class Settings:
 
 class Game(threading.Thread):
 
-    def __init__(self, users: List[User], settings: Settings):
+    def __init__(self, users: List[User], settings: Settings, on_game_finish: Callable[[GameHistory], None]):
         super().__init__()
 
         print("Creating...")
 
         self.history = GameHistory(settings)
+        self.on_game_finish = on_game_finish
 
         random.shuffle(users)
         print([str(u) for u in users])
@@ -47,8 +48,6 @@ class Game(threading.Thread):
     def run(self):
         logging.info("Starting Game...")
 
-        limit = 11 # min(len(self.card_deck)//len(self.players), 11)
-
         self.history.set_start(datetime.now())
 
         ########
@@ -57,7 +56,7 @@ class Game(threading.Thread):
 
         ########
 
-        while self.round_counter <= limit-1:
+        while self.round_counter <= self.settings.round_number:
 
             self.curr_round = Round(history=self.history, first_player=self.first_player, round_counter=self.round_counter)
             self.history.update_round(self.curr_round)
@@ -65,6 +64,7 @@ class Game(threading.Thread):
             self.__do_round()
 
         self.history.set_end(datetime.now())
+        self.on_game_finish(self.history)
 
     def __do_round(self):
         self.curr_round.start_round()

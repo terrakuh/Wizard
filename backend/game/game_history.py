@@ -1,29 +1,31 @@
 from datetime import datetime
 import threading
 import copy
+from game.card_decks import CardDecks
 
-# from .game import Settings
-from .card_decks import CardDecks
-# from .trick import Trick
-# from .player import User, Player, PlayerTask
-# from .round import Round
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from game.player import TaskInfo
+    from game.round import Round
+    from game.player import Player
+    from game.trick import Trick
+
+
+class TrickInfo:
+    def __init__(self, trick: "Trick", actions: list["TaskInfo"]) -> None:
+        self.trick = trick # Trick
+        self.actions = actions # list[TaskInfo]
+
 
 class RoundInfo:
-
-    def __init__(self, round, round_actions: list, tricks: list, players: list) -> None:
+    def __init__(self, round: "Round", round_actions: list["TaskInfo"], tricks: list[TrickInfo], players: list["Player"]) -> None:
         self.round = round # Round
         self.round_actions = round_actions # list[TaskInfo]
         self.tricks = tricks # list[TrickInfo]
         self.players = players # list[Player]
 
-class TrickInfo:
-
-    def __init__(self, trick, actions: list) -> None:
-        self.trick = trick # Trick
-        self.actions = actions # list[TaskInfo]
 
 class GameHistory:
-
     def __init__(self, settings):
         self.settings = settings
 
@@ -154,7 +156,8 @@ class GameHistory:
     # Trick management
     def add_trick(self, trick):
         with self.lock:
-            self.__save_trick()
+            if self.curr_trick is not None:
+                self.__save_trick()
             self.curr_trick = copy.deepcopy(trick)
 
     def update_trick(self, trick) -> None:
