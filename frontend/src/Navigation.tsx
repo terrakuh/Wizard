@@ -1,6 +1,6 @@
-import { AppBar, Divider, Drawer, IconButton, List, ListItem, ListItemIcon, ListItemText, makeStyles, Toolbar, Typography } from "@material-ui/core"
+import { AppBar, Divider, Drawer, IconButton, Link, List, ListItem, ListItemIcon, ListItemText, makeStyles, Toolbar, Typography } from "@material-ui/core"
 import { Settings as SettingsIcon, Menu as MenuIcon, VideogameAsset as VideogameAssetIcon, PersonAdd as PersonAddIcon, LockOpen as LockOpenIcon, Event as EventIcon } from "@material-ui/icons"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useHistory } from "react-router-dom"
 import { SettingsDialog } from "./settings"
 import { smoothGradient } from "./theme"
@@ -10,6 +10,19 @@ export default function Navigation() {
 	const history = useHistory()
 	const [openSettings, setOpenSettings] = useState(false)
 	const [openDrawer, setOpenDrawer] = useState(false)
+	const [version, setVersion] = useState<string>()
+
+	useEffect(() => {
+		fetch("/VERSION.txt")
+			.then(resp => {
+				if (resp.status !== 200 || !resp.headers.get("content-type")?.startsWith("text/plain")) {
+					throw Error()
+				}
+				return resp.text()
+			})
+			.then(setVersion)
+			.catch(() => { })
+	}, [])
 
 	return (
 		<>
@@ -33,9 +46,26 @@ export default function Navigation() {
 
 			<Drawer open={openDrawer} onClose={() => setOpenDrawer(false)}>
 				<List className={classes.list}>
+					<ListItem className={classes.headerInformation}>
+						<Typography variant="h5">
+							<Link
+								target="_blank"
+								rel="noreferrer"
+								href="https://github.com/terrakuh/wizard">
+								Wizard
+							</Link>
+						</Typography>
+						{
+							version == null ? null :
+								<Typography variant="body2">{version}</Typography>
+						}
+					</ListItem>
+
+					<Divider className={classes.divider} />
+
 					{
 						DRAWER_ACTIONS.map((action, index) =>
-							action == null ? <Divider key={index} /> :
+							action == null ? <Divider key={index} className={classes.divider} /> :
 								<ListItem
 									button
 									key={index}
@@ -61,6 +91,16 @@ export default function Navigation() {
 
 const useStyles = makeStyles(theme => ({
 	appBar: smoothGradient(theme, "30s"),
+	headerInformation: {
+		display: "flex",
+		flexDirection: "column",
+		alignItems: "flex-start",
+		gap: theme.spacing(2)
+	},
+	divider: {
+		marginTop: theme.spacing(1),
+		marginBottom: theme.spacing(1)
+	},
 	title: {
 		flexGrow: 1,
 		marginLeft: theme.spacing(2)
