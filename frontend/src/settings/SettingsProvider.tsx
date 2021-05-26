@@ -7,7 +7,7 @@ interface Context {
 	setSettings(settings: Settings): void
 }
 
-const initialSettings = deepMerge<Settings>({
+export const defaultSettings: Settings = {
 	notifications: {
 		enabled: true,
 		audio: true,
@@ -20,8 +20,15 @@ const initialSettings = deepMerge<Settings>({
 			enabled: false,
 			number: ""
 		}
+	},
+	theme: {
+		background: "#242733",
+		primary: "#e42e50",
+		secondary: "#a2268e"
 	}
-}, JSON.parse(localStorage.getItem("settings") || "{}"))
+}
+
+const initialSettings = deepMerge<Settings>(defaultSettings, JSON.parse(localStorage.getItem("settings") || "{}"))
 
 const context = createContext<Context>({
 	settings: initialSettings,

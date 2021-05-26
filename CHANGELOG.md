@@ -8,6 +8,7 @@
 - Appointments/calendar
 - Stay logged in option
 - Manual sorting of own hand cards
+- Customize theme
 
 ### Fixed
 - Missing notification

@@ -1,12 +1,12 @@
 import React from "react"
 import { AppBar, Button, Dialog, DialogContent, IconButton, makeStyles, Paper, Slide, Tab, Tabs, Toolbar, Typography } from "@material-ui/core"
 import { TransitionProps } from "@material-ui/core/transitions"
-import { Close as CloseIcon, Message as MessageIcon, Notifications as NotificationsIcon, Save as SaveIcon } from "@material-ui/icons"
-import SwipeableViews from "react-swipeable-views"
+import { Close as CloseIcon, Message as MessageIcon, Notifications as NotificationsIcon, Palette as PaletteIcon, Save as SaveIcon } from "@material-ui/icons"
 import { useSettings } from "./SettingsProvider"
 import NotificationSettings from "./NotificationSettings"
 import CommunicationSettings from "./CommunicationSettings"
-import { ThemedButton } from "../theme"
+import { createTheme, ThemedButton, useThemePark } from "../theme"
+import ThemeSettings from "./ThemeSettings"
 
 interface Props {
 	open: boolean
@@ -15,6 +15,7 @@ interface Props {
 
 export default function SettingsDialog(props: Props) {
 	const classes = useStyles()
+	const changeTheme = useThemePark()
 	const { settings, setSettings } = useSettings()
 	const [newSettings, setNewSettings] = React.useState(settings)
 	const [index, setIndex] = React.useState(0)
@@ -40,7 +41,10 @@ export default function SettingsDialog(props: Props) {
 
 					<Button
 						color="inherit"
-						onClick={props.onClose}>
+						onClick={() => {
+							changeTheme(createTheme(settings.theme))
+							props.onClose()
+						}}>
 						Abbrechen
 					</Button>
 
@@ -62,24 +66,32 @@ export default function SettingsDialog(props: Props) {
 						centered
 						onChange={(_, newIndex) => setIndex(newIndex)}
 						value={index}>
-						<Tab label={<NotificationsIcon />} />
-						<Tab label={<MessageIcon />} />
+						<Tab value={0} label={<NotificationsIcon />} />
+						<Tab value={1} label={<MessageIcon />} />
+						<Tab value={2} label={<PaletteIcon />} />
 					</Tabs>
 				</Paper>
 
-				<SwipeableViews>
-					<div hidden={index !== 0}>
-						<NotificationSettings
-							onChange={notifications => setNewSettings({ ...newSettings, notifications })}
-							settings={newSettings.notifications} />
-					</div>
+				<div hidden={index !== 0}>
+					<NotificationSettings
+						onChange={notifications => setNewSettings({ ...newSettings, notifications })}
+						settings={newSettings.notifications} />
+				</div>
 
-					<div hidden={index !== 1}>
-						<CommunicationSettings
-							onChange={messages => setNewSettings({ ...newSettings, messages })}
-							settings={newSettings.messages} />
-					</div>
-				</SwipeableViews>
+				<div hidden={index !== 1}>
+					<CommunicationSettings
+						onChange={messages => setNewSettings({ ...newSettings, messages })}
+						settings={newSettings.messages} />
+				</div>
+
+				<div hidden={index !== 2}>
+					<ThemeSettings
+						onChange={theme => {
+							setNewSettings({ ...newSettings, theme })
+							changeTheme(createTheme(theme))
+						}}
+						settings={newSettings.theme} />
+				</div>
 			</DialogContent>
 		</Dialog>
 	)

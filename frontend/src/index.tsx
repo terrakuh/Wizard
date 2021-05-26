@@ -34,9 +34,9 @@ const notistackRef = React.createRef<SnackbarProvider>()
 ReactDOM.render(
 	<React.Fragment>
 		<ApolloProvider client={client}>
-			<ThemeParkProvider>
-				<BrowserRouter>
-					<SettingsProvider>
+			<BrowserRouter>
+				<SettingsProvider>
+					<ThemeParkProvider>
 						<SnackbarProvider
 							ref={notistackRef}
 							preventDuplicate
@@ -49,9 +49,9 @@ ReactDOM.render(
 								<App />
 							</DndProvider>
 						</SnackbarProvider>
-					</SettingsProvider>
-				</BrowserRouter>
-			</ThemeParkProvider>
+					</ThemeParkProvider>
+				</SettingsProvider>
+			</BrowserRouter>
 		</ApolloProvider>
 	</React.Fragment>,
 	document.getElementById("root")

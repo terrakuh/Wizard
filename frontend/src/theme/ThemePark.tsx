@@ -1,5 +1,6 @@
 import { createMuiTheme, lighten, Theme, ThemeProvider } from "@material-ui/core"
 import { createContext, ReactNode, useContext, useState } from "react"
+import { useSettings } from "../settings";
 
 declare module "@material-ui/core/styles/createMuiTheme" {
 	interface Theme {
@@ -10,9 +11,24 @@ declare module "@material-ui/core/styles/createMuiTheme" {
 	interface ThemeOptions extends Theme { }
 }
 
-export const createTheme = (background: string, primary: string, secondary: string) => createMuiTheme({
+function isLight(color: string) {
+	const hex = color.replace('#', '');
+	const c_r = parseInt(hex.substr(0, 2), 16);
+	const c_g = parseInt(hex.substr(2, 2), 16);
+	const c_b = parseInt(hex.substr(4, 2), 16);
+	const brightness = ((c_r * 299) + (c_g * 587) + (c_b * 114)) / 1000;
+	return brightness > 155;
+}
+
+export interface ThemeOptions {
+	background: string
+	primary: string
+	secondary: string
+}
+
+export const createTheme = ({ background, primary, secondary }: ThemeOptions) => createMuiTheme({
 	palette: {
-		type: "dark",
+		type: isLight(background) ? "light" : "dark",
 		background: {
 			default: background,
 			paper: lighten(background, 0.05)
@@ -29,15 +45,15 @@ export const createTheme = (background: string, primary: string, secondary: stri
 	}
 })
 
-const context = createContext<(theme: Theme) => void>(() => {})
+const context = createContext<(theme: Theme) => void>(() => { })
 
 interface Props {
 	children?: ReactNode
 }
 
 export function ThemeParkProvider({ children }: Props) {
-	const [theme, setTheme] = useState(createTheme("#242733", "#e42e50", "#a2268e"))
-	// const [theme, setTheme] = useState(createTheme("#242733", "#5BB14E", "#4E5BB1"))
+	const { settings } = useSettings()
+	const [theme, setTheme] = useState(createTheme(settings.theme))
 
 	return (
 		<ThemeProvider theme={theme}>
