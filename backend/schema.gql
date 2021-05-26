@@ -32,7 +32,7 @@ type RoundState {
 	trumpColor: String
 	trumpCard: String
 	round: Int!
-	pastTrick: [PlayedCard!]
+	pastTrick: [TrickState!]
 }
 
 type PlayedCard {
@@ -42,11 +42,9 @@ type PlayedCard {
 }
 
 type TrickState {
-	playerStates: [PlayerState!]!
 	leadColor: String
 	leadCard: PlayedCard
 	round: Int
-	turn: User
 	deck: [PlayedCard!]
 }
 
@@ -64,6 +62,7 @@ type RequiredAction {
 type GameInfo {
 	roundState: RoundState!
 	trickState: TrickState!
+	playerStates: [PlayerState!]!
 	hand: [PlayableCard!]!
 }
 
@@ -124,7 +123,7 @@ type Mutation {
 
 	# lobby management
 	createLobby: String!
-	setLobbySettings(mode: String): Boolean!
+	setLobbySettings(mode: String, max_rounds: Int): Boolean!
 	joinLobby(code: String!): Boolean!
 	leaveLobby: Boolean!
 	startGame: Boolean!

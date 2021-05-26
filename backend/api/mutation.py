@@ -5,16 +5,16 @@ from graphene.types.field import Field
 from api.decorators import Cookie, smart_api, Response
 from graphene import ObjectType, Boolean, NonNull, String, ResolveInfo, Int, ID, List
 from graphql import GraphQLError
-from .types import Appointment, User as UserType, PlayableCard
+
+from .types import Appointment, User as UserType
 from database import Database
 from fastapi import Request
 
 from lobby.manager import Manager
 from lobby.lobby import Lobby
 
-from game.player import Player, User
-from game.game_interaction import GameInteraction
-
+from game.player import User
+from game.game import Game
 from .graphene_parser import *
 
 
@@ -55,7 +55,7 @@ class Mutation(ObjectType):
 
 	# lobby management
 	create_lobby = NonNull(String)
-	set_lobby_settings = NonNull(Boolean, mode=String())
+	set_lobby_settings = NonNull(Boolean, mode=String(), max_rounds=Int())
 	join_lobby = NonNull(Boolean, code=NonNull(String))
 	leave_lobby = NonNull(Boolean)
 	start_game = NonNull(Boolean)
@@ -65,11 +65,10 @@ class Mutation(ObjectType):
 		return manager.create_lobby(user)
 
 	@smart_api()
-	def resolve_set_lobby_settings(root, info: ResolveInfo, mode: Optional[str], lobby: Lobby, user: User):
+	def resolve_set_lobby_settings(root, info: ResolveInfo, mode: Optional[str], max_rounds: Optional[int], lobby: Lobby, user: User):
 		if not lobby.is_lobby_master(user):
 			raise GraphQLError("not lobby master")
-		if mode is not None:
-			lobby.set_settings(mode)
+		lobby.set_settings(mode, max_rounds)
 		return True
 
 	@smart_api()
@@ -94,8 +93,8 @@ class Mutation(ObjectType):
 	complete_action = NonNull(Boolean, option=NonNull(String))
 
 	@smart_api()
-	def resolve_complete_action(root, info: ResolveInfo, user: User, option: str, game_i: GameInteraction):
-		game_i.complete_action(option, user)
+	def resolve_complete_action(root, info: ResolveInfo, user: User, option: str, history: GameHistory):
+		history.complete_task_sync(user.user_id, option)
 		return True
 
 

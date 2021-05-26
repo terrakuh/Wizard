@@ -1,7 +1,10 @@
+from datetime import datetime
 import logging
 import threading
-from typing import List, Optional
+import copy
+from typing import Optional, Union
 
+from .game_history import GameHistory
 from .card import Card
 from .card_decks import CardDecks
 
@@ -14,75 +17,58 @@ class User:
     def __str__(self) -> str:
         return f"[id={self.user_id},name={self.name}]"
 
+class TaskInfo:
 
-class PlayerState:
-    def __init__(self, player: User, score: int, is_active: bool, tricks_called: Optional[int], tricks_made: Optional[int]):
-        self.player = player
-        self.score = score
-        self.tricks_called = tricks_called
-        self.tricks_made = tricks_made
-        self.is_active = is_active
-
-    def __str__(self) -> str:
-        return f"[User={self.player}]"
-
-
-class HandCard:
-    def __init__(self, card_id: str, playable: bool, variants: list=None):
-        self.card_id = card_id
-        self.playable = playable
-        self.variants = variants
-
-
-class TaskState:
-    def __init__(self, task_type: str, options: List[str]):
+    def __init__(self, task_type: str, player, options: list[str], selected: str=None, duration: int=None) -> None:
         self.task_type = task_type
+        self.player = player # Player
         self.options = options
-
+        self.selected = selected
+        self.duration = duration
 
 class Player:
-    def __init__(self, user: User):
+    def __init__(self, history: GameHistory,  user: User, pos: int):
+        self.history = history
+
         self.user = user
         self.name = user.name
+        self.pos = pos
 
         self.score = 0
-        self.tricks_called: Optional[int] = None
-        self.tricks_made: Optional[int] = None
-        self.cards = None
+        self.tricks_called: int = None
+        self.tricks_made: int = None
+        self.cards: dict[str, Card] = None
 
-        self.current_task = None
+        self.current_task: Optional[Union[PlayerTask, TaskInfo]] = None
         self.is_active = False
 
-        self.card_lock = threading.Lock()
-        self.task_lock = threading.Lock()
-        self.state_lock = threading.Lock()
-        self.__update_state()
 
     def add_score(self, points: int):
         self.score += points
-        self.__update_state()
+        self.__update_history()
 
     def add_tricks_called(self, amount: int):
         self.tricks_called += amount
-        self.__update_state()
+        self.__update_history()
 
     def inc_tricks_made(self):
         self.tricks_made += 1
-        self.__update_state()
+        self.__update_history()
 
-    def set_cards(self, cards: List[Card]):
-        with self.card_lock:
-            logging.info(self.name + " got cards: " + str(cards))
-            self.cards = {card.id: card for card in sorted(cards, key=lambda c: c.sort_value)}
+    def set_cards(self, cards: list[Card]):
+        logging.info(self.name + " got cards: " + str(cards))
+        self.cards = {card.id: card for card in sorted(cards, key=lambda c: c.sort_value)}
+        self.__update_history()
 
     def replace_card(self, card_to_replace_id: str, new_card: Card) -> Card:
-        with self.card_lock:
-            self.cards[new_card.id] = new_card
-            return self.cards.pop(card_to_replace_id)
+        self.cards[new_card.id] = new_card
+        removed_card = self.cards.pop(card_to_replace_id)
+        self.__update_history()
+        return removed_card
 
-    def set_is_active(self, a: bool):
-        self.is_active = a
-        self.__update_state()
+    def toggle_is_active(self):
+        self.is_active = not self.is_active
+        self.__update_history()
 
 
     def call_tricks(self, called_tricks: int, max_tricks: int, is_last: bool) -> int:
@@ -94,92 +80,77 @@ class Player:
         if is_last and left_tricks >= 0:
             valid_values.remove(str(left_tricks))
 
-        with self.task_lock:
-            self.current_task = PlayerTask("call_tricks", self, valid_values)
+        self.current_task = PlayerTask("call_tricks", self, valid_values)
+        self.__update_history()
 
         self.tricks_called = int(self.current_task.do_task())
-        self.tricks_made = 0 if self.tricks_made is None else self.tricks_made
-        self.__update_state()
+        self.tricks_made = 0
+        self.__update_history()
 
         return self.tricks_called
 
-    def play_card(self, lead_color: str) -> str:
-        valid_values = self.__get_playable_cards(lead_color)
+    def select_input(self, select_type: str, options: list[str]) -> str:
+        self.current_task = PlayerTask("choose_" + select_type, self, options)
+        self.__update_history()
+        selected_option = self.current_task.do_task()
 
-        def payload(user_input):
-            card_variants = [card.id for card in self.cards[user_input].variants]
-            if card_variants:
-                variant_selected = self.select_input("card_variant", card_variants)
-                logging.info(self.name + " has selected " + str(variant_selected))
+        self.__update_history()
 
-                self.replace_card(user_input, CardDecks.CARDS[variant_selected])
-
-                print("Replaced card: " + str(self.cards))
-
-                return variant_selected
-            return user_input
-        
-        with self.task_lock:
-            self.current_task = PlayerTask("play_card", self, valid_values)
-
-        card_selected = self.current_task.do_task(payload)
-        
-        with self.card_lock:
-            return self.cards.pop(card_selected)
-
-    def select_input(self, select_type: str, options: List[str]):
-        with self.task_lock:
-            self.current_task = PlayerTask("choose_" + select_type, self, options)
-        return self.current_task.do_task()
+        return selected_option
 
     def select_trump_color(self):
         color = self.select_input("trump_color", CardDecks.CARD_COLORS + ["none"])
         return None if color == "none" else color
 
-    def reset(self):
-        with self.card_lock:
-            self.cards = None
-        self.tricks_called = None
-        self.tricks_made = None
-        self.__update_state()
+    def play_card(self, lead_color: str) -> Card:
+        valid_values = self.get_playable_cards(lead_color)
 
-    def __get_playable_cards(self, lead_color) -> list[str]:
+        def payload(user_input):
+            card_variants = [card.id for card in self.cards[user_input].variants]
+            if card_variants:
+                variant_selected = self.select_input("card_variant", card_variants)
+                self.replace_card(user_input, CardDecks.CARDS[variant_selected])
+
+                logging.info(self.name + " has selected " + str(variant_selected))
+
+                return variant_selected
+            return user_input
+        
+        self.current_task = PlayerTask("play_card", self, valid_values)
+        self.__update_history()
+
+        card_selected = self.current_task.do_task(payload)
+        card_removed = self.cards.pop(card_selected)
+
+        self.__update_history()
+
+        return card_removed
+
+    def get_playable_cards(self, lead_color) -> list[str]:
+        if self.cards is None:
+            return None
         if not lead_color:
-            return self.cards.keys()
+            return list(self.cards.keys())
 
         lead_cards = [card.id for card in self.cards.values() if card.color_bound and card.color == lead_color]
         playable_cards = [key for key, card in self.cards.items() if not lead_cards or not card.color_bound or card.color == lead_color]
         return playable_cards
 
+    def reset(self):
+        self.cards = None
+        self.tricks_called = None
+        self.tricks_made = None
 
-    def get_state(self):
-        with self.state_lock:
-            return self.state
+        self.__update_history()
 
-    def get_hand_cards(self, lead_color: str) -> List[HandCard]:
-        with self.card_lock:
-            return [self.__get_hand_card(card, lead_color) for card in self.cards.values()]
-
-    def get_task(self):
-        with self.task_lock:
-            if self.current_task:
-                return TaskState(self.current_task.task_type, self.current_task.options)
 
     def complete_task(self, arg: str):
-        with self.task_lock:
-            self.current_task.get_input(arg)
+        print("Completing...")
+        self.current_task.get_input(arg)
 
-    def __update_state(self):
-        with self.state_lock:
-            self.state = PlayerState(self.user, self.score, self.is_active, self.tricks_called, self.tricks_made)
-
-    def __get_hand_card(self, card: Card, lead_color: str=None):
-        playable_cards = self.__get_playable_cards(lead_color)
-
-        card_id = card.id
-        playable = card_id in playable_cards
-        variants = [self.__get_hand_card(v_card, lead_color) for v_card in card.variants]
-        return HandCard(card_id, playable, variants)
+    def __update_history(self):
+        self.history.update_player(self.user.user_id)
+    
 
     def __str__(self):
         return self.name
@@ -187,28 +158,50 @@ class Player:
     def __repr__(self):
         return self.name
 
+    # def __deepcopy__(self, memo):
+    #     cls = self.__class__
+    #     result = cls.__new__(cls)
+    #     memo[id(self)] = result
+    #     for k, v in self.__dict__.items():
+    #         if k == "history":
+    #             continue
+    #         if k == "current_task" and self.current_task is not None:
+    #             setattr(result, k, copy.deepcopy(v.task_info, memo))
+    #             continue
+    #         setattr(result, k, copy.deepcopy(v, memo))
+    #     return result
+
 class PlayerTask:
 
-    def __init__(self, task_type: str, player: Player, options: List[str]):
-        self.task_type = task_type
-        self.player = player
-        self.player.set_is_active(True)
+    def __init__(self, task_type: str, player: Player, options: list[str]):
+        self.task_info = TaskInfo(task_type, player, options)
+        player.toggle_is_active()
 
-        self.options = options
         self.selected = None
+        self.duration = datetime.now()
+
+    def do_task(self, process_input=None) -> str:
+        logging.info(self.task_info.player.name + " is waiting for input on " + self.task_info.task_type + ": " + str(self.task_info.options))
 
         self.input_event = threading.Event()
         self.input_lock = threading.Lock()
-
-    def do_task(self, process_input=None) -> str:
-        logging.info(self.player.name + " is waiting for input on " + self.task_type + ": " + str(self.options))
 
         self.input_event.wait()
 
         with self.input_lock:
             user_input = self.selected
 
-        logging.info(self.player.name + "'s input for " + self.task_type + ": " + str(user_input))
+        # Clean up for history/deepcopy
+        delattr(self, "input_event")
+        delattr(self, "input_lock")
+
+        player: Player = self.task_info.player
+        player.current_task = None
+        player.toggle_is_active()
+        self.duration -= datetime.now()
+        player.history.add_action(self.task_info)
+
+        logging.info(self.task_info.player.name + "'s input for " + self.task_info.task_type + ": " + str(user_input))
 
         if process_input:
             user_input = process_input(user_input)
@@ -217,13 +210,12 @@ class PlayerTask:
 
     def get_input(self, user_input: str):
         with self.input_lock:
-            if user_input not in self.options:
+            print(self.task_info.options)
+            if user_input not in self.task_info.options:
                 raise Exception("Invalid value")
 
-            print("Receiving input: " + str(user_input))
+            logging.info("Receiving input: " + str(user_input))
+
             self.selected = user_input
-
-            self.player.current_task = None
-            self.player.set_is_active(False)
-
             self.input_event.set()
+

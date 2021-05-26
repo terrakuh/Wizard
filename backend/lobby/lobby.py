@@ -4,8 +4,9 @@ from datetime import datetime
 from copy import deepcopy
 
 from game.game import Game, Settings
-from game.game_interaction import GameInteraction
 from game.player import User
+from game.game_history import GameHistory
+from game.card_decks import CardDecks
 
 
 class Lobby:
@@ -42,13 +43,22 @@ class Lobby:
 		with self._lock:
 			return self._players[0].user_id == user.user_id
 
-	def set_settings(self, mode: str) -> None:
+	def set_settings(self, mode: str=None, round_number: int=None) -> None:
 		with self._lock:
-			self._settings.mode = mode
+			if mode is not None: self._settings.mode = mode
+			if round_number is not None:
+				if 0 < round_number <= self.get_max_rounds():
+					self._settings.round_number = round_number
+				else:
+					raise Exception("Invalid round number")
 
 	def get_settings(self) -> Settings:
 		with self._lock:
 			return deepcopy(self._settings)
+
+	def get_max_rounds(self) -> int:
+		with self._lock:
+			return CardDecks.get_max_rounds(self._settings.mode, len(self._players))
 
 	def get_players(self) -> List[User]:
 		with self._lock:
@@ -56,6 +66,7 @@ class Lobby:
 
 	def start_game(self) -> None:
 		with self._lock:
+			print("Started ", self.game_started)
 			if self.game_started is not None:
 				raise Exception("game already started")
 			# elif len(self._players) < 3:
@@ -64,6 +75,7 @@ class Lobby:
 			self._game = Game(self._players, self._settings)
 			self._game.setDaemon(True)
 			self._game.start()
+			print("started")
 
 	def get_game(self) -> Game:
 		with self._lock:
@@ -71,8 +83,8 @@ class Lobby:
 				raise Exception("game not started")
 			return self._game
 
-	def get_game_interaction(self) -> GameInteraction:
+	def get_game_interaction(self) -> GameHistory:
 		with self._lock:
 			if self._game is None:
 				raise Exception("game not started")
-			return GameInteraction(self._game)
+			return self._game.history

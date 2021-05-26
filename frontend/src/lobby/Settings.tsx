@@ -18,6 +18,12 @@ export default function Settings(props: Props) {
 		}
 	})
 
+	//const roundOptions = data?.maxRounds ? data.maxRounds : 10
+	//const a = [...Array(roundOptions).keys()]
+
+	//console.log(roundOptions)
+	//console.log()
+
 	return (
 		<div>
 			<FormControl disabled={props.lobby.canStart == null}>
@@ -31,6 +37,17 @@ export default function Settings(props: Props) {
 						)
 					}
 				</Select>
+
+				{/* <InputLabel>RundenAnzahl</InputLabel>
+				<Select
+					//onChange={(ev) => setLobbySettings({ variables: { mode: props.lobby.mode, maxRounds: ev.target.value as number } })}
+					value={props.lobby.maxRounds}>
+					{
+						[...Array(roundOptions).keys()].slice(1).map(amount =>
+							<MenuItem key={amount} value={amount}>{amount}</MenuItem>
+						)
+					}
+				</Select> */}
 			</FormControl>
 		</div>
 	)
@@ -38,6 +55,7 @@ export default function Settings(props: Props) {
 
 interface LobbyOptionsResult {
 	modes: string[]
+	//maxRounds: number
 }
 
 const LOBBY_OPTIONS = gql`

@@ -67,6 +67,7 @@ const INFO = gql`
 		lobby {
 			code
 			mode
+			maxRounds
 			players {
 				id
 				name

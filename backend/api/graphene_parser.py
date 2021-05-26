@@ -1,71 +1,75 @@
-from .types import User as UserType, PlayerState as PlayerStateType, RoundState as RoundStateType, TrickState as TrickStateType, PlayedCard, PlayableCard, RequiredAction
-from game.player import PlayerState, PlayerTask, HandCard, User
-from game.trick import TrickState, TrickCard
-from game.round import RoundState
+from .types import User as UserType, PlayerState, RoundState, TrickState, PlayedCard, PlayableCard, RequiredAction
+
+from game.card import Card
+from game.game_history import GameHistory
+from game.round import Round
+from game.trick import Trick
+from game.player import Player, TaskInfo, User
 from game.card_decks import CardDecks
 
-from typing import List
 
-def parse_lobby():
-    pass
-def parse_graphene_lobby():
-    pass
+def get_player_states(history: GameHistory) -> list[PlayerState]:
+    return __parse_players(history.get_players())
 
-def parse_login_information():
-    pass
-def parse_graphene_login_information():
-    pass
+def get_hand(history: GameHistory, user: User) -> list[PlayableCard]:
+    cards = history.get_hand_cards_sync(user.user_id)
+    if cards is not None:
+        return __parse_hand_cards(cards, history.get_playable_sync(user.user_id))
+
+def get_action(history: GameHistory, user: User) -> RequiredAction:
+    task = history.get_player_task_sync(user.user_id)
+    if task is not None:
+        return __parse_player_task(task)
+
+def get_trick_state(history: GameHistory) -> TrickState:
+    trick = history.get_curr_trick_sync()
+    if trick is not None:
+        print("Parser: ", trick.__dict__)
+        return __parse_trick(trick)
+
+def get_round_state(history: GameHistory) -> RoundState:
+    curr_round = history.get_curr_round_sync()
+    if curr_round is not None:
+        return __parse_round(curr_round, history.get_last_trick_sync())
+
+
+def __parse_round(rd: Round, last_trick: Trick) -> RoundState:
+    return RoundState(trump_color=rd.trump_color, trump_card=rd.trump_card.id, round=rd.round_number, past_trick=__parse_trick(last_trick))
+
+
+def __parse_trick(trick: Trick) -> TrickState:
+    if trick is not None:
+        return TrickState(lead_color=trick.lead_color, lead_card=__parse_trick_card(trick, trick.lead_card), round=trick.trick_number, deck=__parse_trick_cards(trick))
+
+def __parse_trick_cards(trick: Trick) -> list[PlayedCard]:
+    return [__parse_trick_card(trick, card) for card in trick.get_cards()]
+
+def __parse_trick_card(trick: Trick, card: Card):
+    if card is not None:
+        print("Trick ", trick)
+        player = trick.get_player(card.id)
+        return PlayedCard(id=card.id, player=parse_user(player.user), is_winning=(trick.get_current_winner()==player))
+
+
+def __parse_hand_cards(cards: list[Card], playable_cards: list[str]=None) -> list[PlayableCard]:
+    if cards is not None:
+        return [__parse_hand_card(card, playable_cards) for card in cards]
+
+def __parse_hand_card(card: Card, playable_cards: list[str]) -> PlayableCard:
+    playable = True if playable_cards is None else (card.id in playable_cards)
+    return PlayableCard(id=card.id, playable=playable, variants=__parse_hand_cards(card.variants))
+
+
+def __parse_player_task(task: TaskInfo) -> RequiredAction:
+    print("Task", task.task_type)
+    return RequiredAction(type=task.task_type, options=task.options)
+
+def __parse_players(players: list[Player]) -> list[PlayerState]:
+    return [__parse_player(p) for p in players]
+
+def __parse_player(player: Player) -> PlayerState:
+    return PlayerState(player=parse_user(player.user), score=player.score, is_active=player.is_active, tricks_called=player.tricks_called, tricks_made=player.tricks_made)
+
 
 def parse_user(user: User) -> UserType:
     return UserType(id=user.user_id, name=user.name)
-def parse_graphene_user(user: UserType) -> User:
-    return User(user.id, user.name)
-
-def parse_player_state(ps: PlayerState) -> PlayerStateType:
-    return PlayerStateType(player=parse_user(ps.player), score=ps.score, is_active=ps.is_active, tricks_called=ps.tricks_called, tricks_made=ps.tricks_made)
-def parse_graphene_player_state(ps: PlayerStateType) -> PlayerState:
-    return PlayerState(parse_graphene_user(ps.player), ps.score, ps.is_active, ps.tricks_called, ps.tricks_made)
-
-def __parse_trick_card(tc: TrickCard) -> PlayedCard:
-    return PlayedCard(id=tc.card_id, player=parse_user(tc.player), is_winning=tc.is_winning)
-def __parse_played_card(pc: PlayedCard) -> TrickCard:
-    return TrickCard(pc.id, parse_graphene_user(pc.player), pc.is_winning)
-
-def parse_trick_cards(tcs: List[TrickCard]) -> List[PlayedCard]:
-    return [__parse_trick_card(card) for card in tcs]
-def parse_played_cards(pcs: List[PlayedCard]) -> List[TrickCard]:
-    return [__parse_played_card(card) for card in pcs]
-
-def __parse_hand_card(hc: HandCard) -> PlayableCard:
-    return PlayableCard(id=hc.card_id, playable=hc.playable, variants=parse_hand_cards(hc.variants))
-def __parse_playable_card(pc: PlayableCard) -> HandCard:
-    return HandCard(pc.id, pc.playable, parse_playable_cards(pc.variants))
-
-def parse_hand_cards(hcs: List[HandCard]) -> List[PlayableCard]:
-    return [__parse_hand_card(card) for card in hcs]
-def parse_playable_cards(pcs: List[PlayableCard]) -> List[HandCard]:
-    return [__parse_playable_card(card) for card in pcs]
-
-def parse_trick_state(ts: TrickState) -> TrickStateType:
-    player_states = [parse_player_state(player_state) for player_state in ts.players_states]
-    if ts.lead_card is not None: lead_card = __parse_trick_card(ts.lead_card)
-    else: lead_card = None
-    if ts.turn is not None: turn = parse_user(ts.turn)
-    else: turn = None
-    if ts.cards is not None: deck = parse_trick_cards(ts.cards)
-    else: deck = None
-    return TrickStateType(player_states=player_states, lead_color=ts.lead_color, lead_card=lead_card, round=ts.trick_number, turn=turn, deck=deck)
-def parse_graphene_trick_state(ts: TrickStateType) -> TrickState:
-    player_states = [parse_graphene_player_state(player_state) for player_state in ts.player_states]
-    lead_card = __parse_played_card(ts.lead_card)
-    turn = parse_graphene_user(ts.turn)
-    cards = parse_played_cards(ts.deck)
-    return TrickState(player_states, ts.lead_color, lead_card, ts.round, turn, cards)
-
-def parse_player_task(pt: PlayerTask) -> RequiredAction:
-    return RequiredAction(type=pt.task_type, options=pt.options)
-def parse_required_action(ra: RequiredAction) -> PlayerTask:
-    return PlayerTask(ra.type, ra.options)
-
-def parse_round_state(rs: RoundState) -> RoundStateType:
-    return RoundStateType(trump_color=rs.trump_color, trump_card=CardDecks.CARDS.get(rs.trump_card), round=rs.round_number, past_trick=None if rs.past_trick is None else parse_trick_cards(rs.past_trick))

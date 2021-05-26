@@ -26,3 +26,6 @@ class CardDecks:
     CARDS = { card.id: card for card in (__STANDARD_CARDS + __SPECIAL_CARDS_1 + __SPECIAL_CARDS_2 + __VARIANTS) }
     TRUMP_SELECTION_CARDS = ["wizard", "dragon", "werewolf", "juggler", "cloud", "foozard"]
     NO_TRUMP_CARDS = ["fool", "fairy", "bomb"]
+
+    def get_max_rounds(mode: str, player_count: int):
+        return len(CardDecks.MODES[mode]) // player_count
