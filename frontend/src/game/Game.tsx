@@ -12,11 +12,18 @@ import Hand from "./Hand"
 import ScoreBoard from "./ScoreBoard"
 import TrumpCard from "./card/TrumpCard"
 import PastTrick from "./PastTrick"
+import usePlayCard from "./card/usePlayCard"
 
 export default function Game() {
 	const classes = useStyles()
 	const { data } = useQuery<Info>(GET_INFO, { pollInterval: 1000 })
-	const [, drop] = useDrop({ accept: "card" })
+	const playCard = usePlayCard()
+	const [, drop] = useDrop({
+		accept: "card",
+		drop(item: any) {
+			playCard(item.id)
+		}
+	})
 	const [rootRef, setRootRef] = useState<HTMLDivElement | null>(null)
 
 	// prevents redraws
@@ -36,29 +43,33 @@ export default function Game() {
 		return <Redirect to="/lobby" />
 	}
 
-	const { gameInfo: { hand, trickState, roundState } } = data
+	const { gameInfo: { hand, trickState, roundState, playerStates } } = data
+
+	console.log("New player state:\n" + JSON.stringify(playerStates))
 
 	return (
 		<div className={classes.root} ref={setRootRef}>
 			<div className={classes.dropArea} ref={drop}>
-				<Deck cards={trickState.deck ?? []} />
+				<Deck cards={trickState?.deck ?? []} />
 
 				<TrumpCard
 					trumpCard={roundState.trumpCard}
 					trumpColor={roundState.trumpColor}
-					leadCard={trickState.leadCard?.id ?? null}
-					leadColor={trickState.leadColor}
+					leadCard={trickState?.leadCard?.id ?? null}
+					leadColor={trickState?.leadColor}
 					className={classes.trumpCard} />
 			</div>
 
 			<PastTrick
 				boundary={rootRef}
 				className={classes.pastTrick}
-				pastTrick={roundState.pastTrick} />
+				pastTrick={roundState.pastTrick?.deck} />
 
 			<ScoreBoard
+				roundState={roundState}
 				className={classes.scoreBoard}
-				trickState={trickState} />
+				trickState={trickState} 
+				playerStates={playerStates}/>
 
 			<Hand cards={hand ?? []} />
 
@@ -114,6 +125,17 @@ const GET_INFO = gql`
 		isWinning
 	}
 
+	fragment TrickStateFragment on TrickState {
+		leadColor
+		leadCard {
+			...PlayedCardFragment
+		}
+		round
+		deck {
+			...PlayedCardFragment
+		}
+	}
+
 	query {
 		gameInfo {
 			hand {
@@ -125,33 +147,24 @@ const GET_INFO = gql`
 				}
 			}
 			trickState {
-				playerStates {
-					player {
-						...UserFragment
-					}
-				score
-				tricksCalled
-				tricksMade
-				}
-				leadColor
-				leadCard {
-					...PlayedCardFragment
-				}
-				round
-				turn {
-					...UserFragment
-				}
-				deck {
-					...PlayedCardFragment
-				}
+				...TrickStateFragment
 			}
 			roundState {
 				trumpColor
 				trumpCard
 				round
 				pastTrick {
-					...PlayedCardFragment
+					...TrickStateFragment
 				}
+			}
+			playerStates {
+				player {
+					...UserFragment
+				}
+				score
+				isActive
+				tricksCalled
+				tricksMade
 			}
 		}
 		requiredAction {

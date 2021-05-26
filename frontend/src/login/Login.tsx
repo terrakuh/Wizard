@@ -1,5 +1,5 @@
-import React from "react"
-import { Button, makeStyles, Paper, TextField } from "@material-ui/core"
+import { useState } from "react"
+import { Checkbox, FormControlLabel, makeStyles, Paper, TextField } from "@material-ui/core"
 import gql from "graphql-tag"
 import { useLazyQuery, useMutation } from "@apollo/client"
 import { Loading } from "../util"
@@ -7,15 +7,17 @@ import CryptoJS from "crypto-js"
 import { useSnackbar } from "notistack"
 import { generatePasswordHash } from "../util/security"
 import { useHistory } from "react-router"
+import { ThemedButton } from "../theme"
 
 export default function Login() {
 	const classes = useStyles()
 	const history = useHistory()
 	const { enqueueSnackbar } = useSnackbar()
-	const [loggingIn, setLogginIn] = React.useState(false)
-	const [name, setName] = React.useState("")
-	const [password, setPassword] = React.useState("")
-	const [login] = useMutation(LOGIN)
+	const [loggingIn, setLogginIn] = useState(false)
+	const [name, setName] = useState("")
+	const [password, setPassword] = useState("")
+	const [stayLoggedIn, setStayLoggedIn] = useState(false)
+	const [login] = useMutation<any, LoginVariables>(LOGIN)
 	const [fetchLoginInformation, { loading }] = useLazyQuery<GetLoginInformation>(GET_LOGIN_INFORMATION, {
 		onCompleted(data) {
 			setLogginIn(true)
@@ -28,9 +30,9 @@ export default function Login() {
 				return
 			}
 
-			login({ variables: { name, passwordHash } })
+			login({ variables: { name, passwordHash, stayLoggedIn } })
 				.then(() => enqueueSnackbar("Erfolgreich eingeloggt", { variant: "success" }))
-				.then(() => history.push("/game"))
+				.then(() => history.push("/"))
 				.catch(err => enqueueSnackbar(`Login fehlgeschlagen: ${err}`, { variant: "error" }))
 				.finally(() => setLogginIn(false))
 		},
@@ -63,13 +65,20 @@ export default function Login() {
 					onChange={ev => setPassword(ev.target.value)}
 					fullWidth />
 
-				<Button
+				<FormControlLabel
+					label="Angemeldet bleiben"
+					labelPlacement="start"
+					control={<Checkbox
+						onChange={(_, checked) => setStayLoggedIn(checked)}
+						checked={stayLoggedIn} />} />
+
+				<ThemedButton
 					disabled={name === "" || password === ""}
 					onClick={() => fetchLoginInformation({ variables: { name } })}
 					variant="contained"
 					color="primary">
 					Einloggen
-			</Button>
+				</ThemedButton>
 			</Paper>
 		</div>
 	)
@@ -106,9 +115,15 @@ const GET_LOGIN_INFORMATION = gql`
 	}
 `
 
+interface LoginVariables {
+	name: string
+	passwordHash: string
+	stayLoggedIn: boolean
+}
+
 const LOGIN = gql`
-	mutation ($name: String!, $passwordHash: String!) {
-		login(name: $name, passwordHash: $passwordHash) {
+	mutation ($name: String!, $passwordHash: String!, $stayLoggedIn: Boolean!) {
+		login(name: $name, passwordHash: $passwordHash, stayLoggedIn: $stayLoggedIn) {
 			id
 			name
 		}

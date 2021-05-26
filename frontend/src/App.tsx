@@ -1,50 +1,34 @@
-import React from "react"
-import { AppBar, IconButton, makeStyles, Theme, Toolbar, Typography } from "@material-ui/core"
+import { makeStyles } from "@material-ui/core"
 import { Redirect, Route, Switch } from "react-router-dom"
-import { SettingsDialog } from "./settings"
-import { Settings as SettingsIcon } from "@material-ui/icons"
 import RequiresLogin from "./util/RequiresLogin"
 import { Login, Register } from "./login"
 import Lobby from "./lobby"
 import Game from "./game"
 import Deck from "./game/Deck"
+import { PlayedCard } from "./game/card"
+import Calendar from "./calendar"
+import Navigation from "./Navigation"
+import Hand from "./game/Hand"
 
 export default function App() {
 	const classes = useStyles()
-	const [openSettings, setOpenSettings] = React.useState(false)
 
 	return (
 		<div className={classes.root}>
-			<AppBar position="static">
-				<Toolbar>
-					<Typography
-						className={classes.title}
-						variant="h6"
-						color="inherit">
-						Wizard Online
-					</Typography>
-					<IconButton color="inherit" onClick={() => setOpenSettings(true)}>
-						<SettingsIcon />
-					</IconButton>
-				</Toolbar>
-			</AppBar>
-
-			<SettingsDialog
-				open={openSettings}
-				onClose={() => setOpenSettings(false)} />
+			<Navigation />
 
 			<div className={classes.content}>
 				<Switch>
-					<Route path="/login">
+					<RequiresLogin path="/login" invertedLogicPath="/">
 						<Login />
-					</Route>
+					</RequiresLogin>
 
-					<Route path="/register/:token">
+					<RequiresLogin path="/register/:token" invertedLogicPath="/">
 						<Register />
-					</Route>
-					<Route path="/register">
+					</RequiresLogin>
+					<RequiresLogin path="/register" invertedLogicPath="/">
 						<Register />
-					</Route>
+					</RequiresLogin>
 
 					<RequiresLogin path="/lobby/:code">
 						<Lobby />
@@ -55,6 +39,10 @@ export default function App() {
 
 					<RequiresLogin path="/game">
 						<Game />
+					</RequiresLogin>
+
+					<RequiresLogin path="/calendar">
+						<Calendar />
 					</RequiresLogin>
 
 					<Route exact path="/test">
@@ -91,7 +79,61 @@ export default function App() {
 									name: "Yunus"
 								}
 							}
-						]}/>
+						]} />
+					</Route>
+
+					<Route path="/test_hand">
+						<Hand cards={[
+							{
+								id: "green_9",
+								playable: true,
+								variants: null
+							},
+							{
+								id: "blue_9",
+								playable: false,
+								variants: null
+							},
+							{
+								id: "red_9",
+								playable: false,
+								variants: null
+							},
+							{
+								id: "blue_wizard",
+								playable: false,
+								variants: null
+							},
+							{
+								id: "red_wizard",
+								playable: false,
+								variants: null
+							},
+							{
+								id: "yellow_wizard",
+								playable: false,
+								variants: null
+							},
+							{
+								id: "green_wizard",
+								playable: false,
+								variants: null
+							}
+						]} />
+					</Route>
+
+					<Route path="/test1">
+						<PlayedCard
+							discoEffect="hue"
+							size="small"
+							card={{
+								id: "green_9",
+								isWinning: false,
+								player: {
+									id: 1,
+									name: "Yunus"
+								}
+							}} />
 					</Route>
 
 					<Route path="/"><Redirect to="/lobby" /></Route>
@@ -101,7 +143,7 @@ export default function App() {
 	)
 }
 
-const useStyles = makeStyles((theme: Theme) => ({
+const useStyles = makeStyles(theme => ({
 	root: {
 		display: "flex",
 		flexDirection: "column",
@@ -111,9 +153,7 @@ const useStyles = makeStyles((theme: Theme) => ({
 	content: {
 		backgroundColor: theme.palette.background.default,
 		flexGrow: 1,
-		padding: theme.spacing()
-	},
-	title: {
-		flexGrow: 1
+		padding: theme.spacing(1),
+		overflow: "hidden"
 	}
 }))

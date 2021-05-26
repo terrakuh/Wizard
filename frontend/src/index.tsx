@@ -5,13 +5,14 @@ import App from "./App"
 import * as serviceWorkerRegistration from "./serviceWorkerRegistration"
 import reportWebVitals from "./reportWebVitals"
 import { BrowserRouter } from "react-router-dom"
-import { createMuiTheme, IconButton, ThemeProvider } from "@material-ui/core"
+import { IconButton } from "@material-ui/core"
 import { DndProvider } from "react-dnd"
 import { HTML5Backend } from "react-dnd-html5-backend"
 import { SnackbarProvider } from "notistack"
 import { ApolloClient, ApolloProvider, InMemoryCache } from "@apollo/client"
 import { Cancel as CancelIcon } from "@material-ui/icons"
 import { SettingsProvider } from "./settings"
+import { ThemeParkProvider } from "./theme"
 
 const client = new ApolloClient({
 	cache: new InMemoryCache(),
@@ -28,30 +29,14 @@ const client = new ApolloClient({
 	uri: "/api/gql"
 })
 
-const theme = createMuiTheme({
-	palette: {
-		type: "dark",
-		background: {
-			paper: "#303443",
-			default: "#242733"
-		},
-		primary: {
-			main: "#5BB14E"
-		},
-		secondary: {
-			main: "#4E5BB1"
-		}
-	}
-})
-
 const notistackRef = React.createRef<SnackbarProvider>()
 
 ReactDOM.render(
 	<React.Fragment>
 		<ApolloProvider client={client}>
-			<ThemeProvider theme={theme}>
-				<BrowserRouter>
-					<SettingsProvider>
+			<BrowserRouter>
+				<SettingsProvider>
+					<ThemeParkProvider>
 						<SnackbarProvider
 							ref={notistackRef}
 							preventDuplicate
@@ -64,9 +49,9 @@ ReactDOM.render(
 								<App />
 							</DndProvider>
 						</SnackbarProvider>
-					</SettingsProvider>
-				</BrowserRouter>
-			</ThemeProvider>
+					</ThemeParkProvider>
+				</SettingsProvider>
+			</BrowserRouter>
 		</ApolloProvider>
 	</React.Fragment>,
 	document.getElementById("root")

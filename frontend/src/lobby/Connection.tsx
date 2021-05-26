@@ -1,11 +1,12 @@
 import React from "react"
-import { Button, IconButton, makeStyles, TextField, Theme } from "@material-ui/core"
+import { IconButton, makeStyles, TextField, Theme } from "@material-ui/core"
 import { FileCopy as FileCopyIcon } from "@material-ui/icons"
 import { ApolloError, gql, useMutation } from "@apollo/client"
 import { Lobby } from "../types"
 import { useParams } from "react-router-dom"
 import { Loading } from "../util"
 import { useSnackbar } from "notistack"
+import { ThemedButton } from "../theme"
 
 interface Props {
 	lobbyInfo?: Lobby
@@ -62,20 +63,20 @@ export default function Connection(props: Props) {
 				{
 					props.lobbyInfo == null ?
 						codeParam == null && code === "" ?
-							<Button
+							<ThemedButton
 								onClick={handleMainAction(false)}
 								variant="contained"
 								color="primary">
 								Erstellen
-							</Button> :
-							<Button
+							</ThemedButton> :
+							<ThemedButton
 								onClick={handleMainAction(true)}
 								variant="contained"
 								color="primary">
 								Beitreten
-							</Button> :
+							</ThemedButton> :
 						props.lobbyInfo.canStart == null ? null :
-							<Button
+							<ThemedButton
 								variant="contained"
 								color="primary"
 								onClick={async () => {
@@ -88,7 +89,7 @@ export default function Connection(props: Props) {
 								}}
 								disabled={!props.lobbyInfo.canStart}>
 								Starten
-							</Button>
+							</ThemedButton>
 				}
 			</div>
 

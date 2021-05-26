@@ -1,5 +1,3 @@
-from game.game_interaction import GameInteraction
-from game.player import Player
 from datetime import datetime, timedelta
 import functools
 from threading import Lock
@@ -10,16 +8,24 @@ from fastapi import Request
 from database import Database
 from api.security import UserAuthentication
 from inspect import getfullargspec, iscoroutine
+
 from lobby.manager import Manager
 from lobby.lobby import Lobby
-from game.round import Round
-from game.trick import Trick
+
 from game.player import User
+from game.game import Game
+from game.game_history import GameHistory
+
+
+class Cookie:
+	def __init__(self, value: str, max_age: Optional[int] = None) -> None:
+		self.value = value
+		self.max_age = max_age
 
 
 class Response:
 	def __init__(self):
-		self.cookies: Dict[str, Union[None, str]] = {}
+		self.cookies: Dict[str, Union[None, Cookie]] = {}
 
 
 class State:
@@ -87,32 +93,35 @@ def smart_api(access_control: bool = True, cache: Cache = None):
 			spec = getfullargspec(func)
 			additional = {}
 			for key, value in spec.annotations.items():
-				if value is Database:
-					additional[key] = state.db
-				elif value is Response:
-					additional[key] = state.response
-				elif value is Request:
-					additional[key] = request
-				elif value is Manager:
-					additional[key] = state.lobby_manager
-				elif value is User:
-					additional[key] = user
-				elif value is Optional[Lobby]:
-					try: assert_lobby()
-					except: pass
-					additional[key] = lobby
-				elif value is Lobby:
-					assert_lobby()
-					additional[key] = lobby
-				elif value is Optional[GameInteraction]:
-					try:
+				try:
+					if value is Database:
+						additional[key] = state.db
+					elif value is Response:
+						additional[key] = state.response
+					elif value is Request:
+						additional[key] = request
+					elif value is Manager:
+						additional[key] = state.lobby_manager
+					elif value is User:
+						additional[key] = user
+					elif value is Optional[Lobby]:
+						try: assert_lobby()
+						except: pass
+						additional[key] = lobby
+					elif value is Lobby:
 						assert_lobby()
-						additional[key] = lobby.get_game_interaction()
-					except:
-						additional[key] = None
-				elif value is GameInteraction:
-					assert_lobby()
-					additional[key] = lobby.get_game_interaction()
+						additional[key] = lobby
+					elif value is Optional[GameHistory]:
+						try:
+							assert_lobby()
+							additional[key] = lobby.get_game_history()
+						except:
+							additional[key] = None
+					elif value is GameHistory:
+						assert_lobby()
+						additional[key] = lobby.get_game_history()
+				except Exception as e:
+					print("here", key, e)
 			# execute
 			result = func(root, info, **kwargs, **additional)
 			if iscoroutine(result):

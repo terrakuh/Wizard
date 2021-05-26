@@ -1,4 +1,5 @@
 import { SpriteMap } from "use-sound/dist/types"
+import { ThemeOptions } from "../theme"
 
 export const notificationSpriteMap: SpriteMap = {
 	"Alarm": [0, 1417],
@@ -15,4 +16,11 @@ export interface Settings {
 		desktop: boolean
 		playerTurn: boolean
 	}
+	messages: {
+		signal: {
+			enabled: boolean
+			number: string
+		}
+	}
+	theme: ThemeOptions
 }

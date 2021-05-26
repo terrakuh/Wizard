@@ -1,4 +1,4 @@
-from graphene import ObjectType, ID, String, NonNull, List, Int, Boolean, Field
+from graphene import ObjectType, ID, String, NonNull, List, Int, Boolean, Field, Float
 
 
 class User(ObjectType):
@@ -9,6 +9,8 @@ class User(ObjectType):
 class Lobby(ObjectType):
 	code = NonNull(String)
 	mode = NonNull(String)
+	round_limit = NonNull(Int)
+	max_rounds = NonNull(Int)
 	players = NonNull(List(NonNull(User)))
 	can_start = Boolean()
 
@@ -21,6 +23,7 @@ class LoginInformation(ObjectType):
 class PlayerState(ObjectType):
 	player = NonNull(User)
 	score = NonNull(Int)
+	is_active = NonNull(Boolean)
 	tricks_called = Int()
 	tricks_made = Int()
 
@@ -32,11 +35,9 @@ class PlayedCard(ObjectType):
 
 
 class TrickState(ObjectType):
-	player_states = NonNull(List(NonNull(PlayerState)))
 	lead_color = String()
 	lead_card = Field(PlayedCard)
 	round = Int()
-	turn = Field(User)
 	deck = List(NonNull(PlayedCard))
 
 
@@ -50,7 +51,7 @@ class RoundState(ObjectType):
 	trump_color = String()
 	trump_card = NonNull(String)
 	round = NonNull(Int)
-	past_trick = List(NonNull(PlayedCard))
+	past_trick = Field(TrickState)
 
 
 class RequiredAction(ObjectType):
@@ -60,5 +61,22 @@ class RequiredAction(ObjectType):
 
 class GameInfo(ObjectType):
 	round_state = NonNull(RoundState)
-	trick_state = NonNull(TrickState)
+	trick_state = Field(TrickState)
+	player_states = NonNull(List(NonNull(PlayerState)))
 	hand = NonNull(List(NonNull(PlayableCard)))
+
+
+class Appointment(ObjectType):
+	id = NonNull(ID)
+	start = NonNull(String)
+	end = NonNull(String)
+	participants = NonNull(List(NonNull(User)))
+
+
+class ActionDuration(ObjectType):
+	type = NonNull(String)
+	duration = NonNull(Float)
+
+
+class ResidentSleeper(ObjectType):
+	averages = NonNull(List(NonNull(ActionDuration)))

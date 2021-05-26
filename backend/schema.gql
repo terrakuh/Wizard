@@ -1,5 +1,3 @@
-scalar DateTime
-
 type User {
 	id: ID!
 	name: String!
@@ -13,14 +11,20 @@ type LoginInformation {
 type Lobby {
 	code: String!
 	mode: String!
-	roundLimit: Int
+	roundLimit: Int!
+	maxRounds: Int!
 	players: [User!]!
 	canStart: Boolean
 }
 
+########################################
+############## GAME LOGIC ##############
+########################################
+
 type PlayerState {
 	player: User!
 	score: Int!
+	isActive: Boolean!
 	tricksCalled: Int
 	tricksMade: Int
 }
@@ -29,7 +33,7 @@ type RoundState {
 	trumpColor: String
 	trumpCard: String
 	round: Int!
-	pastTrick: [PlayedCard!]
+	pastTrick: [TrickState!]
 }
 
 type PlayedCard {
@@ -39,11 +43,9 @@ type PlayedCard {
 }
 
 type TrickState {
-	playerStates: [PlayerState!]!
 	leadColor: String
 	leadCard: PlayedCard
 	round: Int
-	turn: User
 	deck: [PlayedCard!]
 }
 
@@ -61,14 +63,33 @@ type RequiredAction {
 type GameInfo {
 	roundState: RoundState!
 	trickState: TrickState!
+	playerStates: [PlayerState!]!
 	hand: [PlayableCard!]!
 }
 
-# TODO
-# type Appointment {
-# 	start: DateTime!
-# 	end: DateTime
-# }
+########################################
+################# MISC #################
+########################################
+
+type Appointment {
+	id: ID!
+	start: String!
+	end: String!
+	participants: [User!]!
+}
+
+########################################
+############## STATISTICS ##############
+########################################
+
+type ActionDuration {
+	type: String!
+	duration: Float!
+}
+
+type ResidentSleeper {
+	averages: [ActionDuration!]!
+}
 
 type Query {
 	# user management
@@ -83,6 +104,12 @@ type Query {
 	# game logic
 	gameInfo: GameInfo
 	requiredAction: RequiredAction
+
+	# misc
+	appointments: [Appointment!]!
+
+	# statistics
+	residentSleeper: ResidentSleeper!
 }
 
 ########################################
@@ -92,18 +119,23 @@ type Query {
 type Mutation {
 	# user management
 	register(name: String!, passwordHash: String!, salt: String!, hashType: String!, token: String!): Boolean!
-	login(name: String!, passwordHash: String!): User
+	login(name: String!, passwordHash: String!, stayLoggedIn: Boolean! = false): User
 	logout: Boolean!
 
 	# lobby management
 	createLobby: String!
-	setLobbySettings(mode: String): Boolean!
+	setLobbySettings(mode: String, roundLimit: Int): Boolean!
 	joinLobby(code: String!): Boolean!
 	leaveLobby: Boolean!
 	startGame: Boolean!
 
 	# game logic
 	completeAction(option: String!): Boolean!
+
+	# misc
+	joinAppointment(id: ID!) Boolean!
+	leaveAppointment(id: ID!) Boolean!
+	createAppointment(start: String!, end: String!) Boolean!
 }
 
 schema {

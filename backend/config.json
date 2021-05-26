@@ -1,0 +1,17 @@
+{
+	"$schema": "./config.schema.json",
+	"communicators": {
+		"signal": {
+			"enabled": false,
+			"api": "http://localhost:8089",
+			"number": "+1234567890"
+		},
+		"email": {
+			"enabled": false,
+			"host": "localhost",
+			"port": 25,
+			"user": "noreply@localhost",
+			"from": "Wizardus jetzt Spielus <noreply@localhost>"
+		}
+	}
+}

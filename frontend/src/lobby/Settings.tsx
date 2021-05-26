@@ -1,5 +1,5 @@
 import { useMutation, useQuery } from "@apollo/client"
-import { FormControl, InputLabel, MenuItem, Select } from "@material-ui/core"
+import { FormControl, InputLabel, makeStyles, MenuItem, Select } from "@material-ui/core"
 import gql from "graphql-tag"
 import { useSnackbar } from "notistack"
 import { Lobby } from "../types"
@@ -9,6 +9,7 @@ interface Props {
 }
 
 export default function Settings(props: Props) {
+	const classes = useStyles()
 	const { enqueueSnackbar } = useSnackbar()
 	const { data } = useQuery<LobbyOptionsResult>(LOBBY_OPTIONS)
 	const [setLobbySettings] = useMutation<any, SetLobbySettingsVariables>(SET_LOBBY_SETTINGS, {
@@ -19,11 +20,14 @@ export default function Settings(props: Props) {
 	})
 
 	return (
-		<div>
-			<FormControl disabled={props.lobby.canStart == null}>
-				<InputLabel>SpielModus</InputLabel>
+		<FormControl
+			className={classes.root}
+			component="fieldset"
+			disabled={props.lobby.canStart == null}>
+			<FormControl>
+				<InputLabel>Spiel-Modus</InputLabel>
 				<Select
-					onChange={(ev) => setLobbySettings({ variables: { mode: ev.target.value as string } })}
+					onChange={ev => setLobbySettings({ variables: { mode: ev.target.value as string, roundLimit: null } })}
 					value={props.lobby.mode}>
 					{
 						data?.modes.map(mode =>
@@ -32,9 +36,28 @@ export default function Settings(props: Props) {
 					}
 				</Select>
 			</FormControl>
-		</div>
+
+			<FormControl>
+				<InputLabel>Runden-Anzahl</InputLabel>
+				<Select
+					onChange={ev => setLobbySettings({ variables: { mode: null, roundLimit: ev.target.value as number } })}
+					value={props.lobby.roundLimit}>
+					{
+						new Array(props.lobby.maxRounds).fill(0).map((_, index) =>
+							<MenuItem key={index} value={index + 1}>{index + 1}</MenuItem>
+						)
+					}
+				</Select>
+			</FormControl>
+		</FormControl>
 	)
 }
+
+const useStyles = makeStyles(theme => ({
+	root: {
+		gap: theme.spacing(1)
+	}
+}))
 
 interface LobbyOptionsResult {
 	modes: string[]
@@ -47,11 +70,12 @@ const LOBBY_OPTIONS = gql`
 `
 
 interface SetLobbySettingsVariables {
-	mode: string
+	mode: string | null
+	roundLimit: number | null
 }
 
 const SET_LOBBY_SETTINGS = gql`
-	mutation ($mode: String!) {
-		setLobbySettings(mode: $mode)
+	mutation ($mode: String, $roundLimit: Int) {
+		setLobbySettings(mode: $mode, roundLimit: $roundLimit)
 	}
 `

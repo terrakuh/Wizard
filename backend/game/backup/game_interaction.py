@@ -1,13 +1,32 @@
-from .game import Game
-from .round import Round, RoundState
-from .trick import Trick, TrickState
-from .player import PlayerState, TaskState, HandCard, User
+from .game_history import GameHistory
+from .round import Round
+from .trick import Trick
+from .player import Player
 
-from typing import List, Optional
+class TrickCard:
+    def __init__(self, card_id: str, player: Player, is_winning: bool) -> None:
+        pass
+
+class TrickState:
+    def __init__(self, lead_color: str, lead_card: TrickCard, trick_number: int, card_stack: list[TrickCard]) -> None:
+        pass
+
+class RoundState:
+    def __init__(self, trump_color: str, trump_card: str, round_numer: int, past_trick: TrickState) -> None:
+        self.trump_color
+
+class PlayerState:
+    def __init__(self, player: Player) -> None:
+        self.user = player.user
+        self.score = player.score
+        self.tricks_called = player.tricks_called
+        self.tricks_made = player.tricks_made
+        self.is_active = player.is_active
+
 
 class GameInteraction:
-    def __init__(self, game: Game):
-        self.game = game
+    def __init__(self, history: GameHistory):
+        self.history = history
 
     def get_player_state(self, user: User) -> PlayerState:
         return self.game.players[user.user_id].get_state()
@@ -20,7 +39,7 @@ class GameInteraction:
         try:
             trick = self.__get_trick()
             return trick.get_state()
-        except:
+        except Exception:
             return TrickState([player.get_state() for player in self.game.players.values()])
 
     def get_hand_cards(self, user: User) -> List[HandCard]:

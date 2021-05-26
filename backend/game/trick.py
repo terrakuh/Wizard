@@ -1,47 +1,48 @@
-from .player import User, Player, PlayerState, HandCard
+from copy import deepcopy
+from .game_history import GameHistory
+from .player import Player
 from .card import Card
-from .card_decks import CardDecks
-from typing import List, Optional
 
 import logging
-import threading
 
 class Trick:
 
-    def __init__(self, mode: int, players: List[Player], first_player: int, trump_color: str, trick_number: int):
+    def __init__(self, history: GameHistory, first_player: int, trick_number: int, trump_color: str):
         """
         """
         
-        self.game_mode = mode
+        self.history = history
+
+        self.trick_number = trick_number
         self.first_player = first_player
         self.trump_color = trump_color
-        self.trick_number = trick_number
-        self.players = players
+        
+        self.lead_color: str = None
+        self.lead_card: Card = None
 
-        self.lead_color = None
-        self.lead_card = None
-        self.curr_player = self.first_player
-        self.card_stack_by_player = {}
-        self.card_stack_by_card = {}
+        self.curr_player: int = self.first_player
+        self.curr_winner = None
+        self.card_stack_by_player: dict[str, Card] = {}
+        self.card_stack_by_card: dict[str, Player] = {}
 
-        self.state_lock = threading.Lock()
-        self.__update_state()
-
-        logging.info("first player is: " + str(self.first_player) + ": " + str(self.players))
-
-    def do_trick(self):
-        logging.info("Trump color is " + str(self.trump_color))
-
-        for _ in range(len(self.players)):
+    def do_trick(self) -> tuple[Player, list[str]]:
+        players: list[Player] = self.history.get_players()
+        for _ in players:
             self.__play_card()
+            self.history.update_trick(self)
 
-        print("Returning curr winner: " + str(self.get_current_winner()))
-        return self.get_current_winner()
+        return (self.get_current_winner(), self.__get_after_effects())
+
+    def get_player(self, card_id: str) -> Player:
+        return self.card_stack_by_card[card_id]
+
+    def get_cards(self) -> list[Card]:
+        return list(self.card_stack_by_player.values())
 
     def __play_card(self):
-        player_count = len(self.players)
+        player_count = self.history.get_player_count_sync()
 
-        player = self.players[self.curr_player]
+        player: Player = self.history.get_player(self.curr_player)
 
         card_played = player.play_card(self.lead_color)
 
@@ -50,25 +51,30 @@ class Trick:
 
         logging.info("New stack: " + str(self.card_stack_by_player))
 
-        if not self.lead_color:
+        if self.lead_color is None:
             self.lead_card = card_played
             if card_played.color_bound:
                 self.lead_color = card_played.color
+                print("New lead color: " + self.lead_color)
                 logging.info("New lead color: " + self.lead_color)
 
+        self.curr_winner = self.get_current_winner()
         self.curr_player = (self.curr_player + 1) % player_count
-
-        self.__update_state()
 
 
     def get_current_winner(self) -> Player:
+        print(self.card_stack_by_player)
+        print(self.lead_color)
         curr_winning_card = None
         curr_max_value = -10
+        trump_color = self.trump_color
 
         for card in self.card_stack_by_player.values():
-            is_trump_color = False if (self.trump_color is None or card.color is None or not card.color_bound) else (card.color == self.trump_color)
+            print(card)
+            is_trump_color = False if (trump_color is None or card.color is None or not card.color_bound) else (card.color == trump_color)
 
             if card.color == self.lead_color or is_trump_color or not card.color_bound:
+                print("is valid")
                 cmp_value = card.value
                 if is_trump_color:
                     cmp_value += 13
@@ -77,61 +83,31 @@ class Trick:
                 if cmp_value > curr_max_value:
                     curr_max_value = cmp_value
                     curr_winning_card = card.id
-                
-            logging.info(f"Curr card: {card}, curr max: {curr_max_value}, curr Winner: {curr_winning_card}")
 
-        logging.info("Trick: " + str(self.card_stack_by_player) + "; trump: " + str(self.trump_color))
         logging.info("Trick was won by " + str(self.card_stack_by_card[curr_winning_card]))
 
         return self.card_stack_by_card[curr_winning_card]
 
-    def get_after_effect(self):
-        after_effect = None
+    def __get_after_effects(self) -> list[str]:
+        after_effects = []
 
-        if self.game_mode > 0:
+        if self.history.is_special_mode():
             for card in self.card_stack_by_player.values():
-                if card.card_type == "bomb" or card.card_type == "juggler":
-                    after_effect = card.card_type
-                elif card.card_type == "cloud":
-                    after_effect = None if "bomb" in self.card_stack_by_card.keys() else "cloud"
+                if card.card_type == "bomb":
+                    after_effects.append("bomb")
+                elif card.card_type == "juggler":
+                    after_effects.append("juggler")
+                elif card.card_type == "cloud" and not "bomb" in self.card_stack_by_card.keys():
+                    after_effects.append("cloud")
 
-        return after_effect
+        return after_effects
 
-    def get_state(self):
-        with self.state_lock:
-            return self.state
-
-    def __update_state(self):
-        with self.state_lock:
-            players =  [player.get_state() for player in self.players]
-            lead_color = self.lead_color
-
-            lead_card = None
-            if self.lead_color:
-                lead_card_id = self.lead_card.id
-                lead_card_player = self.card_stack_by_card[lead_card_id]
-                lead_card = TrickCard(lead_card_id, lead_card_player.user, (lead_card_player == self.get_current_winner()))
-
-            trick_number = self.trick_number
-            turn = self.players[self.curr_player].user
-            cards = self.get_card_states()
-            self.state = TrickState(players, lead_color, lead_card, trick_number, turn, cards)
-
-    def get_card_states(self):
-        return [TrickCard(card.id, player.user, (player == self.get_current_winner())) for card, player in zip(self.card_stack_by_player.values(), self.card_stack_by_card.values())]
-
-
-class TrickCard:
-    def __init__(self, card_id: str, player: User, is_winning: bool):
-        self.card_id = card_id
-        self.player = player
-        self.is_winning = is_winning
-
-class TrickState:
-    def __init__(self, player_states: List[PlayerState], lead_color: Optional[str] = None, lead_card: Optional[TrickCard] = None, trick_number: Optional[int] = None, turn: Optional[User] = None, cards: Optional[List[HandCard]] = None):
-        self.players_states = player_states
-        self.lead_color = lead_color
-        self.lead_card = lead_card
-        self.trick_number = trick_number
-        self.turn = turn
-        self.cards = cards
+    def __deepcopy__(self, memo):
+        cls = self.__class__
+        result = cls.__new__(cls)
+        memo[id(self)] = result
+        for k, v in self.__dict__.items():
+            if k == "history":
+                continue
+            setattr(result, k, deepcopy(v, memo))
+        return result

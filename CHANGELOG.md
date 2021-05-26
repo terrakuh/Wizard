@@ -1,5 +1,20 @@
 # Change Log
 
+## [Unreleased]
+### Added
+- Dockerfile
+- Parallel juggler action
+- Winning player to scoreboard
+- Appointments/calendar
+- Stay logged in option
+- Manual sorting of own hand cards
+- Customize theme
+- Round limit selection
+- Adding game history to database
+
+### Fixed
+- Missing notification
+
 ## [v0.5] - 2021-05-17
 ### Added
 - History for last trick

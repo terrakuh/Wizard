@@ -22,7 +22,12 @@ class CardDecks:
         "Jubiläum20": __STANDARD_CARDS +  __SPECIAL_CARDS_1,
         "Jubiläum25": __STANDARD_CARDS + __SPECIAL_CARDS_1 + __SPECIAL_CARDS_2,
     }
+    __CARD_EFFECTS = ["cloud_add", "cloud_sub"]
 
     CARDS = { card.id: card for card in (__STANDARD_CARDS + __SPECIAL_CARDS_1 + __SPECIAL_CARDS_2 + __VARIANTS) }
+    for card in __CARD_EFFECTS: CARDS[card] = card
     TRUMP_SELECTION_CARDS = ["wizard", "dragon", "werewolf", "juggler", "cloud", "foozard"]
     NO_TRUMP_CARDS = ["fool", "fairy", "bomb"]
+
+    def get_max_rounds(mode: str, player_count: int):
+        return len(CardDecks.MODES[mode]) // player_count

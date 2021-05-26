@@ -1,14 +1,17 @@
+from database.database import Database
+from game.game_history import GameHistory
 from game.player import User
 from threading import RLock
 from typing import Dict
 from .lobby import Lobby
-from datetime import datetime, timedelta
+from datetime import timedelta
 from random import choices
 from string import ascii_uppercase
 
 
 class Manager:
-	def __init__(self, max_lobbies: int = 8, inactive_timeout: timedelta = timedelta(minutes=20)) -> None:
+	def __init__(self, db: Database, max_lobbies: int = 8, inactive_timeout: timedelta = timedelta(minutes=20)) -> None:
+		self.db = db
 		self._lock = RLock()
 		self._lobbies: Dict[str, Lobby] = {}
 		self._player_code: Dict[str, str] = {}
@@ -19,6 +22,10 @@ class Manager:
 	# 	now = datetime.now()
 	# 	with self._lock:
 	# 		self._lobbies = {code: lobby for code, lobby in self._lobbies.items() if now < lobby.created + self._inative_timeout}
+	def _on_game_finish(self, history: GameHistory, lobby: Lobby):
+		with self._lock:
+			del self._lobbies[lobby.code]
+			self.db.queue_commit_game_history(history)
 
 	def create_lobby(self, user: User, code_length: int = 5) -> str:
 		code = "".join(choices(ascii_uppercase, k=code_length))
@@ -29,7 +36,7 @@ class Manager:
 				raise Exception("bad luck")
 			elif user.user_id in self._player_code:
 				raise Exception("player already in lobby")
-			self._lobbies[code] = Lobby(code)
+			self._lobbies[code] = Lobby(code, self._on_game_finish)
 			self.join_lobby(user, code)
 		return code
 
