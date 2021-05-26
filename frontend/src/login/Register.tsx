@@ -1,5 +1,5 @@
 import { useMutation } from "@apollo/client"
-import { Button, makeStyles, Paper, TextField, Theme } from "@material-ui/core"
+import { makeStyles, Paper, TextField, Theme } from "@material-ui/core"
 import gql from "graphql-tag"
 import { useState } from "react"
 import { useHistory, useParams } from "react-router"
@@ -7,6 +7,7 @@ import CryptoJS from "crypto-js"
 import { generatePasswordHash } from "../util/security"
 import { Loading } from "../util"
 import { useSnackbar } from "notistack"
+import { ThemedButton } from "../theme"
 
 export default function Register() {
 	const classes = useStyles()
@@ -53,7 +54,7 @@ export default function Register() {
 					label="Token"
 					fullWidth />
 
-				<Button
+				<ThemedButton
 					disabled={name === "" || password.length < 6 || password !== repeatPassword}
 					variant="contained"
 					onClick={async () => {
@@ -87,7 +88,7 @@ export default function Register() {
 					}}
 					color="primary">
 					Registrieren
-				</Button>
+				</ThemedButton>
 			</Paper>
 
 			<Loading loading={loading} />

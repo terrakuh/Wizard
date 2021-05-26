@@ -1,7 +1,5 @@
-import React from "react"
-import { AppBar, IconButton, makeStyles, Theme, Toolbar, Typography } from "@material-ui/core"
+import { makeStyles } from "@material-ui/core"
 import { Redirect, Route, Switch } from "react-router-dom"
-import { SettingsDialog } from "./settings"
 import RequiresLogin from "./util/RequiresLogin"
 import { Login, Register } from "./login"
 import Lobby from "./lobby"
@@ -10,6 +8,7 @@ import Deck from "./game/Deck"
 import { PlayedCard } from "./game/card"
 import Calendar from "./calendar"
 import Navigation from "./Navigation"
+import Hand from "./game/Hand"
 
 export default function App() {
 	const classes = useStyles()
@@ -79,6 +78,46 @@ export default function App() {
 									id: 1,
 									name: "Yunus"
 								}
+							}
+						]} />
+					</Route>
+
+					<Route path="/test_hand">
+						<Hand cards={[
+							{
+								id: "green_9",
+								playable: true,
+								variants: null
+							},
+							{
+								id: "blue_9",
+								playable: false,
+								variants: null
+							},
+							{
+								id: "red_9",
+								playable: false,
+								variants: null
+							},
+							{
+								id: "blue_wizard",
+								playable: false,
+								variants: null
+							},
+							{
+								id: "red_wizard",
+								playable: false,
+								variants: null
+							},
+							{
+								id: "yellow_wizard",
+								playable: false,
+								variants: null
+							},
+							{
+								id: "green_wizard",
+								playable: false,
+								variants: null
 							}
 						]} />
 					</Route>

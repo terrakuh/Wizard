@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { Button, Checkbox, FormControlLabel, makeStyles, Paper, TextField } from "@material-ui/core"
+import { Checkbox, FormControlLabel, makeStyles, Paper, TextField } from "@material-ui/core"
 import gql from "graphql-tag"
 import { useLazyQuery, useMutation } from "@apollo/client"
 import { Loading } from "../util"
@@ -7,6 +7,7 @@ import CryptoJS from "crypto-js"
 import { useSnackbar } from "notistack"
 import { generatePasswordHash } from "../util/security"
 import { useHistory } from "react-router"
+import { ThemedButton } from "../theme"
 
 export default function Login() {
 	const classes = useStyles()
@@ -71,13 +72,13 @@ export default function Login() {
 						onChange={(_, checked) => setStayLoggedIn(checked)}
 						checked={stayLoggedIn} />} />
 
-				<Button
+				<ThemedButton
 					disabled={name === "" || password === ""}
 					onClick={() => fetchLoginInformation({ variables: { name } })}
 					variant="contained"
 					color="primary">
 					Einloggen
-				</Button>
+				</ThemedButton>
 			</Paper>
 		</div>
 	)

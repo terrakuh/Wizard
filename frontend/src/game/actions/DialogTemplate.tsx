@@ -1,10 +1,11 @@
 import { useMutation } from "@apollo/client";
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, makeStyles, Paper, PaperProps, Typography } from "@material-ui/core";
+import { Dialog, DialogActions, DialogContent, DialogTitle, IconButton, makeStyles, Paper, PaperProps, Typography } from "@material-ui/core";
 import { Minimize as MinimizeIcon } from "@material-ui/icons";
 import gql from "graphql-tag";
 import { useSnackbar } from "notistack";
 import { ReactNode, useState, useCallback } from "react";
 import Draggable from "react-draggable";
+import { ThemedButton } from "../../theme";
 import { Loading } from "../../util";
 
 interface Props {
@@ -52,7 +53,7 @@ export default function DialogTemplate(props: Props) {
 				<DialogContent>{props.children}</DialogContent>
 
 				<DialogActions>
-					<Button
+					<ThemedButton
 						disabled={!props.canCommit}
 						onClick={async () => {
 							try {
@@ -65,7 +66,7 @@ export default function DialogTemplate(props: Props) {
 						variant="contained"
 						color="primary">
 						Bestätigen
-				</Button>
+					</ThemedButton>
 				</DialogActions>
 			</Dialog>
 

@@ -6,6 +6,7 @@ import { darken, makeStyles } from "@material-ui/core"
 import useAppointmentAssistant from "./useAppointmentAssistant"
 import { useSnackbar } from "notistack"
 import { Loading } from "../util"
+import { smoothGradient } from "../theme"
 
 
 const locales = {
@@ -75,7 +76,7 @@ const useStyles = makeStyles(theme => ({
 			backgroundColor: theme.palette.background.paper
 		},
 		"& .rbc-event": {
-			backgroundColor: theme.palette.primary.main,
+			...smoothGradient(theme, "5s"),
 			borderColor: darken(theme.palette.primary.main, 0.3)
 		},
 		"& span, td, th": {
@@ -96,7 +97,7 @@ const useStyles = makeStyles(theme => ({
 		},
 		"& .rbc-active": {
 			backgroundColor: theme.palette.action.active,
-			color: theme.palette.primary.contrastText
+			color: theme.palette.background.default
 		}
 	}
 }))

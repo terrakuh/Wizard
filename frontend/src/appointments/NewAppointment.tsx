@@ -8,6 +8,7 @@ import { useMutation } from "@apollo/client"
 import { useSnackbar } from "notistack"
 import { Loading } from "../util"
 import { fromDate } from "./util"
+import { ThemedButton } from "../theme"
 
 interface Props {
 	open: boolean
@@ -43,7 +44,7 @@ export default function NewAppointment(props: Props) {
 						Abbrechen
 					</Button>
 
-					<Button
+					<ThemedButton
 						onClick={async () => {
 							try {
 								await createAppointment({ variables: { start: fromDate(date) } })
@@ -53,10 +54,9 @@ export default function NewAppointment(props: Props) {
 								enqueueSnackbar("Das Event konnte nicht erstellt werden.", { variant: "error" })
 							}
 						}}
-						color="primary"
 						variant="contained">
 						Erstellen
-					</Button>
+					</ThemedButton>
 				</DialogActions>
 			</Dialog>
 

@@ -3,6 +3,7 @@ import { Settings as SettingsIcon, Menu as MenuIcon, VideogameAsset as Videogame
 import { useState } from "react"
 import { useHistory } from "react-router-dom"
 import { SettingsDialog } from "./settings"
+import { smoothGradient } from "./theme"
 
 export default function Navigation() {
 	const classes = useStyles()
@@ -12,7 +13,7 @@ export default function Navigation() {
 
 	return (
 		<>
-			<AppBar position="static">
+			<AppBar position="static" className={classes.appBar}>
 				<Toolbar>
 					<IconButton color="inherit" onClick={() => setOpenDrawer(true)}>
 						<MenuIcon />
@@ -35,10 +36,14 @@ export default function Navigation() {
 					{
 						DRAWER_ACTIONS.map((action, index) =>
 							action == null ? <Divider key={index} /> :
-								<ListItem button key={index} onClick={() => {
-									history.push(action.location)
-									setOpenDrawer(false)
-								}}>
+								<ListItem
+									button
+									key={index}
+									selected={history.location.pathname === action.location}
+									onClick={() => {
+										history.push(action.location)
+										setOpenDrawer(false)
+									}}>
 									<ListItemIcon>{action.icon}</ListItemIcon>
 									<ListItemText primary={action.title} />
 								</ListItem>
@@ -55,6 +60,7 @@ export default function Navigation() {
 }
 
 const useStyles = makeStyles(theme => ({
+	appBar: smoothGradient(theme, "30s"),
 	title: {
 		flexGrow: 1,
 		marginLeft: theme.spacing(2)

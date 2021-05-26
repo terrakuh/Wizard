@@ -6,6 +6,7 @@ import SwipeableViews from "react-swipeable-views"
 import { useSettings } from "./SettingsProvider"
 import NotificationSettings from "./NotificationSettings"
 import CommunicationSettings from "./CommunicationSettings"
+import { ThemedButton } from "../theme"
 
 interface Props {
 	open: boolean
@@ -43,8 +44,7 @@ export default function SettingsDialog(props: Props) {
 						Abbrechen
 					</Button>
 
-					<Button
-						color="secondary"
+					<ThemedButton
 						variant="contained"
 						endIcon={<SaveIcon />}
 						onClick={() => {
@@ -52,7 +52,7 @@ export default function SettingsDialog(props: Props) {
 							props.onClose()
 						}}>
 						Speichern
-					</Button>
+					</ThemedButton>
 				</Toolbar>
 			</AppBar>
 
@@ -85,14 +85,15 @@ export default function SettingsDialog(props: Props) {
 	)
 }
 
-const useStyles = makeStyles({
+const useStyles = makeStyles(theme => ({
 	appBar: {
-		position: "relative"
+		position: "relative",
+		backgroundImage: theme.pretty.primaryGradient
 	},
 	title: {
 		flexGrow: 1
 	}
-})
+}))
 
 const Transition = React.forwardRef(function (props: TransitionProps & { children?: React.ReactElement }, ref: React.Ref<unknown>,) {
 	return <Slide direction="up" ref={ref} {...props} />
