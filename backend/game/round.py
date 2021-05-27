@@ -113,17 +113,14 @@ class Round:
                 futures = [executor.submit(player.select_input, "juggler_effect", player.cards.keys()) for player in players]
                 passed_cards = [future.result() for future in futures]
 
-            with ExitStack() as stack:
-                [stack.enter_context(player.card_lock) for player in players]
-                    
-                for index, card in enumerate(passed_cards):
-                    next_index = (index + 1) % len(players)
+            for index, card in enumerate(passed_cards):
+                next_index = (index + 1) % len(players)
 
-                    remove_from = players[index]
-                    give_to = players[next_index]
+                remove_from = players[index]
+                give_to = players[next_index]
 
-                    given_card = remove_from.cards.pop(card)
-                    give_to.cards[given_card.id] = given_card
+                given_card = remove_from.cards.pop(card)
+                give_to.cards[given_card.id] = given_card
 
     def __get_estimations(self):
         player_count = self.history.get_player_count_sync()

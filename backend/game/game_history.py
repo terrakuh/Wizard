@@ -176,11 +176,10 @@ class GameHistory:
 
     def get_curr_trick_sync(self): # -> Trick
         with self.lock:
-            if len(self.curr_tricks) > 0:
-                return self.curr_trick
+            return self.curr_trick
 
     def get_last_trick_sync(self): # -> Trick
         with self.lock:
-            if len(self.curr_tricks) > 1:
+            if len(self.curr_tricks) > 0:
                 print(type(self.curr_tricks[-1]))
                 return self.curr_tricks[-1].trick
