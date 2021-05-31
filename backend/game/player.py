@@ -2,7 +2,9 @@ from datetime import datetime, timedelta
 import logging
 import threading
 import copy
-from typing import Optional, Union
+import time
+from typing import Callable, Optional, Union
+import asyncio
 
 from .game_history import GameHistory
 from .card import Card
@@ -25,6 +27,50 @@ class TaskInfo:
         self.options = options
         self.selected = selected
         self.duration = duration
+
+class PlayerTask:
+
+    def __init__(self, task_type: str, player: "Player", options: list[str]):
+        self.task_info = TaskInfo(task_type, player, options)
+
+        self.selected = None
+        self.__started = datetime.now()
+
+        self.input_event = asyncio.Event()
+        self.input_lock = asyncio.Lock()
+
+    async def do_task(self, process_input: Callable[[str], str]=None) -> str:
+        logging.info(self.task_info.player.name + " is waiting for input on " + self.task_info.task_type + ": " + str(self.task_info.options))
+
+        print("In doTask: " + str(threading.get_ident()))
+
+        await self.input_event.wait()
+        self.task_info.player.set_task_done()
+
+        async with self.input_lock:
+            user_input = self.task_info.selected
+
+        logging.info(self.task_info.player.name + "'s input for " + self.task_info.task_type + ": " + str(user_input))
+
+        if process_input is not None:
+            user_input = await process_input(user_input)
+
+        return user_input
+
+    async def get_input(self, user_input: str):
+        async with self.input_lock:
+            try:
+                print(self.task_info.options)
+                if user_input not in self.task_info.options:
+                    raise Exception("Invalid value")
+
+                self.task_info.selected = user_input
+                self.task_info.duration = datetime.now() - self.__started
+
+                self.input_event.set()
+                print("In getInput: " + str(threading.get_ident()))
+            except Exception as e:
+                print("Error:\n" + str(e))
 
 class Player:
     def __init__(self, history: GameHistory,  user: User, pos: int):
@@ -66,12 +112,22 @@ class Player:
         self.__update_history()
         return removed_card
 
-    def toggle_is_active(self):
-        self.is_active = not self.is_active
+    def __set_new_task(self, task_type: str, options: list[str]) -> None:
+        self.current_task = PlayerTask(task_type, self, options)
+        self.is_active = True
         self.__update_history()
 
+    def set_task_done(self):
+        try:
+            self.history.add_action(self.current_task.task_info)
+            self.current_task = None
+            self.is_active = False
+            self.__update_history()
+        except Exception as e:
+            print("Error:\n" + str(e))
 
-    def call_tricks(self, called_tricks: int, max_tricks: int, is_last: bool) -> int:
+
+    async def call_tricks(self, called_tricks: int, max_tricks: int, is_last: bool) -> int:
         logging.debug("Calling call_tricks for " + self.name)
 
         valid_values = [str(i) for i in range(max_tricks + 1)]
@@ -80,35 +136,37 @@ class Player:
         if is_last and left_tricks >= 0:
             valid_values.remove(str(left_tricks))
 
-        self.current_task = PlayerTask("call_tricks", self, valid_values)
-        self.__update_history()
+        self.__set_new_task("call_tricks", valid_values)
 
-        self.tricks_called = int(self.current_task.do_task())
+        print("Waiting for call...")
+        self.tricks_called = int(await self.current_task.do_task())
+        print("Got out there!!!")
         self.tricks_made = 0
         self.__update_history()
 
+        print("All done")
+
         return self.tricks_called
 
-    def select_input(self, select_type: str, options: list[str]) -> str:
-        self.current_task = PlayerTask("choose_" + select_type, self, options)
-        self.__update_history()
-        selected_option = self.current_task.do_task()
+    async def select_input(self, select_type: str, options: list[str]) -> str:
+        self.__set_new_task("choose_" + select_type, options)
 
+        selected_option = await self.current_task.do_task()
         self.__update_history()
 
         return selected_option
 
-    def select_trump_color(self):
-        color = self.select_input("trump_color", CardDecks.CARD_COLORS + ["none"])
+    async def select_trump_color(self):
+        color = await self.select_input("trump_color", CardDecks.CARD_COLORS + ["none"])
         return None if color == "none" else color
 
-    def play_card(self, lead_color: str) -> Card:
+    async def play_card(self, lead_color: str) -> Card:
         valid_values = self.get_playable_cards(lead_color)
 
-        def payload(user_input):
+        async def payload(user_input):
             card_variants = [card.id for card in self.cards[user_input].variants]
             if card_variants:
-                variant_selected = self.select_input("card_variant", card_variants)
+                variant_selected = await self.select_input("card_variant", card_variants)
                 self.replace_card(user_input, CardDecks.CARDS[variant_selected])
 
                 logging.info(self.name + " has selected " + str(variant_selected))
@@ -116,10 +174,9 @@ class Player:
                 return variant_selected
             return user_input
         
-        self.current_task = PlayerTask("play_card", self, valid_values)
-        self.__update_history()
+        self.__set_new_task("play_card", valid_values)
 
-        card_selected = self.current_task.do_task(payload)
+        card_selected = await self.current_task.do_task(payload)
         card_removed = self.cards.pop(card_selected)
 
         self.__update_history()
@@ -144,9 +201,10 @@ class Player:
         self.__update_history()
 
 
-    def complete_task(self, arg: str):
+    async def complete_task(self, arg: str):
         print("Completing...")
-        self.current_task.get_input(arg)
+        logging.info("Completing task...")
+        await self.current_task.get_input(arg)
 
     def __update_history(self):
         self.history.update_player(self.user.user_id)
@@ -170,52 +228,3 @@ class Player:
                 continue
             setattr(result, k, copy.deepcopy(v, memo))
         return result
-
-class PlayerTask:
-
-    def __init__(self, task_type: str, player: Player, options: list[str]):
-        self.task_info = TaskInfo(task_type, player, options)
-        player.toggle_is_active()
-
-        self.selected = None
-        self.__started = datetime.now()
-
-    def do_task(self, process_input=None) -> str:
-        logging.info(self.task_info.player.name + " is waiting for input on " + self.task_info.task_type + ": " + str(self.task_info.options))
-
-        self.input_event = threading.Event()
-        self.input_lock = threading.Lock()
-
-        self.input_event.wait()
-
-        with self.input_lock:
-            user_input = self.selected
-
-        # Clean up for history/deepcopy
-        delattr(self, "input_event")
-        delattr(self, "input_lock")
-
-        player: Player = self.task_info.player
-        player.current_task = None
-        player.toggle_is_active()
-        self.task_info.duration = datetime.now() - self.__started
-        self.task_info.selected = user_input
-        player.history.add_action(self.task_info)
-
-        logging.info(self.task_info.player.name + "'s input for " + self.task_info.task_type + ": " + str(user_input))
-
-        if process_input:
-            user_input = process_input(user_input)
-
-        return user_input
-
-    def get_input(self, user_input: str):
-        with self.input_lock:
-            print(self.task_info.options)
-            if user_input not in self.task_info.options:
-                raise Exception("Invalid value")
-
-            logging.info("Receiving input: " + str(user_input))
-
-            self.selected = user_input
-            self.input_event.set()

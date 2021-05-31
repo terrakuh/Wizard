@@ -1,5 +1,6 @@
 from datetime import timedelta
 from typing import Optional
+import threading
 
 from api.decorators import Cache, smart_api
 from graphene import ObjectType, Field, ID, String, NonNull, ResolveInfo, List, DateTime, Int
@@ -84,6 +85,7 @@ class Query(ObjectType):
 
 	@smart_api()
 	def resolve_game_info(root, info, user: User, history: Optional[GameHistory]):
+		print("In API2: " + str(threading.get_ident()))
 		if history is None:
 			return None
 		return GameInfo(

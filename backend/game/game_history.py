@@ -1,4 +1,5 @@
 from datetime import datetime
+import logging
 import threading
 import copy
 from game.card_decks import CardDecks
@@ -9,6 +10,8 @@ if TYPE_CHECKING:
     from game.round import Round
     from game.player import Player
     from game.trick import Trick
+    from game.game import Settings
+    from game.card import Card
 
 
 class TrickInfo:
@@ -19,30 +22,30 @@ class TrickInfo:
 
 class RoundInfo:
     def __init__(self, round: "Round", round_actions: list["TaskInfo"], tricks: list[TrickInfo], players: list["Player"]) -> None:
-        self.round = round # Round
-        self.round_actions = round_actions # list[TaskInfo]
-        self.tricks = tricks # list[TrickInfo]
-        self.players = players # list[Player]
+        self.round = round
+        self.round_actions = round_actions
+        self.tricks = tricks
+        self.players = players
 
 
 class GameHistory:
-    def __init__(self, settings):
+    def __init__(self, settings: "Settings"):
         self.settings = settings
 
         self.start_time: datetime = None
         self.end_time: datetime = None
 
-        self.players_dict = None # dict[str, Player]
-        self.players_dict_sync = None
-        self.players_sync = None # list[Player]
+        self.players_dict: dict[str, "Player"] = None
+        self.players_dict_sync: dict[str, "Player"] = None
+        self.players_sync: list[Player] = None
 
-        self.curr_round = None # Round
-        self.curr_trick = None # Trick
+        self.curr_round: "Round" = None
+        self.curr_trick: "Trick" = None
 
         self.curr_tricks: list[TrickInfo] = []
 
-        self.curr_round_actions = [] # list[TaskInfo]
-        self.curr_trick_actions = [] # list[TaskInfo]
+        self.curr_round_actions: list["TaskInfo"] = []
+        self.curr_trick_actions: list["TaskInfo"] = []
 
         self.rounds: list[RoundInfo] = []
 
@@ -58,7 +61,7 @@ class GameHistory:
 
 
     # Player management
-    def set_players(self, players) -> None:
+    def set_players(self, players: dict[str, "Player"]) -> None:
         print("Setting...")
         with self.lock:
             print("Setting...")
@@ -72,23 +75,24 @@ class GameHistory:
             self.players_dict_sync[user_id] = copy.deepcopy(self.players_dict[user_id])
             self.players_sync = list(self.players_dict_sync.values())
 
-    def get_players_sync(self): # -> list[Player]
+    def get_players_sync(self) -> list["Player"]:
+        print("In History: " + str(threading.get_ident()))
         with self.lock:
             return self.players_sync
 
-    def get_players(self): # -> list[Player]
+    def get_players(self) -> list["Player"]:
         with self.lock:
             return list(self.players_dict.values())
 
-    def get_player(self, index: int): # -> Player
+    def get_player(self, index: int) -> "Player":
         with self.lock:
             return list(self.players_dict.values())[index]
 
-    def get_player_count_sync(self):
+    def get_player_count_sync(self) -> int:
         with self.lock:
             return len(self.players_sync)
 
-    def get_hand_cards_sync(self, user_id: str): # -> list[Card]
+    def get_hand_cards_sync(self, user_id: str) -> list["Card"]:
         with self.lock:
             return list(self.players_dict_sync[user_id].cards.values())
     
@@ -97,32 +101,32 @@ class GameHistory:
         with self.lock:
             return self.players_dict_sync[user_id].get_playable_cards(lead_color)
 
-    def get_player_task_sync(self, user_id): # -> PlayerTask
+    def get_player_task_sync(self, user_id: str) -> "TaskInfo":
+        print("In Hist2: " + str(threading.get_ident()))
         with self.lock:
             return self.players_dict_sync[user_id].current_task
 
     # Player mutations
     def remove_player_sync(self, user_id: str) -> None:
-        # with self.lock:
-            del self.players_dict[user_id]
-            del self.players_dict_sync[user_id]
+        del self.players_dict[user_id]
+        del self.players_dict_sync[user_id]
 
-            self.players_sync = list(self.players_dict_sync.values())
+        self.players_sync = list(self.players_dict_sync.values())
 
-    def complete_task_sync(self, user_id, option: str):
-        with self.lock:
-            self.players_dict[user_id].complete_task(option)
+    async def complete_task_sync(self, user_id: str, option: str) -> None:
+        logging.info("Completing in history...")
+        await self.players_dict[user_id].complete_task(option)
         self.update_player(user_id)
 
 
     # Mode
-    def is_special_mode(self):
+    def is_special_mode(self) -> bool:
         with self.lock:
             return self.settings.mode != list(CardDecks.MODES.keys())[0]
 
 
     # Round management
-    def update_round(self, curr_round) -> None:
+    def update_round(self, curr_round: "Round") -> None:
         with self.lock:
             self.curr_round = copy.deepcopy(curr_round)
 
@@ -145,8 +149,11 @@ class GameHistory:
 
     
     # Action management
-    def add_action(self, task_info):
+    def add_action(self, task_info: "TaskInfo") -> None:
+        print("Adding taks...")
+        print(self.lock.locked)
         with self.lock:
+            print("Adding taks with lock...")
             if self.curr_trick is None:
                 self.curr_round_actions.append(copy.deepcopy(task_info))
             else:
@@ -154,17 +161,17 @@ class GameHistory:
 
 
     # Trick management
-    def add_trick(self, trick):
+    def add_trick(self, trick: "Trick") -> None:
         with self.lock:
             if self.curr_trick is not None:
                 self.__save_trick()
             self.curr_trick = copy.deepcopy(trick)
 
-    def update_trick(self, trick) -> None:
+    def update_trick(self, trick: "Trick") -> None:
         with self.lock:
             self.curr_trick = copy.deepcopy(trick)
 
-    def __save_trick(self):
+    def __save_trick(self) -> None:
         self.curr_tricks.append(TrickInfo(self.curr_trick, self.curr_trick_actions))
 
         self.curr_trick = None
@@ -174,12 +181,11 @@ class GameHistory:
         trick = self.curr_trick
         return None if trick is None else trick.lead_color
 
-    def get_curr_trick_sync(self): # -> Trick
+    def get_curr_trick_sync(self) -> "Trick":
         with self.lock:
             return self.curr_trick
 
-    def get_last_trick_sync(self): # -> Trick
+    def get_last_trick_sync(self) -> "Trick":
         with self.lock:
             if len(self.curr_tricks) > 0:
-                print(type(self.curr_tricks[-1]))
                 return self.curr_tricks[-1].trick
