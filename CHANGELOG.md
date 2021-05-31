@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+## [v0.6.1] - 2021-05-31
+### Fixed
+- Disable lobby settings for non lobby owner
+- Fix missing first round display
+
 ## [v0.6] - 2021-06-26
 ### Added
 - Dockerfile
@@ -67,7 +72,8 @@ Rewrite in Python.
 - Frontend
 - Backend
 
-[Unreleased]: https://github.com/terrakuh/wizard/compare/v0.6...dev
+[Unreleased]: https://github.com/terrakuh/wizard/compare/v0.6.1...dev
+[Unreleased]: https://github.com/terrakuh/wizard/compare/v0.6...v0.6.1
 [v0.6]: https://github.com/terrakuh/wizard/compare/v0.5...v0.6
 [v0.5]: https://github.com/terrakuh/wizard/compare/v0.4...v0.5
 [v0.4]: https://github.com/terrakuh/wizard/compare/v0.3.0...v0.4

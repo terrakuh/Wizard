@@ -22,9 +22,8 @@ export default function Settings(props: Props) {
 	return (
 		<FormControl
 			className={classes.root}
-			component="fieldset"
-			disabled={props.lobby.canStart == null}>
-			<FormControl>
+			component="fieldset">
+			<FormControl disabled={props.lobby.canStart == null}>
 				<InputLabel>Spiel-Modus</InputLabel>
 				<Select
 					onChange={ev => setLobbySettings({ variables: { mode: ev.target.value as string, roundLimit: null } })}
@@ -37,7 +36,7 @@ export default function Settings(props: Props) {
 				</Select>
 			</FormControl>
 
-			<FormControl>
+			<FormControl disabled={props.lobby.canStart == null}>
 				<InputLabel>Runden-Anzahl</InputLabel>
 				<Select
 					onChange={ev => setLobbySettings({ variables: { mode: null, roundLimit: ev.target.value as number } })}
