@@ -2,6 +2,8 @@ from threading import RLock
 from typing import Callable, List
 from datetime import datetime
 from copy import deepcopy
+import asyncio
+import concurrent
 
 from game.game import Game, Settings
 from game.player import User
@@ -74,9 +76,7 @@ class Lobby:
 			# 	raise Exception("at least 3 players required")
 			self.game_started = datetime.now()
 			self._game = Game(self._players, self._settings, self._on_game_finish)
-			self._game.setDaemon(True)
-			self._game.start()
-			print("started")
+			asyncio.create_task(self._game.start())
 
 	def get_game(self) -> Game:
 		with self._lock:

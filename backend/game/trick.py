@@ -25,10 +25,10 @@ class Trick:
         self.card_stack_by_player: dict[str, Card] = {}
         self.card_stack_by_card: dict[str, Player] = {}
 
-    def do_trick(self) -> tuple[Player, list[str]]:
+    async def do_trick(self) -> tuple[Player, list[str]]:
         players: list[Player] = self.history.get_players()
         for _ in players:
-            self.__play_card()
+            await self.__play_card()
             self.history.update_trick(self)
 
         return (self.get_current_winner(), self.__get_after_effects())
@@ -39,12 +39,12 @@ class Trick:
     def get_cards(self) -> list[Card]:
         return list(self.card_stack_by_player.values())
 
-    def __play_card(self):
+    async def __play_card(self):
         player_count = self.history.get_player_count_sync()
 
         player: Player = self.history.get_player(self.curr_player)
 
-        card_played = player.play_card(self.lead_color)
+        card_played = await player.play_card(self.lead_color)
 
         self.card_stack_by_player[player.name] = card_played
         self.card_stack_by_card[card_played.id] = player

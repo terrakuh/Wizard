@@ -3,6 +3,7 @@ import random
 import logging
 from typing import Callable, List, Optional
 from datetime import datetime
+import asyncio
 
 from .round import Round
 from .card import Card
@@ -16,7 +17,7 @@ class Settings:
         self.round_number = round_number
 
 
-class Game(threading.Thread):
+class Game():
 
     def __init__(self, users: List[User], settings: Settings, on_game_finish: Callable[[GameHistory], None]):
         super().__init__()
@@ -45,14 +46,14 @@ class Game(threading.Thread):
 
         print("Game created")
 
-    def run(self):
+    async def start(self):
         logging.info("Starting Game...")
 
         self.history.set_start(datetime.now())
 
         ########
 
-        self.__do_round()
+        await self.__do_round()
 
         ########
 
@@ -61,19 +62,16 @@ class Game(threading.Thread):
             self.curr_round = Round(history=self.history, first_player=self.first_player, round_counter=self.round_counter)
             self.history.update_round(self.curr_round)
 
-            self.__do_round()
+            await self.__do_round()
 
         self.history.set_end(datetime.now())
         self.on_game_finish(self.history)
 
-    def __do_round(self):
-        self.curr_round.start_round()
+    async def __do_round(self):
+        await self.curr_round.start_round()
 
         self.first_player = (self.first_player + 1) % len(self.players)
         self.round_counter += 1
         
         self.history.save_round()
         for p in self.players.values(): p.reset()
-
-    def complete_action(self, user: User, option: str) -> None:
-        self.players[user.user_id].complete_task(option)

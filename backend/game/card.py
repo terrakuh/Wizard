@@ -1,6 +1,6 @@
 class Card:
 
-    def __init__(self, value: int, card_type: str, color: str=None, color_bound: bool=True, variants: list=[]):
+    def __init__(self, value: int, card_type: str, color: str=None, color_bound: bool=True, variants: list["Card"]=[]):
         self.value = value # ~1-100
         self.card_type = card_type # 1-13, wizard, fool, dragon, ...
 

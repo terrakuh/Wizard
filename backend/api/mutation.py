@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+import threading
 from typing import Optional
 
 from graphene.types.field import Field
@@ -93,8 +94,9 @@ class Mutation(ObjectType):
 	complete_action = NonNull(Boolean, option=NonNull(String))
 
 	@smart_api()
-	def resolve_complete_action(root, info: ResolveInfo, user: User, option: str, history: GameHistory):
-		history.complete_task_sync(user.user_id, option)
+	async def resolve_complete_action(root, info: ResolveInfo, user: User, option: str, history: GameHistory):
+		print("In API: " + str(threading.get_ident()))
+		await history.complete_task_sync(user.user_id, option)
 		return True
 
 
