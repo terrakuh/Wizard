@@ -1,6 +1,8 @@
 # Change Log
 
 ## [Unreleased]
+### Fixed
+- Disable lobby settings for non lobby owner
 
 ## [v0.6] - 2021-06-26
 ### Added
