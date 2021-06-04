@@ -44,7 +44,6 @@ class TrickState(ObjectType):
 class PlayableCard(ObjectType):
 	id = NonNull(ID)
 	playable = NonNull(Boolean)
-	variants = List(NonNull(lambda: PlayableCard))
 
 
 class RoundState(ObjectType):

@@ -42,17 +42,18 @@ function Hand(props: Props) {
 							const x = (index + 1) * step
 							const y = foo(x)
 
-							return <PlayableCard
-								moveCard={moveCard}
-								style={{
-									position: "absolute",
-									bottom: y * 150 - 200,
-									left: x - CARD_WIDTH / 2 + CARD_HEIGHT / 2,
-									transform: `rotate(${Math.PI / 2 * (1 - y) * (index < props.cards.length / 2 ? -1 : 1)}rad)`,
-									filter: card.playable ? undefined : "brightness(30%)"
-								}}
-								key={card.id}
-								card={card} />
+							return (
+								<div
+									style={{
+										position: "absolute",
+										bottom: y * 150 - 200,
+										left: x - CARD_WIDTH / 2 + CARD_HEIGHT / 2,
+										transform: `rotate(${Math.PI / 2 * (1 - y) * (index < props.cards.length / 2 ? -1 : 1)}rad)`
+									}}
+									key={card.id}>
+									<PlayableCard moveCard={moveCard} card={card} />
+								</div>
+							)
 						})
 					}
 				}

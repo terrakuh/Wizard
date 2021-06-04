@@ -45,7 +45,28 @@ export const createTheme = ({ background, primary, secondary }: ThemeOptions) =>
 	}
 })
 
-const context = createContext<(theme: Theme) => void>(() => { })
+export type Scheme = "dark" | "light"
+
+interface Context {
+	setScheme(scheme: Scheme): void
+	scheme: Scheme
+}
+
+const context = createContext<Context>({
+	scheme: "dark",
+	setScheme() { }
+})
+
+const darkTheme = createTheme({
+	background: "#242733",
+	primary: "#e42e50",
+	secondary: "#a2268e"
+})
+const lightTheme = createTheme({
+	background: "#fafafa",
+	primary: "#90caf9",
+	secondary: "#f48fb1"
+})
 
 interface Props {
 	children?: ReactNode
@@ -53,11 +74,11 @@ interface Props {
 
 export function ThemeParkProvider({ children }: Props) {
 	const { settings } = useSettings()
-	const [theme, setTheme] = useState(createTheme(settings.theme))
+	const [scheme, setScheme] = useState<Scheme>("dark")
 
 	return (
-		<ThemeProvider theme={theme}>
-			<context.Provider value={setTheme}>
+		<ThemeProvider theme={scheme === "dark" ? darkTheme : lightTheme}>
+			<context.Provider value={{ scheme, setScheme }}>
 				{children}
 			</context.Provider>
 		</ThemeProvider>

@@ -57,7 +57,7 @@ def __parse_hand_cards(cards: list[Card], playable_cards: list[str]=None) -> lis
 
 def __parse_hand_card(card: Card, playable_cards: list[str]) -> PlayableCard:
     playable = True if playable_cards is None else (card.id in playable_cards)
-    return PlayableCard(id=card.id, playable=playable, variants=__parse_hand_cards(card.variants))
+    return PlayableCard(id=card.id, playable=playable)
 
 
 def __parse_player_task(task: TaskInfo) -> RequiredAction:

@@ -52,7 +52,6 @@ type TrickState {
 type PlayableCard {
 	id: ID!
 	playable: Boolean!
-	variants: [PlayableCard!]
 }
 
 type RequiredAction {

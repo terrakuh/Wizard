@@ -141,10 +141,6 @@ const GET_INFO = gql`
 			hand {
 				id
 				playable
-				variants {
-					id
-					playable
-				}
 			}
 			trickState {
 				...TrickStateFragment

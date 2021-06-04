@@ -49,7 +49,6 @@ export interface TrickState {
 export interface PlayableCard {
 	id: string
 	playable: boolean
-	variants: PlayableCard[] | null
 }
 
 export interface RequiredAction {

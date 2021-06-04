@@ -15,7 +15,7 @@ interface Props {
 
 export default function SettingsDialog(props: Props) {
 	const classes = useStyles()
-	const changeTheme = useThemePark()
+	// const changeTheme = useThemePark()
 	const { settings, setSettings } = useSettings()
 	const [newSettings, setNewSettings] = React.useState(settings)
 	const [index, setIndex] = React.useState(0)
@@ -42,7 +42,7 @@ export default function SettingsDialog(props: Props) {
 					<Button
 						color="inherit"
 						onClick={() => {
-							changeTheme(createTheme(settings.theme))
+							// changeTheme(createTheme(settings.theme))
 							props.onClose()
 						}}>
 						Abbrechen
@@ -88,7 +88,7 @@ export default function SettingsDialog(props: Props) {
 					<ThemeSettings
 						onChange={theme => {
 							setNewSettings({ ...newSettings, theme })
-							changeTheme(createTheme(theme))
+							// changeTheme(createTheme(theme))
 						}}
 						settings={newSettings.theme} />
 				</div>
