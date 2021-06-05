@@ -45,8 +45,6 @@ export default function Game() {
 
 	const { gameInfo: { hand, trickState, roundState, playerStates } } = data
 
-	console.log("New player state:\n" + JSON.stringify(playerStates))
-
 	return (
 		<div className={classes.root} ref={setRootRef}>
 			<div className={classes.dropArea} ref={drop}>

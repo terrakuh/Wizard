@@ -7,6 +7,7 @@
 
 ### Fixed
 - Lobby cleanup
+- Fix wrong references when sorting hand
 
 ### Removed
 - Menu drawer
