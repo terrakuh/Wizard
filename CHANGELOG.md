@@ -5,6 +5,9 @@
 - Logout button
 - New sleek fast menu
 
+### Fixed
+- Lobby cleanup
+
 ### Removed
 - Menu drawer
 - Settings dialog
