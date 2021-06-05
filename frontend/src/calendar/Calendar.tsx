@@ -1,6 +1,6 @@
 import { Calendar as BigCalendar, dateFnsLocalizer } from "react-big-calendar"
 import { format, parse, startOfWeek, getDay, parseISO } from "date-fns"
-import { de, enUS } from "date-fns/locale"
+import { de } from "date-fns/locale"
 import "react-big-calendar/lib/css/react-big-calendar.css"
 import { darken, makeStyles } from "@material-ui/core"
 import useAppointmentAssistant from "./useAppointmentAssistant"
@@ -9,17 +9,12 @@ import { Loading } from "../util"
 import { smoothGradient } from "../theme"
 
 
-const locales = {
-	"de": de,
-	"en-US": enUS
-}
-
 const localizer = dateFnsLocalizer({
 	format,
 	parse,
 	startOfWeek,
 	getDay,
-	locales
+	locales: { "de": de }
 })
 
 export default function Calendar() {
@@ -34,7 +29,7 @@ export default function Calendar() {
 			<BigCalendar
 				localizer={localizer}
 				className={classes.calendar}
-				culture={navigator.language in locales ? navigator.language : "en-US"}
+				culture={"de"}
 				views={["week", "day", "agenda"]}
 				defaultView="week"
 				selectable={true}

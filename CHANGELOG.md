@@ -4,6 +4,7 @@
 ### Added
 - Logout button
 - New sleek fast menu
+- Leave lobby option
 
 ### Fixed
 - Lobby cleanup
