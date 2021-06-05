@@ -1,5 +1,5 @@
 import { SpriteMap } from "use-sound/dist/types"
-import { ThemeOptions } from "../theme"
+import { Scheme } from "../theme"
 
 export const notificationSpriteMap: SpriteMap = {
 	"Alarm": [0, 1417],
@@ -10,11 +10,7 @@ export type AudioTrack = "Alarm" | "Klang 1" | "Klang 2"
 
 export interface Settings {
 	notifications: {
-		enabled: boolean
-		audio: boolean
-		audioTrack: AudioTrack
-		desktop: boolean
-		playerTurn: boolean
+		audioTrack: AudioTrack | null
 	}
 	messages: {
 		signal: {
@@ -22,5 +18,5 @@ export interface Settings {
 			number: string
 		}
 	}
-	theme: ThemeOptions
+	theme: Scheme
 }

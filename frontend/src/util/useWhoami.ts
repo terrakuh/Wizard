@@ -1,27 +1,11 @@
-import { gql, useQuery } from "@apollo/client";
-import { User } from "../types";
+import { useQuery } from "@apollo/client"
+import { WHOAMI, WhoAmIResult, WhoAmIVariables } from "../gql"
 
-interface Options {
-	pollInterval?: number
-}
+export default function useWhoami() {
+	const { data } = useQuery<WhoAmIResult, WhoAmIVariables>(WHOAMI)
 
-export default function useWhoami(options?: Options) {
-	const { data } = useQuery<WhoamiResult>(WHOAMI, { pollInterval: options?.pollInterval })
 	return {
 		isLoggedIn: data?.whoami != null,
 		user: data?.whoami
 	}
 }
-
-interface WhoamiResult {
-	whoami: User | null
-}
-
-const WHOAMI = gql`
-	query {
-		whoami {
-			id
-			name
-		}
-	}
-`

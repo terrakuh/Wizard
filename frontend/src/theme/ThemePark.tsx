@@ -1,5 +1,5 @@
-import { createMuiTheme, lighten, Theme, ThemeProvider } from "@material-ui/core"
-import { createContext, ReactNode, useContext, useState } from "react"
+import { createMuiTheme, lighten, ThemeProvider } from "@material-ui/core"
+import { ReactNode, useEffect, useState } from "react"
 import { useSettings } from "../settings";
 
 declare module "@material-ui/core/styles/createMuiTheme" {
@@ -20,13 +20,13 @@ function isLight(color: string) {
 	return brightness > 155;
 }
 
-export interface ThemeOptions {
+interface ThemeOptions {
 	background: string
 	primary: string
 	secondary: string
 }
 
-export const createTheme = ({ background, primary, secondary }: ThemeOptions) => createMuiTheme({
+const createTheme = ({ background, primary, secondary }: ThemeOptions) => createMuiTheme({
 	palette: {
 		type: isLight(background) ? "light" : "dark",
 		background: {
@@ -47,16 +47,6 @@ export const createTheme = ({ background, primary, secondary }: ThemeOptions) =>
 
 export type Scheme = "dark" | "light"
 
-interface Context {
-	setScheme(scheme: Scheme): void
-	scheme: Scheme
-}
-
-const context = createContext<Context>({
-	scheme: "dark",
-	setScheme() { }
-})
-
 const darkTheme = createTheme({
 	background: "#242733",
 	primary: "#e42e50",
@@ -74,15 +64,13 @@ interface Props {
 
 export function ThemeParkProvider({ children }: Props) {
 	const { settings } = useSettings()
-	const [scheme, setScheme] = useState<Scheme>("dark")
+	const [scheme, setScheme] = useState<Scheme>(settings.theme)
+
+	useEffect(() => setScheme(settings.theme), [settings.theme])
 
 	return (
 		<ThemeProvider theme={scheme === "dark" ? darkTheme : lightTheme}>
-			<context.Provider value={{ scheme, setScheme }}>
-				{children}
-			</context.Provider>
+			{children}
 		</ThemeProvider>
 	)
 }
-
-export const useThemePark = () => useContext(context)

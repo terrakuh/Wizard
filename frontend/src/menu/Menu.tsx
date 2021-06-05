@@ -1,22 +1,100 @@
-import { Divider, List, Paper, makeStyles } from "@material-ui/core"
-import { ArrowBack as ArrowBackIcon, Brightness2 as Brightness2Icon, BrightnessHigh as BrightnessHighIcon, Check as CheckIcon, ChevronRight as ChevronRightIcon, Event as EventIcon, ExitToApp as ExitToAppIcon, MusicNote as MusicNoteIcon, Notifications as NotificationsIcon, VolumeOff as VolumeOffIcon } from "@material-ui/icons"
-import { useState, CSSProperties, useRef, useEffect } from "react"
-import { useHistory } from "react-router"
+import { Paper, makeStyles, Popover } from "@material-ui/core"
+import { useState, CSSProperties, useEffect } from "react"
 import { Transition } from "react-transition-group"
-import { useThemePark } from "../theme"
-import Item from "./Item"
+import Main from "./Main"
+import Notifications from "./Notifications"
+import { MenuType } from "./menus"
 
-const primary: {
+
+interface Props {
+	open: boolean
+	onClose(): void
+	anchorEl: HTMLElement | null
+}
+
+export default function Menu(props: Props) {
+	const classes = useStyles()
+	const [menu, setMenu] = useState<MenuType>("main")
+	const [height, setHeight] = useState<number>()
+
+	// reset
+	useEffect(() => {
+		if (props.open) {
+			setMenu("main")
+		}
+	}, [props.open])
+
+	return (
+		<Popover
+			open={props.open}
+			onClose={props.onClose}
+			anchorEl={props.anchorEl}
+			anchorOrigin={{ horizontal: "right", vertical: "bottom" }}>
+			<Paper className={classes.root} style={{ height }}>
+				<Transition
+					in={menu === "main"}
+					unmountOnExit
+					timeout={250}>
+					{
+						state =>
+							<Main
+								navigate={setMenu}
+								onResize={height => menu === "main" && setHeight(height)}
+								onClose={props.onClose}
+								style={{
+									transition: "transform 250ms ease-in-out",
+									width: "100%",
+									...PRIMARY[state]
+								}} />
+					}
+				</Transition>
+
+				<Transition
+					in={menu === "notifications"}
+					unmountOnExit
+					timeout={250}>
+					{
+						state =>
+							<Notifications
+								navigate={setMenu}
+								onResize={height => menu === "notifications" && setHeight(height)}
+								style={{
+									width: "100%",
+									transition: "transform 250ms ease-in-out",
+									...SECONDARY[state]
+								}} />
+					}
+				</Transition>
+			</Paper>
+		</Popover>
+	)
+}
+
+const useStyles = makeStyles(theme => ({
+	root: {
+		width: 300,
+		overflow: "hidden",
+		transition: "height 200ms ease",
+		position: "relative",
+		"& .MuiDivider-root": {
+			margin: theme.spacing(1)
+		}
+	}
+}))
+
+
+const PRIMARY: {
 	[k: string]: CSSProperties
 } = {
 	entering: {
-		transform: "translateX(-100%)",
+		transform: "translateX(0%)",
 		position: "absolute"
 	},
 	entered: {
 		transform: "translateX(0%)"
 	},
 	exiting: {
+		transform: "translateX(-100%)",
 		position: "absolute"
 	},
 	exited: {
@@ -25,129 +103,21 @@ const primary: {
 	}
 }
 
-const secondary: {
+const SECONDARY: {
 	[k: string]: CSSProperties
 } = {
 	entering: {
-		transform: "translateX(100%)"
+		transform: "translateX(0%)"
 	},
 	entered: {
 		transform: "translateX(0%)"
+	},
+	exiting: {
+		transform: "translateX(100%)",
+		position: "absolute"
 	},
 	exited: {
 		transform: "translateX(100%)",
 		position: "absolute"
 	}
 }
-
-export default function Menu() {
-	const classes = useStyles()
-	const [test, setTest] = useState(true)
-	const history = useHistory()
-	const ref = useRef<HTMLDivElement>(null)
-	const [height, setHeight] = useState<number>()
-	const { scheme, setScheme } = useThemePark()
-
-	useEffect(() => {
-		setHeight((ref.current?.firstChild as HTMLElement)?.offsetHeight)
-	}, [])
-
-	return (
-		<Paper className={classes.root} ref={ref} style={{ height }}>
-			<Transition
-				in={test}
-				onEnter={(el: HTMLElement) => setHeight(el.offsetHeight)}
-				timeout={0}>
-				{
-					state =>
-						<div style={{
-							transition: "transform 250ms ease-in-out",
-							width: "100%",
-							...primary[state]
-						}}>
-							<List>
-								<Item
-									onClick={() => history.push("/calendar")}
-									icon={<EventIcon />}
-									title="Kalendar" />
-
-								<Divider />
-
-								<Item
-									onClick={() => setScheme(scheme === "dark" ? "light" : "dark")}
-									icon={scheme === "dark" ? <BrightnessHighIcon /> : <Brightness2Icon />}
-									title={scheme === "dark" ? "Helles Design" : "Dunkles Design"} />
-
-								<Item
-									onClick={() => setTest(false)}
-									icon={<NotificationsIcon />}
-									action={<ChevronRightIcon />}
-									title="Benachrichtigungen" />
-
-								<Divider />
-
-								<Item
-									onClick={() => { }}
-									icon={<ExitToAppIcon />}
-									title="Abmelden" />
-							</List>
-						</div>
-				}
-			</Transition>
-
-			<Transition
-				in={!test}
-				onEnter={(el: HTMLElement) => setHeight(el.offsetHeight)}
-				timeout={0}>
-				{
-					state =>
-						<div style={{
-							width: "100%",
-							transition: "transform 250ms ease-in-out",
-							...secondary[state]
-						}}>
-							<List>
-								<Item
-									onClick={() => setTest(true)}
-									icon={<ArrowBackIcon />}
-									title="Zurück" />
-
-								<Divider />
-								
-								<Item
-									onClick={() => { }}
-									icon={<VolumeOffIcon />}
-									title="Lautlos" />
-
-								<Item
-									onClick={() => { }}
-									icon={<MusicNoteIcon />}
-									title="Klang 1" />
-
-								<Item
-									onClick={() => { }}
-									icon={<MusicNoteIcon />}
-									action={<CheckIcon />}
-									title="Klang 2" />
-
-								<Item
-									onClick={() => { }}
-									icon={<MusicNoteIcon />}
-									title="Alarm" />
-							</List>
-						</div>
-				}
-			</Transition>
-		</Paper>
-	)
-}
-
-const useStyles = makeStyles({
-	root: {
-		width: 300,
-		overflow: "hidden",
-		position: "absolute",
-		left: 300,
-		transition: "height 200ms ease"
-	}
-})

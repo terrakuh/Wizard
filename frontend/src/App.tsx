@@ -9,7 +9,6 @@ import { PlayedCard } from "./game/card"
 import Calendar from "./calendar"
 import Navigation from "./Navigation"
 import Hand from "./game/Hand"
-import Menu from "./menu/Menu"
 
 export default function App() {
 	const classes = useStyles()
@@ -114,10 +113,6 @@ export default function App() {
 								playable: false
 							}
 						]} />
-					</Route>
-
-					<Route path="/menu">
-						<Menu />
 					</Route>
 
 					<Route path="/test1">

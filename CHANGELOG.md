@@ -1,6 +1,13 @@
 # Change Log
 
 ## [Unreleased]
+### Added
+- Logout button
+- New sleek fast menu
+
+### Removed
+- Menu drawer
+- Settings dialog
 
 ## [v0.6.1] - 2021-05-31
 ### Fixed
