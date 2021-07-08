@@ -23,7 +23,7 @@
     "crypto-js": "^4.0.0",
     "date-fns": "^2.21.3",
     "graphql": "^15.5.0",
-    "material-ui-color": "^1.1.0",
+    "material-ui-color": "^1.2.0",
     "notistack": "^1.0.3",
     "react": "^17.0.1",
     "react-big-calendar": "^0.33.3",
