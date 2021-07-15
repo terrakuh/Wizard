@@ -1,5 +1,9 @@
-import { Paper, Table, TableBody, TableCell, TableContainer, TableRow } from "@material-ui/core"
+import { useMutation } from "@apollo/client"
+import { Button, Paper, Table, TableBody, TableCell, TableContainer, TableRow } from "@material-ui/core"
+import gql from "graphql-tag"
+import { useSnackbar } from "notistack"
 import { useMemo } from "react"
+import { useHistory } from "react-router-dom"
 import { PlayerState, RoundState, TrickState } from "../types"
 
 interface Props {
@@ -11,6 +15,20 @@ interface Props {
 
 export default function ScoreBoard(props: Props) {
 	const winningPlayer = useMemo(() => props.trickState?.deck?.find(card => card.isWinning)?.player, [props.trickState])
+
+	const { enqueueSnackbar } = useSnackbar()
+	const [endGame] = useMutation(END_GAME, {
+		onError(err) {
+			console.error(err)
+			enqueueSnackbar("Konnt Spiel nicht beenden.", { variant: "error" })
+		}
+	})
+	const [leaveLobby] = useMutation(LEAVE_LOBBY, {
+		onError(err) {
+			console.error(err)
+			enqueueSnackbar("Konnt Lobby nicht verlassen.", { variant: "error" })
+		}
+	})
 
 	return (
 		<div className={props.className}>
@@ -46,6 +64,20 @@ export default function ScoreBoard(props: Props) {
 					</TableBody>
 				</Table>
 			</TableContainer>
+			<Button variant="contained" color="primary" onClick={ev => endGame()}>End Game</Button>
+			<Button variant="contained" color="primary" onClick={ev => leaveLobby()}>Leave Game</Button>
 		</div>
 	)
 }
+
+const END_GAME = gql`
+	mutation {
+		endGame
+	}
+`
+
+const LEAVE_LOBBY = gql`
+	mutation {
+		leaveLobby
+	}
+`

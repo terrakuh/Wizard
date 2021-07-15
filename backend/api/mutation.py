@@ -56,14 +56,23 @@ class Mutation(ObjectType):
 
 	# lobby management
 	create_lobby = NonNull(String)
+	close_lobby = NonNull(Boolean)
 	set_lobby_settings = NonNull(Boolean, mode=String(), round_limit=Int())
 	join_lobby = NonNull(Boolean, code=NonNull(String))
 	leave_lobby = NonNull(Boolean)
 	start_game = NonNull(Boolean)
+	end_game = NonNull(Boolean)
 
 	@smart_api()
 	def resolve_create_lobby(root, info: ResolveInfo, manager: Manager, user: User):
 		return manager.create_lobby(user)
+
+	@smart_api()
+	def resolve_close_lobby(root, info: ResolveInfo, manager: Manager, lobby: Lobby, user: User):
+		if not lobby.is_lobby_master(user):
+			raise GraphQLError("not lobby master")
+		manager.close_lobby(lobby)
+		return True
 
 	@smart_api()
 	def resolve_set_lobby_settings(root, info: ResolveInfo, lobby: Lobby, user: User, mode: str=None, round_limit: int=None):
@@ -87,6 +96,13 @@ class Mutation(ObjectType):
 		if not lobby.is_lobby_master(user):
 			raise GraphQLError("not lobby master")
 		lobby.start_game()
+		return True
+
+	@smart_api()
+	def resolve_end_game(root, info: ResolveInfo, lobby: Lobby, user: User):
+		if not lobby.is_lobby_master(user):
+			raise GraphQLError("not lobby master")
+		lobby.end_game()
 		return True
 
 

@@ -60,10 +60,10 @@ type RequiredAction {
 }
 
 type GameInfo {
-	roundState: RoundState!
-	trickState: TrickState!
+	roundState: RoundState
+	trickState: TrickState
 	playerStates: [PlayerState!]!
-	hand: [PlayableCard!]!
+	hand: [PlayableCard!]
 }
 
 ########################################
@@ -102,6 +102,7 @@ type Query {
 
 	# game logic
 	gameInfo: GameInfo
+	gameOver: Boolean
 	requiredAction: RequiredAction
 
 	# misc

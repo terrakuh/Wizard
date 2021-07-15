@@ -22,11 +22,13 @@ class Manager:
 	# 	now = datetime.now()
 	# 	with self._lock:
 	# 		self._lobbies = {code: lobby for code, lobby in self._lobbies.items() if now < lobby.created + self._inative_timeout}
-	def _on_game_finish(self, history: GameHistory, lobby: Lobby):
-		self.db.queue_commit_game_history(history)
+	def close_lobby(self, lobby: Lobby):
 		with self._lock:
 			del self._lobbies[lobby.code]
 			self._player_code = {id: code for id, code in self._player_code.items() if code != lobby.code}
+
+	def _on_game_finish(self, history: GameHistory):
+		self.db.queue_commit_game_history(history)
 
 	def create_lobby(self, user: User, code_length: int = 5) -> str:
 		code = "".join(choices(ascii_uppercase, k=code_length))
@@ -37,7 +39,7 @@ class Manager:
 				raise Exception("bad luck")
 			elif self.__in_lobby(user):
 				raise Exception("player already in lobby")
-			self._lobbies[code] = Lobby(code, self._on_game_finish)
+			self._lobbies[code] = Lobby(code, user.user_id, self._on_game_finish)
 			self.join_lobby(user, code)
 		return code
 

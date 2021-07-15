@@ -13,6 +13,7 @@ import ScoreBoard from "./ScoreBoard"
 import TrumpCard from "./card/TrumpCard"
 import PastTrick from "./PastTrick"
 import usePlayCard from "./card/usePlayCard"
+import End from "./end/End"
 
 export default function Game() {
 	const classes = useStyles()
@@ -33,7 +34,8 @@ export default function Game() {
 		}
 		return {
 			...data.gameInfo,
-			requiredAction: data.requiredAction
+			requiredAction: data.requiredAction,
+			gameOver: data.gameOver
 		}
 	}, [data])
 
@@ -107,6 +109,7 @@ const useStyles = makeStyles({
 interface Info {
 	gameInfo: GameInfo | null
 	requiredAction: RequiredAction | null
+	gameOver: Boolean | null
 }
 
 const GET_INFO = gql`
@@ -165,5 +168,6 @@ const GET_INFO = gql`
 			type
 			options
 		}
+		gameOver
 	}
 `
