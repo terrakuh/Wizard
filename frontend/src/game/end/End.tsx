@@ -15,6 +15,13 @@ export default function Item(props: Props) {
 	const history = useHistory()
 
 	const { enqueueSnackbar } = useSnackbar()
+
+	const [closeGame] = useMutation(CLOSE_GAME, {
+		onError(err) {
+			console.error(err)
+			enqueueSnackbar("Konnte Lobby nicht schließen.", { variant: "error" })
+		}
+	})
 	const [closeLobby] = useMutation(CLOSE_LOBBY, {
 		onError(err) {
 			console.error(err)
@@ -40,11 +47,17 @@ export default function Item(props: Props) {
 					</TableBody>
 				</Table>
 			</TableContainer>
-			<Button variant="contained" color="primary" onClick={() => history.push("/lobby")}>Lobby</Button>
+			<Button variant="contained" color="primary" onClick={() => closeGame()}>End Game</Button>
 			<Button variant="contained" color="primary" onClick={ev => closeLobby()}>Close Lobby</Button>
         </div>
 	)
 }
+
+const CLOSE_GAME = gql`
+	mutation {
+		closeGame
+	}
+`
 
 const CLOSE_LOBBY = gql`
 	mutation {

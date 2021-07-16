@@ -86,14 +86,14 @@ class Query(ObjectType):
 	required_action = Field(RequiredAction)
 
 	@smart_api()
-	def resolve_game_info(root, info, user: User, history: Optional[GameHistory], lobby: Optional[Lobby]):
+	def resolve_game_info(root, info, user: User, history: Optional[GameHistory]):
 		if history is None:
 			return None
 		return GameInfo(
 			round_state=graphene_parser.get_round_state(history),
 			trick_state=graphene_parser.get_trick_state(history),
 			player_states=graphene_parser.get_player_states(history),
-			hand=graphene_parser.get_hand(history, user),
+			hand=graphene_parser.get_hand(history, user)		
 		)
 
 	@smart_api()

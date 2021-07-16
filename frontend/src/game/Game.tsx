@@ -47,6 +47,14 @@ export default function Game() {
 
 	const { gameInfo: { hand, trickState, roundState, playerStates } } = data
 
+	if (data.gameOver) {
+		return <End playerStates={playerStates}></End>
+	}
+
+	if (roundState == null) {
+		return <Loading loading={true} />
+	}
+
 	return (
 		<div className={classes.root} ref={setRootRef}>
 			<div className={classes.dropArea} ref={drop}>
@@ -109,7 +117,7 @@ const useStyles = makeStyles({
 interface Info {
 	gameInfo: GameInfo | null
 	requiredAction: RequiredAction | null
-	gameOver: Boolean | null
+	gameOver: Boolean
 }
 
 const GET_INFO = gql`

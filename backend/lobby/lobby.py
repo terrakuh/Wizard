@@ -44,7 +44,7 @@ class Lobby:
 		with self._lock:
 			try:
 				if len(self._players) <= 1:
-					self.end_game()
+					self.close_game()
 					return
 				self._players.remove(user)
 				if self.is_lobby_master(user):
@@ -91,7 +91,15 @@ class Lobby:
 	def end_game(self) -> None:
 		with self._lock:
 			self._game_task.cancel()
-			self._game.end_game()
+			self._game.end_game() # Calls finish_game
+
+	def close_game(self) -> None:
+		with self._lock:
+			if not self.is_game_over():
+				self.end_game()
+			self._game = None
+			self._game_task = None
+
 
 	def is_game_over(self) -> bool:
 		with self._lock:

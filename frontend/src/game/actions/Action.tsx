@@ -7,7 +7,7 @@ import { useEffect } from "react"
 interface Props {
 	info: {
 		requiredAction: RequiredAction
-		roundState: RoundState
+		roundState: RoundState | null
 		trickState?: TrickState | null
 		playerStates: PlayerState[]
 	} | null
@@ -22,7 +22,7 @@ export default function Action(props: Props) {
 		}
 	}, [notify, props.info])
 
-	if (props.info) {
+	if (props.info && props.info.roundState) {
 		const reqAction = props.info?.requiredAction.type
 
 		if (reqAction === "call_tricks") {
