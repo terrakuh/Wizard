@@ -9,6 +9,7 @@ import { PlayedCard } from "./game/card"
 import Calendar from "./calendar"
 import Navigation from "./Navigation"
 import Hand from "./game/Hand"
+import { Stats } from "./stats"
 
 export default function App() {
 	const classes = useStyles()
@@ -43,6 +44,10 @@ export default function App() {
 
 					<RequiresLogin path="/calendar">
 						<Calendar />
+					</RequiresLogin>
+
+					<RequiresLogin path="/stats">
+						<Stats />
 					</RequiresLogin>
 
 					<Route exact path="/test">

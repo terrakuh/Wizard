@@ -4,7 +4,6 @@ from typing import Callable, List
 from datetime import datetime
 from copy import deepcopy
 import asyncio
-import concurrent
 
 from game.game import Game, Settings
 from game.player import User
@@ -117,5 +116,4 @@ class Lobby:
 		with self._lock:
 			if self._game is None:
 				raise Exception("game not started")
-			print("HISTORY IS " + str(self._game.history))
 			return self._game.history
