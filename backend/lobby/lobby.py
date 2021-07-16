@@ -94,8 +94,10 @@ class Lobby:
 
 	def close_game(self) -> None:
 		with self._lock:
-			if not self.is_game_over():
-				self.end_game()
+			try:
+				if not self.is_game_over():
+					self.end_game()
+			except: pass
 			self._game = None
 			self._game_task = None
 

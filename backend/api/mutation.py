@@ -82,7 +82,7 @@ class Mutation(ObjectType):
 
 	@smart_api()
 	def resolve_leave_lobby(root, info: ResolveInfo, manager: Manager, lobby: Lobby,  user: User):
-		if lobby.is_game_over():
+		if lobby.game_started is None or lobby.is_game_over():
 			if not lobby.is_lobby_master(user):
 				raise GraphQLError("not lobby master")
 			manager.close_lobby(lobby)
