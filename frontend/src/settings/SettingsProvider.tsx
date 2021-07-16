@@ -9,11 +9,7 @@ interface Context {
 
 export const defaultSettings: Settings = {
 	notifications: {
-		enabled: true,
-		audio: true,
-		audioTrack: "Klang 1",
-		desktop: true,
-		playerTurn: true
+		audioTrack: "Klang 1"
 	},
 	messages: {
 		signal: {
@@ -21,11 +17,7 @@ export const defaultSettings: Settings = {
 			number: ""
 		}
 	},
-	theme: {
-		background: "#242733",
-		primary: "#e42e50",
-		secondary: "#a2268e"
-	}
+	theme: window?.matchMedia('(prefers-color-scheme: dark)').matches ? "dark" : "light"
 }
 
 const initialSettings = deepMerge<Settings>(defaultSettings, JSON.parse(localStorage.getItem("settings") || "{}"))

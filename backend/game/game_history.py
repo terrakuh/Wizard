@@ -76,7 +76,6 @@ class GameHistory:
             self.players_sync = list(self.players_dict_sync.values())
 
     def get_players_sync(self) -> list["Player"]:
-        print("In History: " + str(threading.get_ident()))
         with self.lock:
             return self.players_sync
 
@@ -94,7 +93,8 @@ class GameHistory:
 
     def get_hand_cards_sync(self, user_id: str) -> list["Card"]:
         with self.lock:
-            return list(self.players_dict_sync[user_id].cards.values())
+            cards = self.players_dict_sync[user_id].cards
+            return [] if (cards is None) else list(cards.values())
     
     def get_playable_sync(self, user_id: str) -> list[str]:
         lead_color = self.__get_lead_color()
@@ -102,7 +102,6 @@ class GameHistory:
             return self.players_dict_sync[user_id].get_playable_cards(lead_color)
 
     def get_player_task_sync(self, user_id: str) -> "TaskInfo":
-        print("In Hist2: " + str(threading.get_ident()))
         with self.lock:
             return self.players_dict_sync[user_id].current_task
 
@@ -114,7 +113,6 @@ class GameHistory:
         self.players_sync = list(self.players_dict_sync.values())
 
     async def complete_task_sync(self, user_id: str, option: str) -> None:
-        logging.info("Completing in history...")
         await self.players_dict[user_id].complete_task(option)
         self.update_player(user_id)
 

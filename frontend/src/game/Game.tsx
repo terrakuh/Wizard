@@ -13,6 +13,7 @@ import ScoreBoard from "./ScoreBoard"
 import TrumpCard from "./card/TrumpCard"
 import PastTrick from "./PastTrick"
 import usePlayCard from "./card/usePlayCard"
+import End from "./End"
 
 export default function Game() {
 	const classes = useStyles()
@@ -33,7 +34,8 @@ export default function Game() {
 		}
 		return {
 			...data.gameInfo,
-			requiredAction: data.requiredAction
+			requiredAction: data.requiredAction,
+			gameOver: data.gameOver
 		}
 	}, [data])
 
@@ -45,7 +47,13 @@ export default function Game() {
 
 	const { gameInfo: { hand, trickState, roundState, playerStates } } = data
 
-	console.log("New player state:\n" + JSON.stringify(playerStates))
+	if (data.gameOver) {
+		return <End playerStates={playerStates}></End>
+	}
+
+	if (roundState == null) {
+		return <Loading loading={true} />
+	}
 
 	return (
 		<div className={classes.root} ref={setRootRef}>
@@ -109,6 +117,7 @@ const useStyles = makeStyles({
 interface Info {
 	gameInfo: GameInfo | null
 	requiredAction: RequiredAction | null
+	gameOver: Boolean
 }
 
 const GET_INFO = gql`
@@ -141,10 +150,6 @@ const GET_INFO = gql`
 			hand {
 				id
 				playable
-				variants {
-					id
-					playable
-				}
 			}
 			trickState {
 				...TrickStateFragment
@@ -171,5 +176,6 @@ const GET_INFO = gql`
 			type
 			options
 		}
+		gameOver
 	}
 `

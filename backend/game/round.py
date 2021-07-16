@@ -39,7 +39,6 @@ class Round:
     def __handout_cards(self, card_deck: list[Card]) -> list[Card]:
         print("Handing")
         random.shuffle(card_deck)
-        card_deck[0] = CardDecks.CARDS["juggler"]
 
         player_count = self.history.get_player_count_sync()
 

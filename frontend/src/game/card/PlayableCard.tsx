@@ -1,5 +1,4 @@
 import { makeStyles } from "@material-ui/core"
-import { React } from "@ungap/global-this"
 import { memo, useCallback, useState } from "react"
 import { useDrag, useDrop } from "react-dnd"
 import { PlayableCard as PlayableCardSchema } from "../../types"
@@ -8,7 +7,6 @@ import usePlayCard from "./usePlayCard"
 
 interface Props {
 	card: PlayableCardSchema
-	style?: React.CSSProperties
 	moveCard(from: string, to: string): void
 }
 
@@ -46,10 +44,13 @@ function PlayableCard(props: Props) {
 			onDoubleClick={() => playCard(props.card.id)}
 			className={hovering && !isDragging ? classes.hover : undefined}
 			onMouseEnter={() => setHovering(true)}
-			onMouseLeave={() => setHovering(false)}
-			style={props.style}>
+			onMouseLeave={() => setHovering(false)}>
 			<img
-				style={{ ...cardStyle, opacity: thisIsDragging ? 0 : 1 }}
+				style={{
+					...cardStyle,
+					opacity: thisIsDragging ? 0 : 1,
+					filter: props.card.playable ? undefined : "brightness(30%)"
+				}}
 				alt=""
 				src={`/private/${props.card.id}.jpg`} />
 		</div>
@@ -64,7 +65,7 @@ const useStyles = makeStyles({
 		to: {
 			zIndex: 999,
 			bottom: 50,
-			transform: "translateY(15%)"
+			transform: "translateY(-15%)"
 		}
 	},
 	hover: {

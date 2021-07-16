@@ -44,7 +44,6 @@ class TrickState(ObjectType):
 class PlayableCard(ObjectType):
 	id = NonNull(ID)
 	playable = NonNull(Boolean)
-	variants = List(NonNull(lambda: PlayableCard))
 
 
 class RoundState(ObjectType):
@@ -60,10 +59,10 @@ class RequiredAction(ObjectType):
 
 
 class GameInfo(ObjectType):
-	round_state = NonNull(RoundState)
+	round_state = Field(RoundState)
 	trick_state = Field(TrickState)
 	player_states = NonNull(List(NonNull(PlayerState)))
-	hand = NonNull(List(NonNull(PlayableCard)))
+	hand = List(NonNull(PlayableCard))
 
 
 class Appointment(ObjectType):

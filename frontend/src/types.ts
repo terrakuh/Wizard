@@ -49,7 +49,6 @@ export interface TrickState {
 export interface PlayableCard {
 	id: string
 	playable: boolean
-	variants: PlayableCard[] | null
 }
 
 export interface RequiredAction {
@@ -58,8 +57,8 @@ export interface RequiredAction {
 }
 
 export interface GameInfo {
-	hand: PlayableCard[]
-	roundState: RoundState
+	hand: PlayableCard[] | null
+	roundState: RoundState | null
 	trickState: TrickState | null
 	playerStates: PlayerState[]
 }

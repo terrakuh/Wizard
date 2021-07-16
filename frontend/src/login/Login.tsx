@@ -8,6 +8,7 @@ import { useSnackbar } from "notistack"
 import { generatePasswordHash } from "../util/security"
 import { useHistory } from "react-router"
 import { ThemedButton } from "../theme"
+import { WHOAMI } from "../gql"
 
 export default function Login() {
 	const classes = useStyles()
@@ -17,7 +18,11 @@ export default function Login() {
 	const [name, setName] = useState("")
 	const [password, setPassword] = useState("")
 	const [stayLoggedIn, setStayLoggedIn] = useState(false)
-	const [login] = useMutation<any, LoginVariables>(LOGIN)
+	const [login] = useMutation<any, LoginVariables>(LOGIN, {
+		refetchQueries: [{
+			query: WHOAMI
+		}]
+	})
 	const [fetchLoginInformation, { loading }] = useLazyQuery<GetLoginInformation>(GET_LOGIN_INFORMATION, {
 		onCompleted(data) {
 			setLogginIn(true)

@@ -2,6 +2,21 @@
 
 ## [Unreleased]
 
+## [v0.7] - 2021-07-16
+### Added
+- Logout button
+- New sleek fast menu
+- Leave/close lobby option
+- End game prematurely
+
+### Fixed
+- Lobby cleanup
+- Fix wrong references when sorting hand
+
+### Removed
+- Menu drawer
+- Settings dialog
+
 ## [v0.6.1] - 2021-05-31
 ### Fixed
 - Disable lobby settings for non lobby owner
@@ -72,8 +87,9 @@ Rewrite in Python.
 - Frontend
 - Backend
 
-[Unreleased]: https://github.com/terrakuh/wizard/compare/v0.6.1...dev
-[Unreleased]: https://github.com/terrakuh/wizard/compare/v0.6...v0.6.1
+[Unreleased]: https://github.com/terrakuh/wizard/compare/v0.7...dev
+[v0.7]: https://github.com/terrakuh/wizard/compare/v0.6.1...v0.7
+[v0.6.1]: https://github.com/terrakuh/wizard/compare/v0.6...v0.6.1
 [v0.6]: https://github.com/terrakuh/wizard/compare/v0.5...v0.6
 [v0.5]: https://github.com/terrakuh/wizard/compare/v0.4...v0.5
 [v0.4]: https://github.com/terrakuh/wizard/compare/v0.3.0...v0.4

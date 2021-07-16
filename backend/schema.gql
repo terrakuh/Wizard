@@ -52,7 +52,6 @@ type TrickState {
 type PlayableCard {
 	id: ID!
 	playable: Boolean!
-	variants: [PlayableCard!]
 }
 
 type RequiredAction {
@@ -61,10 +60,10 @@ type RequiredAction {
 }
 
 type GameInfo {
-	roundState: RoundState!
-	trickState: TrickState!
+	roundState: RoundState
+	trickState: TrickState
 	playerStates: [PlayerState!]!
-	hand: [PlayableCard!]!
+	hand: [PlayableCard!]
 }
 
 ########################################
@@ -103,6 +102,7 @@ type Query {
 
 	# game logic
 	gameInfo: GameInfo
+	gameOver: Boolean
 	requiredAction: RequiredAction
 
 	# misc
@@ -128,6 +128,7 @@ type Mutation {
 	joinLobby(code: String!): Boolean!
 	leaveLobby: Boolean!
 	startGame: Boolean!
+	endGame: Boolean!
 
 	# game logic
 	completeAction(option: String!): Boolean!

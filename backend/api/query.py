@@ -2,6 +2,8 @@ from datetime import timedelta
 from typing import Optional
 import threading
 
+from graphene.types.scalars import Boolean
+
 from api.decorators import Cache, smart_api
 from graphene import ObjectType, Field, ID, String, NonNull, ResolveInfo, List, DateTime, Int
 from graphql import GraphQLError
@@ -72,7 +74,6 @@ class Query(ObjectType):
 
 	@smart_api()
 	async def resolve_max_rounds(root, info: ResolveInfo, lobby: Optional[Lobby]):
-		print("Getting max...")
 		try:
 			return lobby.get_max_rounds()
 		except:
@@ -81,19 +82,23 @@ class Query(ObjectType):
 
 	# game logic
 	game_info = Field(GameInfo)
+	game_over = Boolean()
 	required_action = Field(RequiredAction)
 
 	@smart_api()
 	def resolve_game_info(root, info, user: User, history: Optional[GameHistory]):
-		print("In API2: " + str(threading.get_ident()))
 		if history is None:
 			return None
 		return GameInfo(
 			round_state=graphene_parser.get_round_state(history),
 			trick_state=graphene_parser.get_trick_state(history),
 			player_states=graphene_parser.get_player_states(history),
-			hand=graphene_parser.get_hand(history, user)
+			hand=graphene_parser.get_hand(history, user)		
 		)
+
+	@smart_api()
+	def resolve_game_over(root, info: ResolveInfo, lobby: Lobby):
+		return lobby.is_game_over()
 
 	@smart_api()
 	def resolve_required_action(root, info: ResolveInfo, user: User, history: GameHistory):

@@ -9,6 +9,7 @@ import { PlayedCard } from "./game/card"
 import Calendar from "./calendar"
 import Navigation from "./Navigation"
 import Hand from "./game/Hand"
+import { Stats } from "./stats"
 
 export default function App() {
 	const classes = useStyles()
@@ -43,6 +44,10 @@ export default function App() {
 
 					<RequiresLogin path="/calendar">
 						<Calendar />
+					</RequiresLogin>
+
+					<RequiresLogin path="/stats">
+						<Stats />
 					</RequiresLogin>
 
 					<Route exact path="/test">
@@ -86,38 +91,31 @@ export default function App() {
 						<Hand cards={[
 							{
 								id: "green_9",
-								playable: true,
-								variants: null
+								playable: false
 							},
 							{
 								id: "blue_9",
-								playable: false,
-								variants: null
+								playable: true
 							},
 							{
 								id: "red_9",
-								playable: false,
-								variants: null
+								playable: false
 							},
 							{
 								id: "blue_wizard",
-								playable: false,
-								variants: null
+								playable: false
 							},
 							{
 								id: "red_wizard",
-								playable: false,
-								variants: null
+								playable: false
 							},
 							{
 								id: "yellow_wizard",
-								playable: false,
-								variants: null
+								playable: false
 							},
 							{
 								id: "green_wizard",
-								playable: false,
-								variants: null
+								playable: false
 							}
 						]} />
 					</Route>
