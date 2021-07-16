@@ -4,7 +4,8 @@
 ### Added
 - Logout button
 - New sleek fast menu
-- Leave lobby option
+- Leave/close lobby option
+- End game prematurely
 
 ### Fixed
 - Lobby cleanup

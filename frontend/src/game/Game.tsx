@@ -13,7 +13,7 @@ import ScoreBoard from "./ScoreBoard"
 import TrumpCard from "./card/TrumpCard"
 import PastTrick from "./PastTrick"
 import usePlayCard from "./card/usePlayCard"
-import End from "./end/End"
+import End from "./End"
 
 export default function Game() {
 	const classes = useStyles()
