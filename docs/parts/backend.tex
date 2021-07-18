@@ -3,7 +3,22 @@
 \section{Backend}
 \subsection{API}
 \subsection{Datenbank}
+Um Informationen über die Spiele, Termine, Spieler und Login-Informationen zu speichern kam die in der Python-Standardbibliothek enthaltene Offline-Datenbank SQLite zum Einsatz. Der Vorteil dieser Technologie ist, dass sie sich perfekt für kleinere Projekte eignet, da keine externe Datenbank aufgesetzt werden muss. Für die Anbindung im Backend fiel die Entscheidung auf eine \textit{asyncio}-Implementation, da gewissen Abfragen auf die Datenbank Lese- beziehungsweise Schreiboperation auslösen können, welche immer eine gewisse Zeit mit Warten im Code als Folge nach sich ziehen. Die Python Klasse \textit{Database}, welche die fortgeschrittenere Anbindung zur eigentlichen Datenbank bietet, initialisiert zu Beginn einen \textit{Thread-Pool} mit einem Thread, welcher ausschließlich für die Datenbankoperationen reserviert ist. Durch diesen Ansatz müssen die einzelnen Abfragen nicht synchronisiert werden und können direkt mit dem \textit{asyncio} Paket integriert werden.
+
+\begin{lstlisting}[language=Python]
+db = Database("wizard.db") # Der Dateiname
+await db.login(name="user", password_hash="...")
+\end{lstlisting}
+
+Durch diesen Ansatz kann Pythons Coroutinenimplementation einen einzelnen Thread besser auslasten, da Operationen welche mit Warten verbunden sind, in den Hintergrund geschoben werden.
+
+Für die Benutzerregistrierung existieren zwei Methoden namens \textit{register\_user} und \textit{consume\_token}. Die erste Methode legt einen neuen Benutzer in der Datenbank an und speichert hierbei den Namen, einen Hash vom Passwort, sowie den dazugehörigen Salt. \textit{consume\_token} ermöglicht es dem Backend eine Registrierung nur mit gültigem Token zu erlauben. Hierbei wird der vom Benutzer eingegebene Registriertoken mit den Token in der Datenbank abgeglichen und je nach Resultat wird der Token gelöscht und die Registrierung erlaubt oder abgewiesen. Dies soll unerwünschte Anmeldungen verhindern.
+
+Die eigentliche An- und Abmeldung der Benutzer ist etwas komplexer, was sich auch in der Anzahl der benötigten Methoden widerspiegelt: \textit{login}, \textit{logout}, \textit{is\_logged\_in}, \textit{get\_user\_by\_cookie} und \textit{get\_login\_information}. Bevor sich ein Nutzer anmelden kann muss dieser durch \textit{get\_login\_information} essentielle Informationen abfragen, wie einen Salt-Wert der für die Schlüsselgenerierung wichtig ist. In keinem Fall wird das eigentliche Benutzerpasswort an das Backend gesendet oder anderweitig gespeichert (siehe \cref{sec:frontend-registrierung}).
 
 \section{Frontend}
+
+\label{sec:frontend-registrierung}
+Bevor das Passwort in einen Anmeldeschlüssel umgewandelt wird, wird zuerst mithilfe des kostenlosen Dienstes \textit{Have I Been Pwned?} überprüft ob das Passwort in der Vergangenheit kompromittiert wurde. Hierbei werden nur die ersten fünf Zeichen des Passwort-Hashes an den Service geschickt, wodurch das eigentliche Passwort niemals den Browserkontext verlässt. Anschließend wird ein x-Bit langer Salt zufällig generiert, welcher mithilfe der \gls{pbkdf2} + SHA512 Methode und dem eigentlichen Passwort einen 256-Bit langen Schlüssel generiert. Für den Abschluss wird die entsprechende API Funktion \textit{register} mit den Base64 enkodierten Schlüssel und Salt aufgerufen.
 
 \section{Zusammenspiel}
