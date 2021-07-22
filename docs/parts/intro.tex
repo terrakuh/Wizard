@@ -1,5 +1,40 @@
 \chapter{Einleitung}
 
-\section{Motivation und Anforderungen}
+Die grundlegende Idee zu diesem Projekt entstammt den Folgen der Corona-Pandemie. Durch die Kontaktbeschränkungen war es uns und unserne Kommilitonen leider nicht mehr möglich, nach einem langen Tag an der Hochschule eine Runde des Kartenspiels Wizard zu spielen. Da auch die Suche nach kostenlosen, brauchbaren Online-Lösungen für das Spiel keine befriedigenden Ergebnisse hervorbrachte, hat sich als Lösung eine eigene Implementierung von Wizard mit Online-Multiplayer Funktion ergeben. Diese Idee wurde daher für dieses Projekt aufgegriffen. Dabei wurde bereits im Voraus des Projekts eine schnelle, prototypische Implementierung in Go erstellt. Diese wurde allerdings aufgrund ihrer mangelnden Übersichtlichkeit und Flexibilität schlussendlich im Rahmen dieses Projekts im Python neu implementiert und auch mit einem stark erweiterten Frontend versehen.
+
+\section{Anforderungen}
+
+Die zentrale Anforderung an die Anwendung war selbstverständlich die Möglichkeit, online mit mehreren Spielern das Kartenspiel Wizard spielen zu können. Dafür werden bereits folgende Funktionen benötigt:
+\begin{itemize}
+	\item Nutzerverwaltung für die verschiedenen Mitspieler
+	\item Austeilen der Karten
+	\item Ansagen der Stiche
+	\item Spielen von Karten
+	\item Stichzuweisung und entsprechende Bepunktung
+\end{itemize}
+Davon ausgehend haben sich dann einige weitere Anforderungen ergeben:
+\begin{itemize}
+	\item Anzeige eines Scoreboards
+	\item Auswahl der Trumpffarbe
+	\item Anzeige der Trumpffarbe
+	\item Anzeige der farbgebenden Karte eines Stichs
+	\item Ansicht der Karten des (letzten) Stichs inklusive der ausspielenden Person
+	\item Hervorhebung der stechenden Karte inklusive der ausspielenden Person
+\end{itemize}
+Hiermit kann bereits problemslos gespielt werden, es bieten sich allerdings auch noch einige weitere praktische und unterhaltsame Funktionen an, welche das Spiel noch interessanter werden lassen würden und daher auch erfasst wurden:
+\begin{itemize}
+	\item Auswahl zwischen den Jubiläumseditionen des Spiels
+	\item Kalenderfunktion mit automatischer Benachrichtigungsfunktion zum Spielstart
+	\item Statistische Auswertung und Übersicht der Spieler
+	\item Abschlussbildschirm am Ende des Spiels
+	\item Automatisches Ausspielen einer im Voraus ausgewählten Karte
+	\item Benachrichtigungen beim eigenen Zug
+	\item Ansprechende graphische Effekte
+\end{itemize}
+Auf all diesen Anforderungen und Ideen basierend wurde das Spiel dann nach und nach entwickelt, wobei viele Ideen auch integriert wurde, einige allerdings auch (noch) nicht.
 
 \section{Planung}
+
+Entwickelt wurde die Webanwendung von einem Team bestehend aus Yunus Ayar und Maximilian Diesenbacher. Dabei fand die Kommunikation situationsbedingt vorrangig digital über Messengerdiesnte, Discord und Zoom statt. Circa alle zwei Wochen wurde in einem Meeting der erreichte Fortschritt besprochen und in Github gemerged. Aufgeteilt wurde die Arbeit grob in die Bereiche Backend, Frontend, API und Datenbank, wobei die ersten zwei vergleichsweise exklusiv verteilt wurden und an API und Datenbank kollaborativer gearbeitet wurde.
+
+Die Entwicklung an sich wurde primär in Visual Studio Code erledigt. Dabei wurde für die API primär auf FastAPI und das zugehörige Paket für GraphQL "graphene" gesetzt. Das Frontend wurde mit React und dem React-Framework Material-UI gebaut. Und bei der Datenbank wurde zuletzt auf SQLite gesetzt. Da diese und deren Struktur einen grundlegenden Aufbau des Spiels wiederspiegelt, war eine der ersten Schritte die Erstellung eines entsprechenden Modells. Bei diesem wurden bereits aus allen der obigen Anforderungen Aspekte miteinbezogen. Dieses wurde dann in Details auch im Laufe des Projekts weiterentwickelt, hat in seiner allgemeinen Struktur allerdings einen zentralen Grundseitn des Projets dargestellt. Dabei ist schlussendlich folgende Struktur entstanden:

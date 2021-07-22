@@ -1,6 +1,52 @@
 \chapter{Entwicklung}
 
 \section{Backend}
+
+\subsection{Spiellogik}
+
+Die Spiellogik besteht elementar aus den Objekten Spiel, Runde, Stich, Spieler und Karte. Dabei wird ein Spiel mit einer Liste an Spielern erstellt und eine Game-Loop gestartet:
+\begin{lstlisting}[language=Python]
+while self.round_counter <= self.settings.round_number:
+	self.curr_round = Round(history=self.history, first_player=self.first_player, round_counter=self.round_counter)
+	self.history.update_round(self.curr_round)
+	await self.__do_round()
+\end{lstlisting}
+\begin{lstlisting}[language=Python]
+async def __do_round(self):
+	await self.curr_round.start_round()
+	self.first_player = (self.first_player + 1) % len(self.players)
+	self.round_counter += 1
+	self.history.save_round()
+	for p in self.players.values(): p.reset()
+\end{lstlisting}
+Wie hier zu sehen ist, erstellt die Game-Loop grunsätzlich entsprechend der zu spielenden Rundenanzahl ein neues Runden-Objekt und startet diese Runde. Nachdem bei Erstellung der Runde bereits Karten verteilt und die Trumpfkarte bestimmt werden, geschieht innerhalb einer Runde Folgendes:
+\begin{lstlisting}[language=Python]
+async def start_round(self):
+	await self.__init_trump()
+	await self.__get_estimations()
+	
+	for i in range(1, self.round_number + 1):
+		self.curr_trick = Trick(history=self.history, first_player=self.first_player, trick_number=i, trump_color=self.trump_color)
+		self.history.add_trick(self.curr_trick)
+		winning_player, after_effects = await self.curr_trick.do_trick()
+		await asyncio.sleep(2)
+		self.first_player  = winning_player.pos
+		await self.__handle_after_effects(after_effects, winning_player, i)
+	self.__calculate_points()
+\end{lstlisting}
+Eine Runde besteht also darin, die Trumpffarbe der Runde zu bestimmen, die Spieler ihre Stich-Schätzung abgeben zu lassen und dann die nötige Anzahl an Stichen durchführen zu lassen. Dafür werden jeweils Stich-Objekte erstellt und "ausgeführt":
+\begin{lstlisting}[language=Python]
+async def do_trick(self) -> tuple[Player, list[str]]:
+	players: list[Player] = self.history.get_players()
+	for _ in players:
+		await self.__play_card()
+		self.history.update_trick(self)
+	return (self.get_current_winner(), self.__get_after_effects())
+\end{lstlisting}
+Hier wird also schlussendlich jeder Spieler nacheinander dazu aufgefordert, eine Karte zu spielen und der Gewinner des Stichs ermittelt.
+
+In den obigen Ausschnitten sind außerdem noch zwei wichtige Aspekte zu erkennen. Zum einen ist an den Schlüsselwörtern "async" und "await" zu erkennen, dass die interaktive und daher asynchrone Natur eines Spiels mittel "asyncio" realisiert wurde. Zum anderen taucht immer wieder eine "history" auf. Dabei handelt es sich um ein Objekt, welches den Spielverlauf enthält und damit zwei aufgekommene Problematiken löst. Der erste Zweck dieser Klasse ist die Lösung des Problems synchroner Datenabfragen in einem asynchronen System. Es wird also sichergestellt, dass mit der Spiellogik konsistente Antworten auf API-Anfragen geliefert werden können. Daher wird, sobald sich die Daten eines relevanten Objekts, beispielsweise eines Stichs, ändern, eine entsprechende Funktion der History zum aktualisieren dieser Daten aufgerufen. So kann die History als zentrale Datenquelle für die API dienen und dabei mit entsprechenden Lock-Mechanismen vor Inkonsistenzen geschützt werden. Die andere Aufgabe dieses Objekts ist die maximale Minderung der nötigen Datenbank-Aufrufe, und die Ereignisse eines Spiels abzuspeichern. Genauer kann, dadurch, dass die History den gesamten Spielverlauf enthält, am Ende eines Spiels ein einziger Datenbank-Aufruf zum Speichern des Spiels erfolgen und alle relevanten Daten werden direkt gespeichert.
+
 \subsection{API}
 Für die API kam das Web-Framework \textit{FastAPI} zum Einsatz. Hierbei wurden folgende Routen definiert:
 
