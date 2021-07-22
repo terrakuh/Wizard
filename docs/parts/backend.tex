@@ -54,7 +54,7 @@ Für die API kam das Web-Framework \textit{FastAPI} zum Einsatz. Hierbei wurden 
 Die Aufgabe dieser Route ist es beim Deployment die Ressourcen an das Frontend liefern zu können. Hierbei wird zwischen \textit{privaten} und \textit{öffentlichen} Dateien unterschieden, wobei Ersteres eine valide Authentifizierung benötigt und Zweiteres nicht. Diese Überprüfung verläuft über einen Abgleich der Cookies, wobei der Cookie vom Nutzer über die von der FastAPI bereitgestellten Klasse \textit{Request} abgerufen werden kann. Zudem wird überprüft, dass die angefragte Ressource niemals den Ordner \textit{static} verlässt. Falls die geforderten Dateien nicht existieren wird standardmäßig \textit{index.html} versendet, damit auch die Routen im Frontend ordnungsmäßig funktionieren. Um die Datei letztendlich zu verschicken wird die von FastAPI mitgelieferte Klasse \textit{FileResponse} genutzt, welche den Datentransfer asynchron ablaufen lassen kann. \cite{fastapi-fileresponse}
 
 \subsubsection{POST /api/gql}
-Um einen Austausch von Daten beziehungsweise Status zwischen Frontend und Backend zu ermöglichen fiel die Wahl auf die Abfragesprache \textit{GraphQL}. Mithilfe dieser Technologie können JSON-ähnliche Anfragen an das Backend geschickt werden, welches im Anschluss mit einer entsprechenden JSON-Datei antwortet. Für die einfachere Programmierung wurde ein Python-Dekorateur namens \textit{smart\_api} entwickelt, welcher je nach Wunsch repetitive 
+Um einen Austausch von Daten beziehungsweise Status zwischen Frontend und Backend zu ermöglichen fiel die Wahl auf die Abfragesprache \textit{GraphQL}. Mithilfe dieser Technologie können JSON-ähnliche Anfragen an das Backend geschickt werden, welches im Anschluss mit einer entsprechenden JSON-Datei antwortet. Für die einfachere Programmierung wurde ein Python-Dekorateur namens \textit{smart\_api} entwickelt, welcher je nach Wunsch repetitive Aufgaben, wie beispielsweise die Authentifizierung, Caching oder auch die Auflösung von Abhängigkeiten wie zum Beispiel die Datenbank, den Lobby-Manager oder auch das für den Spieler aktive Spiel.
 
 Dabei stehen folgende Leseabfragen zur Verfügung:
 
@@ -121,19 +121,40 @@ await db.login(name="user", password_hash="...")
 
 Durch diesen Ansatz kann Pythons Coroutinenimplementation einen einzelnen Thread besser auslasten, da Operationen welche mit Warten verbunden sind, in den Hintergrund geschoben werden.
 
-Für die Benutzerregistrierung existieren zwei Methoden namens \textit{register\_user} und \textit{consume\_token}. Die erste Methode legt einen neuen Benutzer in der Datenbank an und speichert hierbei den Namen, einen Hash vom Passwort, sowie den dazugehörigen Salt. \textit{consume\_token} ermöglicht es dem Backend eine Registrierung nur mit gültigem Token zu erlauben. Hierbei wird der vom Benutzer eingegebene Registriertoken mit den Token in der Datenbank abgeglichen und je nach Resultat wird der Token gelöscht und die Registrierung erlaubt oder abgewiesen. Dies soll unerwünschte Anmeldungen verhindern.
+Für die Benutzerregistrierung existieren zwei Methoden namens \textit{register\_user} und \textit{consume\_token}. Die erste Methode legt einen neuen Benutzer in der Datenbank an und speichert hierbei den Namen, einen Hash vom Passwort, sowie den dazugehörigen Salt (siehe \cref{fig:user-db}). \textit{consume\_token} ermöglicht es dem Backend eine Registrierung nur mit gültigem Token zu erlauben. Hierbei wird der vom Benutzer eingegebene Registriertoken mit den Token in der Datenbank abgeglichen und je nach Resultat wird der Token gelöscht und die Registrierung erlaubt oder abgewiesen. Dies soll unerwünschte Anmeldungen verhindern.
 
 Die eigentliche An- und Abmeldung der Benutzer ist etwas komplexer, was sich auch in der Anzahl der benötigten Methoden widerspiegelt: \textit{login}, \textit{logout}, \textit{is\_logged\_in}, \textit{get\_user\_by\_cookie} und \textit{get\_login\_information}. Bevor sich ein Nutzer anmelden kann muss dieser durch \textit{get\_login\_information} essentielle Informationen abfragen, wie einen Salt-Wert der für die Schlüsselgenerierung wichtig ist. In keinem Fall wird das eigentliche Benutzerpasswort an das Backend gesendet oder anderweitig gespeichert (siehe \cref{sec:frontend-registrierung}).
 
 \begin{figure}[h]
 	\includegraphics[width=\textwidth]{images/user-db.png}
 	\caption{Benutzertabelle mit Cookie-Session}
+	\label{fig:user-db}
 \end{figure}
 
+\begin{sidewaysfigure}
+	\includegraphics[width=\textheight]{images/statistics-db.png}
+	\caption{Datenbankmodel der Statistiken}
+	\label{fig:statistics-db}
+\end{sidewaysfigure}
+
 \section{Frontend}
-Wenn die Frontend-Webseite zum ersten Mal aufgerufen wird, wird das Login-Interface angezeigt. Hierbei muss der Nutzer Name und Passwort eingeben. Optional kann festgelegt werden, ob der Nutzer angemeldet bleiben möchte um eine erneute Eingabe der Daten zu verhindern.
+Wenn die Frontend-Webseite zum ersten Mal aufgerufen wird, wird das Login-Interface angezeigt. Hierbei muss der Nutzer Name und Passwort eingeben. Optional kann festgelegt werden, ob der Nutzer angemeldet bleiben möchte um eine erneute Eingabe der Daten zu verhindern. Ohne Anmeldung ist sonst nur die Registrierseite erreichbar, da alles weitere eine erfolgreiche Authentifizierung benötigt.
+
+Nachdem der Spieler authentifiziert wurde, wird dieser auf die Lobby-Seite weitergeleitet, wo er wahlweise eine neue Lobby erstellen kann oder einer bereits existierenden mittels eines Codes oder Einladungslinks beitreten kann. Der Ersteller der Lobby hat zusätzlich die Möglichkeit vor dem Spielstart den Spielmodus und die gewünschte Rundenanzahl zu ändern. Zur Verfügung stehen die Standardedition, sowie die beiden Jubiläumseditionen für jeweils 20 und 25 Jahre. Die Rundenanzahl reicht von mindestens einer bis hin zu Anzahl der Karten durch die Anzahl der Spieler. Des Weiteren hat der Lobby-Master die Möglichkeit das Spiel zu starten oder die Lobby über das rechte obere Menü aufzulösen.
+
+Das Menü bietet den Nutzern über die ganze Seite verschiedene Schnellaktionen, wie beispielsweise das Springen zwischen den unterschiedlichen Seiten oder auch gewisse Einstellungsmöglichkeit, wie Darstellung und Benachrichtigungen (siehe \cref{fig:menu}). Zusätzlich kann ein angemeldeter Nutzer auch hierdurch sich abmelden oder eine eventuelle Lobby beziehungsweise laufendes Spiel verlassen.
+
+\begin{wrapfigure}{r}{5cm}
+	\includegraphics[width=5cm]{images/menu.png}
+	\caption{Allgemein verfügbares Menü}
+	\label{fig:menu}
+\end{wrapfigure}
+
+\textbf{TODO}: Über das Spiel.
+
+Zusätzlich kann ein angemeldeter Nutzer über das Menü auf den Kalender zugreifen. Hierbei kann über einfaches Klicken und Ziehen der Maus ein Event erstellt werden, was für alle anderen Spieler sichtbar ist. Diese können je nach Wunsch mit einem Klick beitreten oder es auch verlassen. Sobald keine Spieler in einem Event sind, wird dieses gelöscht. Des Weiteren werden alle Events, welche älter als eine Stunde sind automatisch aus der Datenbank entfernt. Der Sinn des Kalenders ist es Spieler schnell über das Portal zu vernetzten und somit eine einfachere Terminfindung zu ermöglichen.
 
 \label{sec:frontend-registrierung}
-Bevor das Passwort in einen Anmeldeschlüssel umgewandelt wird, wird zuerst mithilfe des kostenlosen Dienstes \textit{Have I Been Pwned?} überprüft ob das Passwort in der Vergangenheit kompromittiert wurde. Hierbei werden nur die ersten fünf Zeichen des Passwort-Hashes an den Service geschickt, wodurch das eigentliche Passwort niemals den Browserkontext verlässt. Anschließend wird ein x-Bit langer Salt zufällig generiert, welcher mithilfe der \gls{pbkdf2} + SHA512 Methode und dem eigentlichen Passwort einen 256-Bit langen Schlüssel generiert. Für den Abschluss wird die entsprechende API Funktion \textit{register} mit den Base64 enkodierten Schlüssel und Salt aufgerufen.
+Bevor das Passwort in einen Anmeldeschlüssel umgewandelt wird, wird zuerst mithilfe des kostenlosen Dienstes \textit{Have I Been Pwned?} überprüft ob das Passwort in der Vergangenheit kompromittiert wurde. Hierbei werden nur die ersten fünf Zeichen des Passwort-Hashes an den Service geschickt, wodurch das eigentliche Passwort niemals den Browserkontext verlässt. Falls die Abfrage erfolgreich verlief wird dem Benutzer eine Benachrichtigung mit der Anzahl der Kompromittierungen angezeigt und das Passwort abgewiesen. Anschließend wird ein 64-Bit langer Salt zufällig generiert, welcher mithilfe der \gls{pbkdf2} + SHA512 Methode und dem eigentlichen Passwort einen 256-Bit langen Schlüssel generiert. Für den Abschluss wird die entsprechende API Funktion \textit{register} mit den Base64 enkodierten Schlüssel und Salt aufgerufen.
 
 \section{Zusammenspiel}
