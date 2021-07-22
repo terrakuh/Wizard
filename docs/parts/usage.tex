@@ -29,3 +29,31 @@ sudo docker volume create wizard-data
 sudo docker run --name wizard -p 8000:8000 \
 	-v wizard-data:/data wizard
 \end{lstlisting}
+
+Außerdem kann die Anwendung, insbesondere zu Testzwecken auch lokal gestartet werden. Dafür müssen zuerst die nötigen Dependencies installiert werden:
+
+\begin{itemize}
+	\item Backend (/wizard/backend)
+	\begin{lstlisting}[language=bash]
+	pip install -r requirements.txt
+	\end{lstlisting}
+	\item Frontend (/wizard/frontend)
+	\begin{lstlisting}[language=bash]
+	yarn install
+	\end{lstlisting}
+\end{itemize}
+
+Ist dies geschehen, können Front- und Backend gestertet werden:
+
+\begin{itemize}
+	\item Backend (/wizard/backend)
+	\begin{lstlisting}[language=bash]
+	python main.py --reload
+	\end{lstlisting}
+	\item Frontend (/wizard/frontend)
+	\begin{lstlisting}[language=bash]
+	yarn start
+	\end{lstlisting}
+\end{itemize}
+
+Damit wird das Backend lokal auf Port 8000 und das Frontend lokal auf Port 8080 gestartet und die Anwendung kann über den Browser erreicht werden.
