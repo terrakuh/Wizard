@@ -2,6 +2,69 @@
 
 \section{Backend}
 \subsection{API}
+Für die API kam das Web-Framework \textit{FastAPI} zum Einsatz. Hierbei wurden folgende Routen definiert:
+
+\subsubsection{GET /\{full\_path:path\}}
+Die Aufgabe dieser Route ist es beim Deployment die Ressourcen an das Frontend liefern zu können. Hierbei wird zwischen \textit{privaten} und \textit{öffentlichen} Dateien unterschieden, wobei Ersteres eine valide Authentifizierung benötigt und Zweiteres nicht. Diese Überprüfung verläuft über einen Abgleich der Cookies, wobei der Cookie vom Nutzer über die von der FastAPI bereitgestellten Klasse \textit{Request} abgerufen werden kann. Zudem wird überprüft, dass die angefragte Ressource niemals den Ordner \textit{static} verlässt. Falls die geforderten Dateien nicht existieren wird standardmäßig \textit{index.html} versendet, damit auch die Routen im Frontend ordnungsmäßig funktionieren. Um die Datei letztendlich zu verschicken wird die von FastAPI mitgelieferte Klasse \textit{FileResponse} genutzt, welche den Datentransfer asynchron ablaufen lassen kann. \cite{fastapi-fileresponse}
+
+\subsubsection{POST /api/gql}
+Um einen Austausch von Daten beziehungsweise Status zwischen Frontend und Backend zu ermöglichen fiel die Wahl auf die Abfragesprache \textit{GraphQL}. Mithilfe dieser Technologie können JSON-ähnliche Anfragen an das Backend geschickt werden, welches im Anschluss mit einer entsprechenden JSON-Datei antwortet. Für die einfachere Programmierung wurde ein Python-Dekorateur namens \textit{smart\_api} entwickelt, welcher je nach Wunsch repetitive 
+
+Dabei stehen folgende Leseabfragen zur Verfügung:
+
+\begin{lstlisting}
+type Query {
+	# user management
+	loginInformation(name: String!): LoginInformation
+	user(id: ID!): User
+	whoami: User
+	
+	# lobby management
+	lobby: Lobby
+	modes: [String!]!
+	
+	# game logic
+	gameInfo: GameInfo
+	gameOver: Boolean
+	requiredAction: RequiredAction
+	
+	# misc
+	appointments: [Appointment!]!
+	
+	# statistics
+	residentSleeper: ResidentSleeper!
+}
+\end{lstlisting}
+
+Zusätzlich dazu sind Schreibabfragen wie folgt möglich:
+
+\begin{lstlisting}
+type Mutation {
+	# user management
+	register(name: String!, passwordHash: String!, salt: String!, 
+		hashType: String!, token: String!): Boolean!
+	login(name: String!, passwordHash: String!, 
+		stayLoggedIn: Boolean! = false): User
+	logout: Boolean!
+	
+	# lobby management
+	createLobby: String!
+	setLobbySettings(mode: String, roundLimit: Int): Boolean!
+	joinLobby(code: String!): Boolean!
+	leaveLobby: Boolean!
+	startGame: Boolean!
+	endGame: Boolean!
+	
+	# game logic
+	completeAction(option: String!): Boolean!
+	
+	# misc
+	joinAppointment(id: ID!) Boolean!
+	leaveAppointment(id: ID!) Boolean!
+	createAppointment(start: String!, end: String!) Boolean!
+}
+\end{lstlisting}
+
 \subsection{Datenbank}
 Um Informationen über die Spiele, Termine, Spieler und Login-Informationen zu speichern kam die in der Python-Standardbibliothek enthaltene Offline-Datenbank SQLite zum Einsatz. Der Vorteil dieser Technologie ist, dass sie sich perfekt für kleinere Projekte eignet, da keine externe Datenbank aufgesetzt werden muss. Für die Anbindung im Backend fiel die Entscheidung auf eine \textit{asyncio}-Implementation, da gewissen Abfragen auf die Datenbank Lese- beziehungsweise Schreiboperation auslösen können, welche immer eine gewisse Zeit mit Warten im Code als Folge nach sich ziehen. Die Python Klasse \textit{Database}, welche die fortgeschrittenere Anbindung zur eigentlichen Datenbank bietet, initialisiert zu Beginn einen \textit{Thread-Pool} mit einem Thread, welcher ausschließlich für die Datenbankoperationen reserviert ist. Durch diesen Ansatz müssen die einzelnen Abfragen nicht synchronisiert werden und können direkt mit dem \textit{asyncio} Paket integriert werden.
 
@@ -16,7 +79,13 @@ Für die Benutzerregistrierung existieren zwei Methoden namens \textit{register\
 
 Die eigentliche An- und Abmeldung der Benutzer ist etwas komplexer, was sich auch in der Anzahl der benötigten Methoden widerspiegelt: \textit{login}, \textit{logout}, \textit{is\_logged\_in}, \textit{get\_user\_by\_cookie} und \textit{get\_login\_information}. Bevor sich ein Nutzer anmelden kann muss dieser durch \textit{get\_login\_information} essentielle Informationen abfragen, wie einen Salt-Wert der für die Schlüsselgenerierung wichtig ist. In keinem Fall wird das eigentliche Benutzerpasswort an das Backend gesendet oder anderweitig gespeichert (siehe \cref{sec:frontend-registrierung}).
 
+\begin{figure}[h]
+	\includegraphics[width=\textwidth]{images/user-db.png}
+	\caption{Benutzertabelle mit Cookie-Session}
+\end{figure}
+
 \section{Frontend}
+Wenn die Frontend-Webseite zum ersten Mal aufgerufen wird, wird das Login-Interface angezeigt. Hierbei muss der Nutzer Name und Passwort eingeben. Optional kann festgelegt werden, ob der Nutzer angemeldet bleiben möchte um eine erneute Eingabe der Daten zu verhindern.
 
 \label{sec:frontend-registrierung}
 Bevor das Passwort in einen Anmeldeschlüssel umgewandelt wird, wird zuerst mithilfe des kostenlosen Dienstes \textit{Have I Been Pwned?} überprüft ob das Passwort in der Vergangenheit kompromittiert wurde. Hierbei werden nur die ersten fünf Zeichen des Passwort-Hashes an den Service geschickt, wodurch das eigentliche Passwort niemals den Browserkontext verlässt. Anschließend wird ein x-Bit langer Salt zufällig generiert, welcher mithilfe der \gls{pbkdf2} + SHA512 Methode und dem eigentlichen Passwort einen 256-Bit langen Schlüssel generiert. Für den Abschluss wird die entsprechende API Funktion \textit{register} mit den Base64 enkodierten Schlüssel und Salt aufgerufen.

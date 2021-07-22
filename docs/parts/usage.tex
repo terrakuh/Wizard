@@ -1,1 +1,23 @@
 \chapter{Nutzung}
+Für die Nutzung der Software wird zum einen die Container-Virtualisierungssoftware Docker benötigt, sowie weitere Ressourcen wie Bilder von den Spielkarten und Benachrichtigung-Sounds. Um an den aktuellsten Stand der Software zu gelangen, kann das GitHub Repository mittels Git geklont werden. Hierfür muss folgendes in ein Terminal getippt werden:
+
+\begin{lstlisting}[language=bash]
+git clone https://github.com/terrakuh/wizard.git
+cd wizard
+\end{lstlisting}
+
+Anschließend muss die Datei \textit{wizard-assets.zip} in dem Hauptverzeichnis abgespeichert werden. Die folgende Befehle bauen ein Docker-Image und führen es anschließend aus:
+
+\begin{lstlisting}[language=bash]
+sudo docker build . -t wizard
+sudo docker run --name wizard -p 8000:8000 wizard
+\end{lstlisting}
+
+Nun kann über URL \textit{http://localhost:8080/register} mithilfe des Webbrowsers auf die App zugegriffen werden. Für den ersten Nutzer ist der Token ein leerer String, wohingegen für jeden weiteren Nutzer ein Token manuell in der Datenbank erstellt werden muss. Folgender Befehl fügt einen neuen Token mit dem Wert \textit{token} in die Datenbank hinzu:
+
+\begin{lstlisting}[language=bash]
+sudo docker exec -t wizard sqlite3 /data/wizard.db \
+	"INSERT INTO register_token(token) VALUES('token')"
+\end{lstlisting}
+
+Zusätzlich muss beachtet werden, dass ein Token nur einmalig gleichzeitig in der Datenbank existieren kann.

@@ -1,6 +1,7 @@
 \documentclass[a4paper]{scrreprt}
 
 \usepackage{listings}
+\usepackage{graphicx}
 \usepackage[hidelinks]{hyperref}
 \usepackage{polyglossia}
 \setmainlanguage[spelling=new]{german}
@@ -13,6 +14,9 @@
 
 \usepackage{cleveref}
 
+\usepackage{biblatex}
+\addbibresource{sources.bib}
+
 \begin{document}
 \maketitle
 \tableofcontents
@@ -22,4 +26,6 @@
 \input{parts/usage.tex}
 \input{parts/conclusion.tex}
 \input{parts/sources.tex}
+
+\printbibliography
 \end{document}
