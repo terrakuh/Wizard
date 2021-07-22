@@ -6,7 +6,7 @@ git clone https://github.com/terrakuh/wizard.git
 cd wizard
 \end{lstlisting}
 
-Anschließend muss die Datei \textit{wizard-assets.zip} in dem Hauptverzeichnis abgespeichert werden. Die folgende Befehle bauen ein Docker-Image und führen es anschließend aus:
+Des Weiteren muss die Datei \textit{wizard-assets.zip} im Hauptverzeichnis abgespeichert werden. Die folgende Befehle bauen ein Docker-Image und führen es anschließend aus:
 
 \begin{lstlisting}[language=bash]
 sudo docker build . -t wizard
@@ -21,3 +21,11 @@ sudo docker exec -t wizard sqlite3 /data/wizard.db \
 \end{lstlisting}
 
 Zusätzlich muss beachtet werden, dass ein Token nur einmalig gleichzeitig in der Datenbank existieren kann.
+
+Die Daten werden standardmäßig in dem Container unter dem Ordner \textit{/data} abgespeichert. Um also einen Datenverlust zwischen verschiedenen Container-Versionen zu vermeiden kann der Container mit einem permanenten Volume gestartet werden:
+
+\begin{lstlisting}[language=bash]
+sudo docker volume create wizard-data
+sudo docker run --name wizard -p 8000:8000 \
+	-v wizard-data:/data wizard
+\end{lstlisting}
