@@ -9,7 +9,7 @@ interface Props {
 
 export default function End(props: Props) {
 	const classes = useStyles()
-	const playerStates = useMemo(() => props.playerStates.sort((a, b) => a.score - b.score), [props.playerStates])
+	const playerStates = useMemo(() => [...props.playerStates].sort((a, b) => b.score - a.score), [props.playerStates])
 
 	return (
 		<div className={classes.root}>

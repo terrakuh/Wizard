@@ -1,5 +1,5 @@
 \chapter{Nutzung}
-Für die Nutzung der Software wird zum einen die Container-Virtualisierungssoftware Docker benötigt, sowie weitere Ressourcen wie Bilder von den Spielkarten und Benachrichtigung-Sounds. Um an den aktuellsten Stand der Software zu gelangen, kann das GitHub Repository mittels Git geklont werden. Hierfür muss folgendes in ein Terminal getippt werden:
+Für die Nutzung der Software wird zum einen die Container-Virtualisierungssoftware Docker benötigt, zum anderen weitere Ressourcen wie Bilder von den Spielkarten und Benachrichtigungssounds. Um an den aktuellsten Stand der Software zu gelangen, kann das GitHub Repository mittels Git geklont werden. Hierfür muss folgendes in ein Terminal getippt werden:
 
 \begin{lstlisting}[language=bash]
 git clone https://github.com/terrakuh/wizard.git
@@ -22,7 +22,7 @@ sudo docker exec -t wizard sqlite3 /data/wizard.db \
 
 Zusätzlich muss beachtet werden, dass ein Token nur einmalig gleichzeitig in der Datenbank existieren kann.
 
-Die Daten werden standardmäßig in dem Container unter dem Ordner \textit{/data} abgespeichert. Um also einen Datenverlust zwischen verschiedenen Container-Versionen zu vermeiden kann der Container mit einem permanenten Volume gestartet werden:
+Die Daten werden standardmäßig in dem Container unter dem Ordner \textit{/data} abgespeichert. Um also einen Datenverlust zwischen verschiedenen Container-Versionen zu vermeiden, kann der Container mit einem permanenten Volume gestartet werden:
 
 \begin{lstlisting}[language=bash]
 sudo docker volume create wizard-data
@@ -43,7 +43,7 @@ Außerdem kann die Anwendung, insbesondere zu Testzwecken, auch lokal ohne Docke
 	\end{lstlisting}
 \end{itemize}
 
-Ist dies geschehen, sollte der entpackte Inhalt von \textit{wizard-assets.zip} in den noch zu erstellenden Verzeichnis \textit{backend/static/private} abgelegt werden. Front- und Backend können wie folgt gestartet werden:
+Ist dies geschehen, sollte der entpackte Inhalt von \textit{wizard-assets.zip} in das noch zu erstellende Verzeichnis \textit{backend/static/private} gelegt werden. Front- und Backend können dann wie folgt gestartet werden:
 
 \begin{itemize}
 	\item Backend (/wizard/backend)
@@ -56,4 +56,8 @@ Ist dies geschehen, sollte der entpackte Inhalt von \textit{wizard-assets.zip} i
 	\end{lstlisting}
 \end{itemize}
 
-Damit wird das Backend lokal auf Port 8000 und das Frontend lokal auf Port 3000 gestartet und die Anwendung kann über den Browser erreicht werden.
+Damit wird das Backend lokal auf Port 8000 und das Frontend lokal auf Port 3000 gestartet und die Anwendung kann über den Browser erreicht werden. Für die Erstellung mehrerer Nutzer müssen weitere Token in der Datenbank erstellt werden. Dafür kann beispielsweise das Programm \textit{sqlite3} verwendet werden:
+
+\begin{lstlisting}[language=bash]
+	sqlite3 wizard.db "INSERT INTO register_token(token) VALUES('token')"
+\end{lstlisting}
