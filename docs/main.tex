@@ -1,0 +1,53 @@
+\documentclass[a4paper]{scrreprt}
+
+\usepackage{listings}
+\usepackage[hidelinks]{hyperref}
+\usepackage{graphicx,rotating,incgraph}
+\usepackage{polyglossia}
+\setmainlanguage[spelling=new]{german}
+
+\title{Online Kartenspiel: Wizard}
+\author{
+	Yunus Ayar\\
+	2043768
+	\and
+	Maximilian Diesenbacher\\
+	2050504
+}
+
+\usepackage[acronym]{glossaries}
+\newacronym{pbkdf2}{PBKDF2}{Password-Based Key Derivation Function 2}
+
+\usepackage{cleveref}
+
+\usepackage{biblatex}
+\addbibresource{sources.bib}
+
+\lstset{language=Python,
+	keywordstyle=\color{blue},
+	stringstyle=\color{red},
+	commentstyle=\color[RGB]{9,128,13},
+	breaklines=true,
+	morecomment=[l][\color{magenta}]{\#},
+	emph={async,await},
+	emphstyle=\color{blue},
+}
+
+\begin{document}
+\maketitle
+\tableofcontents
+
+\input{parts/intro.tex}
+\input{parts/backend.tex}
+\input{parts/usage.tex}
+\input{parts/conclusion.tex}
+
+\pagebreak
+\addcontentsline{toc}{part}{Appendix}
+\listoffigures
+\addcontentsline{toc}{section}{Abbildungsverzeichnis}
+\pagebreak
+
+\printbibliography
+\addcontentsline{toc}{section}{Literatur}
+\end{document}

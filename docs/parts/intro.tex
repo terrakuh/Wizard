@@ -1,0 +1,60 @@
+\chapter{Einleitung}
+
+Die grundlegende Idee zu diesem Projekt entstammt den Folgen der Corona-Pandemie. Durch die Kontaktbeschränkungen war es uns und unseren Kommilitonen leider nicht mehr möglich, nach einem langen Tag an der Hochschule eine Runde des Kartenspiels Wizard \cite{wizard} zu spielen. Da auch die Suche nach kostenlosen, brauchbaren Online-Lösungen für das Spiel keine befriedigenden Ergebnisse hervorbrachte, hat sich als Idee eine eigene Implementierung von Wizard mit Online-Multiplayer Funktion ergeben. Diese Idee wurde daher für dieses Projekt aufgegriffen und umgesetzt.
+
+\section{Anforderungen}
+
+Die zentrale Anforderung an die Anwendung war selbstverständlich die Möglichkeit, online mit mehreren Spielern das Kartenspiel Wizard spielen zu können. Dafür werden bereits folgende Funktionen benötigt:
+\begin{itemize}
+	\item Nutzerverwaltung für die verschiedenen Mitspieler
+	\item Austeilen der Karten
+	\item Ansagen der Stiche
+	\item Spielen von Karten
+	\item Stichzuweisung und entsprechende Bepunktung
+\end{itemize}
+Davon ausgehend haben sich dann einige weitere Anforderungen ergeben:
+\begin{itemize}
+	\item Anzeige eines Scoreboards
+	\item Auswahl der Trumpffarbe
+	\item Anzeige der Trumpffarbe
+	\item Anzeige der farbgebenden Karte eines Stichs
+	\item Ansicht der Karten des (letzten) Stichs inklusive der ausspielenden Person
+	\item Hervorhebung der stechenden Karte inklusive der ausspielenden Person
+\end{itemize}
+Hiermit kann bereits problemlos gespielt werden, es bieten sich allerdings auch noch einige weitere praktische und unterhaltsame Funktionen an, welche das Spiel noch interessanter werden lassen würden und daher auch erfasst wurden:
+\begin{itemize}
+	\item Auswahl zwischen den Jubiläumseditionen (zusätzliche Karten mit speziellen Effekten) des Spiels
+	\item Kalenderfunktion mit automatischer Benachrichtigungsfunktion zum Spielstart
+	\item Statistische Auswertung der Spiele
+	\item Abschlussbildschirm am Ende des Spiels
+	\item Automatisches Ausspielen einer im Voraus ausgewählten Karte
+	\item Benachrichtigungen beim eigenen Zug
+	\item Ansprechende graphische Effekte
+\end{itemize}
+Auf all diesen Anforderungen und Ideen basierend wurde das Spiel dann nach und nach entwickelt, begonnen mit einer möglichst einfachen, aber funktionalen Variante bis hin zum umfangreichen Endergebnis, wobei viele Ideen auch integriert wurden, einige allerdings auch (noch) nicht.
+
+\section{Planung und Entwurf}
+
+Entwickelt wurde die Webanwendung von einem Team bestehend aus Yunus Ayar und Maximilian Diesenbacher. Dabei fand die Kommunikation situationsbedingt vorrangig digital über Messenger-Dienste, Discord und Zoom statt. Circa alle zwei Wochen wurde in einem Meeting der erreichte Fortschritt besprochen und ggf. der Code zusammengeführt. Zusätzlich dazu war ein kontinuierlicher Austausch über Messenger möglich und es wurden selbstverständlich regelmäßige Tests der aktuellen Version mit einigen Kommilitonen durchgeführt.
+
+Aufgeteilt wurde die Arbeit grob in die Bereiche Backend, Frontend, API und Datenbank, wobei die ersten zwei insbesondere aufgrund ihres Umfangs vergleichsweise exklusiv verteilt wurden, also primär von einer Person bearbeitet wurden. An der API und der Datenbank wurde hingegen eher kollaborativ gearbeitet, da hier auch die beiden anderen Bereiche zusammengeführt werden und eine entsprechende Abstimmung stattfinden muss.
+
+Dabei fiel die Entscheidung bei der API auf das moderne und performante Framework FastAPI \cite{fastapi}, da das Projekt bereits sehr früh im Semester begonnen wurde und FastAPI ein einfaches und übersichtliches Framework darstellt. Weil dies für FastAPI empfohlen wird, kam zur Entwicklung das Paket "uvicorn" \cite{uvicorn} zum Einsatz, welches einen flexiblen lokalen Backend-Server bietet. Außerdem sollte mit GraphQL \cite{graphql} eine flexible Technologie für die Interaktion mit der API zum Einsatz kommen. Mithilfe dieser können JSON-ähnliche Anfragen an das Backend geschickt werden, welches im Anschluss mit einer entsprechenden JSON-Datei antwortet. Hierfür hat sich das Paket "graphene" \cite{graphene} angeboten, welches eine einfache Bibliothek für GraphQL in Python ist. Durch diese Flexibilität wird auch insbesondere die API-Kommunikation im Frontend einfacher und übersichtlicher. Das entsprechende Frontend wurde vorrangig mit React \cite{react} und dem UI-Framework Material-UI \cite{material-ui} gebaut. Dabei wurde zudem zur Steigerung der Robustheit und Übersichtlichkeit kein einfaches JavaScript, sondern TypeScript verwendet. Im eigentlichen Backend kam natürlich primär Python zum Einsatz und für die Datenspeicherung wurde die Offline-Datenbank SQLite \cite{sqlite} verwendet. Der Vorteil dieser ist, dass sie sich perfekt für kleinere Projekte eignet, da keine externe Datenbank aufgesetzt werden muss. Weil die Struktur der Datenbank den grundlegenden Aufbau des Spiels widerspiegelt, war einer der ersten Schritte des Projekts die Erstellung eines entsprechenden Modells. Bei diesem wurden bereits aus allen der obigen Anforderungen Aspekte miteinbezogen, insbesondere die statistische Auswertung der Spiele. Dieses Modell wurde in seinen Details auch im Laufe des Projekts weiterentwickelt, hat in seiner allgemeinen Struktur allerdings einen zentralen Grundstein des Projekts dargestellt. Dabei ist schlussendlich die Struktur auf der folgenden Seite entstanden.
+
+Die zentralen Tools bei der Entwicklung an sich waren Visual Studio Code zur Programmierung und GitHub zur Codeverwaltung. Daneben kamen auch spezielle Tools zum Einsatz. So wurde die API beispielsweise mit Insomnia \cite{insomnia} getestet, Diagramme wurden mit Diagrams.net \cite{diagrams.net} erstellt und die Anwendung wurde über Docker ausgeführt. Außerdem wurde im Repository, um die Dependencies auf einem aktuellen Stand zu halten, der "Dependa-Bot" konfiguriert und somit aktiviert. Dieser erstellt im Falle einer nicht mehr aktuellen Version in den Dependencies des Projekts automatisch einen Pull-Request:
+
+\begin{lstlisting}
+version: 2
+updates:
+	- package-ecosystem: "npm" # See documentation for possible values
+	  directory: "/frontend" # Location of package manifests
+	  schedule:
+		interval: "daily"
+	
+	- package-ecosystem: "pip"
+	  directory: "/backend"
+	  schedule:
+		interval: "daily"
+\end{lstlisting}
+
+\incgraph[][height=\paperheight]{images/database.png}
