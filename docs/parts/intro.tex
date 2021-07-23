@@ -1,6 +1,6 @@
 \chapter{Einleitung}
 
-Die grundlegende Idee zu diesem Projekt entstammt den Folgen der Corona-Pandemie. Durch die Kontaktbeschränkungen war es uns und unserne Kommilitonen leider nicht mehr möglich, nach einem langen Tag an der Hochschule eine Runde des Kartenspiels Wizard zu spielen. Da auch die Suche nach kostenlosen, brauchbaren Online-Lösungen für das Spiel keine befriedigenden Ergebnisse hervorbrachte, hat sich als Lösung eine eigene Implementierung von Wizard mit Online-Multiplayer Funktion ergeben. Diese Idee wurde daher für dieses Projekt aufgegriffen. Dabei wurde bereits im Voraus des Projekts eine schnelle, prototypische Implementierung in Go erstellt. Diese wurde allerdings aufgrund ihrer mangelnden Übersichtlichkeit und Flexibilität schlussendlich im Rahmen dieses Projekts im Python neu implementiert und auch mit einem stark erweiterten Frontend versehen.
+Die grundlegende Idee zu diesem Projekt entstammt den Folgen der Corona-Pandemie. Durch die Kontaktbeschränkungen war es uns und unseren Kommilitonen leider nicht mehr möglich, nach einem langen Tag an der Hochschule eine Runde des Kartenspiels Wizard zu spielen. Da auch die Suche nach kostenlosen, brauchbaren Online-Lösungen für das Spiel keine befriedigenden Ergebnisse hervorbrachte, hat sich als Idee eine eigene Implementierung von Wizard mit Online-Multiplayer Funktion ergeben. Diese Idee wurde daher für dieses Projekt aufgegriffen. Dabei wurde bereits im Voraus des Projekts eine schnelle, prototypische Implementierung in Go erstellt. ???Diese wurde allerdings aufgrund ihrer mangelnden Übersichtlichkeit und Flexibilität schlussendlich im Rahmen dieses Projekts in Python neu implementiert und auch mit einem stark überarbeiteten und erweiterten Frontend versehen.
 
 \section{Anforderungen}
 
@@ -33,12 +33,20 @@ Hiermit kann bereits problemslos gespielt werden, es bieten sich allerdings auch
 \end{itemize}
 Auf all diesen Anforderungen und Ideen basierend wurde das Spiel dann nach und nach entwickelt, wobei viele Ideen auch integriert wurde, einige allerdings auch (noch) nicht.
 
-\section{Planung}
+\section{Planung und Entwurf}
 
-Entwickelt wurde die Webanwendung von einem Team bestehend aus Yunus Ayar und Maximilian Diesenbacher. Dabei fand die Kommunikation situationsbedingt vorrangig digital über Messengerdiesnte, Discord und Zoom statt. Circa alle zwei Wochen wurde in einem Meeting der erreichte Fortschritt besprochen und in Github gemerged. Aufgeteilt wurde die Arbeit grob in die Bereiche Backend, Frontend, API und Datenbank, wobei die ersten zwei vergleichsweise exklusiv verteilt wurden, also primär von einer Person bearbeitet wurden, und an API und Datenbank kollaborativer gearbeitet wurde.
+Entwickelt wurde die Webanwendung von einem Team bestehend aus Yunus Ayar und Maximilian Diesenbacher. Dabei fand die Kommunikation situationsbedingt vorrangig digital über Messengerdienste, Discord und Zoom statt. Circa alle zwei Wochen wurde in einem Meeting der erreichte Fortschritt besprochen und der Code zusammengeführt. Zusätzlich dazu war natürlich ein kontinuierlicher Austausch über Messenger möglich und es wurden selbstverständlich regelmäßige Tests der aktuellen Version mit einigen Kommilitonen durchgeführt.
 
-Die Entwicklung an sich wurde primär in Visual Studio Code erledigt. Dabei wurde für die API primär auf FastAPI und das zugehörige Paket für GraphQL "graphene" gesetzt. 
+Aufgeteilt wurde die Arbeit grob in die Bereiche Backend, Frontend, API und Datenbank, wobei die ersten zwei insbesondere aufgrund ihres Umfangs vergleichsweise exklusiv verteilt wurden, also primär von einer Person bearbeitet wurden. An der API und der Datenbank wurde hingegen eher kollaborativ gearbeitet, da hier auch die beiden anderen Bereiche zusammengeführt werden und eine entsprechende Abstimmung stattfinden muss.
 
-WIESO???
+Dabei fiel die Entscheidung bei der API auf das Framework FastAPI, da...(GrapQL) (Spiellogik im Fokus, GraphQL einfach)
 
-Das Frontend wurde mit React und dem React-Framework Material-UI gebaut. Und bei der Datenbank wurde zuletzt auf SQLite gesetzt. Da diese und deren Struktur einen grundlegenden Aufbau des Spiels wiederspiegelt, war eine der ersten Schritte die Erstellung eines entsprechenden Modells. Bei diesem wurden bereits aus allen der obigen Anforderungen Aspekte miteinbezogen, insbesondere die statistische Auswertung der Spiele. Dieses wurde dann in Details auch im Laufe des Projekts weiterentwickelt, hat in seiner allgemeinen Struktur allerdings einen zentralen Grundseitn des Projets dargestellt. Dabei ist schlussendlich folgende Struktur entstanden:
+Das zugehörige Frontend wurde vorrangig mit React und dem React-Framework Material-UI gebaut. Dabei wurde zudem zur Steigerung der Robustheit und Übersichtlichkeit kein einfaches Javascript, sondern Typescript verwendet. Im eigentlichen Backend kam natürlich primär Python zum Einsatz und für die Datenspeicherung wurde die Offline-Datenbank SQLite verwendet. Der Vorteil dieser ist, dass sie sich perfekt für kleinere Projekte eignet, da keine externe Datenbank aufgesetzt werden muss. Da die Struktur dieser einen grundlegenden Aufbau des Spiels wiederspiegelt, war einer der ersten Schritte die Erstellung eines entsprechenden Modells. Bei diesem wurden bereits aus allen der obigen Anforderungen Aspekte miteinbezogen, insbesondere die statistische Auswertung der Spiele. Dieses Modell wurde in seinen Details auch im Laufe des Projekts weiterentwickelt, hat in seiner allgemeinen Struktur allerdings einen zentralen Grundstein des Projets dargestellt. Dabei ist schlussendlich folgende Struktur entstanden:
+
+Und bei der Datenbank wurde zuletzt auf SQLite gesetzt. 
+
+Die Entwicklung an sich wurde primär in Visual Studio Code erledigt und in GitHub verwaltet. Zur Verwaltung der Dependencies wurde außerdem ein Bot eingesetzt (GENAUER!!!). Bei der eigentlichen Implementierung wurde für die API primär auf FastAPI und das zugehörige Paket für GraphQL "graphene" gesetzt. 
+
+WIESO??? 
+
+
