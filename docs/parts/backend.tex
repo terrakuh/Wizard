@@ -161,7 +161,7 @@ Die eigentliche An- und Abmeldung der Benutzer ist etwas komplexer, was sich auc
 \section{Frontend}
 Wenn die Frontend-Webseite zum ersten Mal aufgerufen wird, wird das Login-Interface angezeigt. Hierbei muss der Nutzer Name und Passwort eingeben. Optional kann festgelegt werden, ob der Nutzer angemeldet bleiben möchte um eine erneute Eingabe der Daten zu verhindern. Ohne Anmeldung ist sonst nur die Registrierseite erreichbar, da alles weitere eine erfolgreiche Authentifizierung benötigt.
 
-Nachdem der Spieler authentifiziert wurde, wird dieser auf die Lobby-Seite weitergeleitet, wo er wahlweise eine neue Lobby erstellen kann oder einer bereits existierenden mittels eines Codes oder Einladungslinks beitreten kann. Der Ersteller der Lobby hat zusätzlich die Möglichkeit vor dem Spielstart den Spielmodus und die gewünschte Rundenanzahl zu ändern. Zur Verfügung stehen die Standardedition, sowie die beiden Jubiläumseditionen für jeweils 20 und 25 Jahre. Die Rundenanzahl reicht von mindestens einer bis hin zu Anzahl der Karten durch die Anzahl der Spieler. Des Weiteren hat der Lobby-Master die Möglichkeit das Spiel zu starten oder die Lobby über das rechte obere Menü aufzulösen (siehe \cref{fig:lobby}).
+Nachdem der Spieler authentifiziert wurde, wird dieser auf die Lobby-Seite weitergeleitet, wo er wahlweise eine neue Lobby erstellen kann oder einer bereits existierenden mittels eines Codes oder Einladungslinks beitreten kann. Der Ersteller der Lobby hat zusätzlich vor dem Spielstart die Möglichkeit, den Spielmodus und die gewünschte Rundenanzahl zu ändern. Zur Verfügung stehen die Standardedition, sowie die beiden Jubiläumseditionen für jeweils 20 und 25 Jahre. Die Rundenanzahl reicht von mindestens einer bis hin zu Anzahl der Karten durch die Anzahl der Spieler. Des Weiteren hat der Lobby-Master die Möglichkeit, das Spiel zu starten oder die Lobby über das rechte obere Menü aufzulösen (siehe \cref{fig:lobby}).
 
 \begin{figure}[h]
 	\includegraphics[width=\textwidth]{images/lobby.png}
@@ -169,13 +169,24 @@ Nachdem der Spieler authentifiziert wurde, wird dieser auf die Lobby-Seite weite
 	\label{fig:lobby}
 \end{figure}
 
-\begin{wrapfigure}{l}{5cm}
-	\includegraphics[width=5cm]{images/menu.png}
-	\caption{Allgemein verfügbares Menü}
-	\label{fig:menu}
-\end{wrapfigure}
+\begin{figure}[h]
+	\begin{minipage}{0.5\textwidth}
+		\centering
+		\includegraphics[width=0.85\textwidth]{images/menu.png}
+		\caption{Allgemein verfügbares Menü im Dark-Mode}
+		\label{fig:menu}
+	\end{minipage}
+	\begin{minipage}{0.5\textwidth}
+		\centering
+		\includegraphics[width=0.85\textwidth]{images/menu-light.png}
+		\caption{Allgemein verfügbares Menü im Light-Mode}
+		\label{fig:menu-light}
+	\end{minipage}
+\end{figure}
 
 Das Menü bietet den Nutzern über die ganze Seite verschiedene Schnellaktionen, wie beispielsweise das Springen zwischen den unterschiedlichen Seiten oder auch gewisse Einstellungsmöglichkeit, wie Darstellung und Benachrichtigungen (siehe \cref{fig:menu}). Zusätzlich kann ein angemeldeter Nutzer auch hierdurch sich abmelden oder eine eventuelle Lobby beziehungsweise laufendes Spiel verlassen.
+
+Wurde ein Spiel gestartet, wird sekündlich über die GraphQL-Abfrage \textit{gameInfo} der aktuelle Spielstatus abgerufen. Sobald eine Aktion von einem Spieler erforderlich ist, kann diese über die GraphQL-Mutation \textit{completeAction} ausgeführt werden. Dabei besteht eine Aktion immer daraus, ein Element aus einer Menge möglicher Optionen auszuwählen (siehe zum Beispiel \cref{fig:trick-color-selection}).
 
 Während dem Spiel werden den Spieler in der Mitte die gespielten Karten angezeigt (siehe \cref{fig:game-view}), welche durch ein Mausklick ausführlicher hervorgehoben werden. Links davon befinden sich zwei halbierte Karten, wobei die obere die Trumpfkarte und die untere die angespielte Karte beschreibt. Die farblichen Umrandungen zeigen jeweils die Trumpf- und angespielte Farbe an. Auf der rechten Seite befindet sich eine Tabelle mit allen Spielern in richtiger Reihenfolge. Hierbei wird links vom Namen der aktuelle Punktestand und rechts die Anzahl der Stiche angezeigt. Zusätzlich wird der für den derzeitigen Stich gewinnende Spieler unterstrichen. Des Weiteren werden alle Spieler, welche eine Aktion, wie beispielsweise die Ansage der Stiche (siehe \cref{fig:trick-selection}) oder anderweitige spezielle Auswahlmöglichkeiten (siehe \cref{fig:trick-color-selection}, \cref{fig:cloud-effect} und \cref{fig:cloud-select}) zur Verfügung haben, farblich hervorgehoben. Die untere Hälfte zeigt die Hand des Spielers an, wobei hier Karten ausgegraut werden, falls diese nicht gespielt werden dürfen (siehe \cref{fig:greyed-out}). Ab der zweiten Runde taucht in der oberen linken Ecke ein Verlauf-Icon auf, welches durch den Fokus des Mauszeigers die gespielten Karten der letzten Stichrunde anzeigen (siehe \cref{fig:last-round}).
 
@@ -229,7 +240,14 @@ Während dem Spiel werden den Spieler in der Mitte die gespielten Karten angezei
 	\label{fig:last-round}
 \end{figure}
 
-Zusätzlich kann ein angemeldeter Nutzer über das Menü auf den Kalender zugreifen. Hierbei kann über einfaches Klicken und Ziehen der Maus ein Event erstellt werden, was für alle anderen Spieler sichtbar ist. Diese können je nach Wunsch mit einem Klick beitreten oder es auch verlassen. Sobald keine Spieler in einem Event sind, wird dieses gelöscht. Des Weiteren werden alle Events, welche älter als eine Stunde sind automatisch aus der Datenbank entfernt. Der Sinn des Kalenders ist es Spieler schnell über das Portal zu vernetzten und somit eine einfachere Terminfindung zu ermöglichen.
+\clearpage
+Zusätzlich kann ein angemeldeter Nutzer über das Menü auf den Kalender (siehe \cref{fig:calendar}) zugreifen. Hierbei kann über einfaches Klicken und Ziehen der Maus ein Event erstellt werden, was für alle anderen Spieler sichtbar ist. Diese können je nach Wunsch mit einem Klick beitreten oder es auch verlassen. Sobald keine Spieler in einem Event sind, wird dieses gelöscht. Des Weiteren werden alle Events, welche älter als eine Stunde sind automatisch aus der Datenbank entfernt. Der Sinn des Kalenders ist es Spieler schnell über das Portal zu vernetzten und somit eine einfachere Terminfindung zu ermöglichen.
+
+\begin{figure}[h]
+	\includegraphics[width=\textwidth]{images/calendar.png}
+	\caption{Terminkalender}
+	\label{fig:calendar}
+\end{figure}
 
 \label{sec:frontend-registrierung}
 Bevor das Passwort in einen Anmeldeschlüssel umgewandelt wird, wird zuerst mithilfe des kostenlosen Dienstes \textit{Have I Been Pwned?} überprüft ob das Passwort in der Vergangenheit kompromittiert wurde. Hierbei werden nur die ersten fünf Zeichen des Passwort-Hashes an den Service geschickt, wodurch das eigentliche Passwort niemals den Browserkontext verlässt. Falls die Abfrage erfolgreich verlief wird dem Benutzer eine Benachrichtigung mit der Anzahl der Kompromittierungen angezeigt und das Passwort abgewiesen. Anschließend wird ein 64-Bit langer Salt zufällig generiert, welcher mithilfe der \gls{pbkdf2} + SHA512 Methode und dem eigentlichen Passwort einen 256-Bit langen Schlüssel generiert. Für den Abschluss wird die entsprechende API Funktion \textit{register} mit den Base64 enkodierten Schlüssel und Salt aufgerufen.

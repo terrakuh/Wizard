@@ -30,7 +30,7 @@ sudo docker run --name wizard -p 8000:8000 \
 	-v wizard-data:/data wizard
 \end{lstlisting}
 
-Außerdem kann die Anwendung, insbesondere zu Testzwecken auch lokal gestartet werden. Dafür müssen zuerst die nötigen Dependencies installiert werden:
+Außerdem kann die Anwendung, insbesondere zu Testzwecken, auch lokal ohne Docker gestartet werden. Dafür werden Python 3.9 oder höher, wie auch Node.JS v14 oder höher und Yarn benötigt. Die Abhängigkeiten des Projekts können wie folgt installiert werden:
 
 \begin{itemize}
 	\item Backend (/wizard/backend)
@@ -43,7 +43,7 @@ Außerdem kann die Anwendung, insbesondere zu Testzwecken auch lokal gestartet w
 	\end{lstlisting}
 \end{itemize}
 
-Ist dies geschehen, können Front- und Backend gestertet werden:
+Ist dies geschehen, sollte der entpackte Inhalt von \textit{wizard-assets.zip} in den noch zu erstellenden Verzeichnis \textit{backend/static/private} abgelegt werden. Front- und Backend können wie folgt gestartet werden:
 
 \begin{itemize}
 	\item Backend (/wizard/backend)
@@ -56,4 +56,4 @@ Ist dies geschehen, können Front- und Backend gestertet werden:
 	\end{lstlisting}
 \end{itemize}
 
-Damit wird das Backend lokal auf Port 8000 und das Frontend lokal auf Port 8080 gestartet und die Anwendung kann über den Browser erreicht werden.
+Damit wird das Backend lokal auf Port 8000 und das Frontend lokal auf Port 3000 gestartet und die Anwendung kann über den Browser erreicht werden.

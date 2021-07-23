@@ -2,12 +2,18 @@
 
 \usepackage{listings}
 \usepackage[hidelinks]{hyperref}
-\usepackage{graphicx,rotating,wrapfig,incgraph}
+\usepackage{graphicx,rotating,incgraph}
 \usepackage{polyglossia}
 \setmainlanguage[spelling=new]{german}
 
 \title{Online Kartenspiel: Wizard}
-\author{Yunus Ayar \and Maximilian Diesenbacher}
+\author{
+	Yunus Ayar\\
+	2043768
+	\and
+	Maximilian Diesenbacher\\
+	2050504
+}
 
 \usepackage[acronym]{glossaries}
 \newacronym{pbkdf2}{PBKDF2}{Password-Based Key Derivation Function 2}
@@ -35,9 +41,12 @@
 \input{parts/backend.tex}
 \input{parts/usage.tex}
 \input{parts/conclusion.tex}
-\input{parts/sources.tex}
 
-\listoffigures
+\pagebreak
+\addcontentsline{toc}{part}{Appendix}
+\listoffigures\pagebreak
+\addcontentsline{toc}{section}{Abbildungsverzeichnis}
+
 \printbibliography
-\addcontentsline{toc}{part}{Literatur}
+\addcontentsline{toc}{section}{Literatur}
 \end{document}
