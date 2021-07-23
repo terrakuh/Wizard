@@ -1,8 +1,8 @@
 \documentclass[a4paper]{scrreprt}
 
 \usepackage{listings}
-\usepackage{graphicx,rotating,wrapfig}
 \usepackage[hidelinks]{hyperref}
+\usepackage{graphicx,rotating,wrapfig,incgraph}
 \usepackage{polyglossia}
 \setmainlanguage[spelling=new]{german}
 
@@ -17,6 +17,16 @@
 \usepackage{biblatex}
 \addbibresource{sources.bib}
 
+\lstset{language=Python,
+	keywordstyle=\color{blue},
+	stringstyle=\color{red},
+	commentstyle=\color[RGB]{9,128,13},
+	breaklines=true,
+	morecomment=[l][\color{magenta}]{\#},
+	emph={async,await},
+	emphstyle=\color{blue},
+}
+
 \begin{document}
 \maketitle
 \tableofcontents
@@ -27,6 +37,7 @@
 \input{parts/conclusion.tex}
 \input{parts/sources.tex}
 
+\listoffigures
 \printbibliography
 \addcontentsline{toc}{part}{Literatur}
 \end{document}
