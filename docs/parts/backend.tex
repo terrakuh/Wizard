@@ -4,7 +4,7 @@
 
 \subsection{Spiellogik}
 
-Die übergeordnete Struktur zum Spielen in der Anwendung ist ein Lobby-System. Dabei werden die Lobbies, also beispielsweise deren Erstellung und Löschung, vom Lobby-Manager verwaltet, das eigentliche Spielen wird über einzelne Lobbies an sich organisiert. Es muss also zuerst eine Lobby erstellt werden, welcher alle Mitspieler entsprechend beitreten können. In dieser können dann Spieleinstellungen wie die gewünschte Edition oder die Rundenanzahl eingestellt werden. Schlussendlich kann in der Lobby ein Spiel begonnen werden, welches im Backend dann ungefähr wie im groben Sequenzdiagramm in \cref{fig:game-flow} zu sehenist, abläuft.
+Die übergeordnete Struktur zum Spielen in der Anwendung ist ein Lobby-System. Dabei werden die Lobbies, also beispielsweise deren Erstellung und Löschung, vom Lobby-Manager verwaltet, das eigentliche Spielen wird über einzelne Lobbies an sich organisiert. Es muss also zuerst eine Lobby erstellt werden, welcher alle Mitspieler entsprechend beitreten können. In dieser können dann Spieleinstellungen wie die gewünschte Edition oder die Rundenanzahl eingestellt werden. Schlussendlich kann in der Lobby ein Spiel begonnen werden, welches im Backend dann ungefähr wie im vereinfachten und groben Sequenzdiagramm in \cref{fig:game-flow} zu sehen ist, abläuft.
 
 \begin{figure}
 	\includegraphics[width=\textwidth]{images/game-flow.png}
@@ -30,7 +30,7 @@ async def __do_round(self):
 	for p in self.players.values(): p.reset()
 \end{lstlisting}
 
-Wie hier zu sehen ist, erstellt die Game-Loop grunsätzlich pro Runde ein neues Runden-Objekt und "startet" dieses. Nachdem bei Erstellung der Runde bereits Karten verteilt und die Trumpfkarte bestimmt werden, geschieht innerhalb einer Runde Folgendes:
+Wie hier zu sehen ist, erstellt die Game-Loop grundsätzlich pro Runde ein neues Runden-Objekt und "startet" dieses. Nachdem bei Erstellung der Runde bereits Karten verteilt und die Trumpfkarte bestimmt werden, geschieht innerhalb einer Runde Folgendes:
 
 \begin{lstlisting}[language=Python]
 async def start_round(self):
@@ -71,7 +71,7 @@ Für die API kam das Web-Framework \textit{FastAPI} zum Einsatz. Hierbei wurden 
 Die Aufgabe dieser Route ist es, beim Deployment die Ressourcen an das Frontend liefern zu können. Dabei wird zwischen \textit{privaten} und \textit{öffentlichen} Dateien unterschieden. Erstere benötigen eine valide Authentifizierung, Letztere nicht. Diese Überprüfung verläuft über einen Abgleich der Cookies, wobei der Cookie vom Nutzer über die von der FastAPI bereitgestellten Klasse \textit{Request} abgerufen werden kann. Zudem wird sichergestellt, dass die angefragte Ressource niemals den Ordner \textit{static} verlässt. Falls die geforderten Dateien nicht existieren, wird standardmäßig \textit{index.html} versendet, damit auch die Routen im Frontend wie gewünscht funktionieren. Um die Datei letztendlich zu verschicken, wird die von FastAPI mitgelieferte Klasse \textit{FileResponse} genutzt, welche einen asynchronen Datentransfer ermöglicht. \cite{fastapi-fileresponse}
 
 \subsubsection{POST /api/gql}
-Um einen Austausch von Daten beziehungsweise Status zwischen Frontend und Backend zu ermöglichen, fiel die Wahl auf die Abfragesprache \textit{GraphQL}. Mithilfe dieser Technologie können JSON-ähnliche Anfragen an das Backend geschickt werden, welches im Anschluss mit einer entsprechenden JSON-Datei antwortet. Für die einfachere Programmierung wurde ein Python-Dekorator namens \textit{smart\_api} entwickelt, welcher je nach Wunsch repetitive Aufgaben wie beispielsweise 
+Um einen Austausch von Daten beziehungsweise Status zwischen Frontend und Backend zu ermöglichen, fiel die Wahl auf die Abfragesprache \textit{GraphQL}. Für die einfachere Programmierung wurde ein Python-Dekorateur namens \textit{smart\_api} entwickelt, welcher je nach Wunsch repetitive Aufgaben wie beispielsweise 
 \begin{itemize}
 	\item Authentifizierung, 
 	\item Caching
@@ -133,7 +133,7 @@ type Mutation {
 \end{lstlisting}
 
 \subsection{Datenbank}
-Um Informationen über die Spiele, Termine, Spieler und Login-Informationen zu speichern, kam die in der Python-Standardbibliothek enthaltene Offline-Datenbank SQLite zum Einsatz. Der Vorteil dieser Technologie ist, dass sie sich perfekt für kleinere Projekte eignet, da keine externe Datenbank aufgesetzt werden muss. Für die Anbindung im Backend fiel die Entscheidung auf eine \textit{asyncio}-Implementation, da gewisse Abfragen auf die Datenbank Lese- beziehungsweise Schreiboperation auslösen können, welche immer eine gewisse Zeit mit Warten im Code zur Folge haben. Die Python Klasse \textit{Database}, welche die fortgeschrittenere Anbindung zur eigentlichen Datenbank bietet, initialisiert zu Beginn einen \textit{Thread-Pool} mit einem Thread, welcher ausschließlich für die Datenbankoperationen reserviert ist. Durch diesen Ansatz müssen die einzelnen Abfragen nicht synchronisiert werden und können direkt mit dem \textit{asyncio} Paket integriert werden.
+Um Informationen über die Spiele, Termine, Spieler und Login-Informationen zu speichern, kam die in der Python-Standardbibliothek enthaltene Offline-Datenbank SQLite zum Einsatz. Für die Anbindung im Backend fiel die Entscheidung auf eine \textit{asyncio}-Implementation, da gewisse Abfragen auf die Datenbank Lese- beziehungsweise Schreiboperation auslösen können, welche immer eine gewisses Maß an Wartezeit im Code zur Folge haben. Die Python Klasse \textit{Database}, welche die fortgeschrittenere Anbindung zur eigentlichen Datenbank bietet, initialisiert zu Beginn einen \textit{Thread-Pool} mit einem Thread, welcher ausschließlich für die Datenbankoperationen reserviert ist. Durch diesen Ansatz müssen die einzelnen Abfragen nicht synchronisiert werden und können direkt mit dem \textit{asyncio} Paket integriert werden.
 
 \begin{lstlisting}[language=Python]
 db = Database("wizard.db") # Der Dateiname

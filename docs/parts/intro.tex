@@ -1,6 +1,6 @@
 \chapter{Einleitung}
 
-Die grundlegende Idee zu diesem Projekt entstammt den Folgen der Corona-Pandemie. Durch die Kontaktbeschränkungen war es uns und unseren Kommilitonen leider nicht mehr möglich, nach einem langen Tag an der Hochschule eine Runde des Kartenspiels Wizard zu spielen. Da auch die Suche nach kostenlosen, brauchbaren Online-Lösungen für das Spiel keine befriedigenden Ergebnisse hervorbrachte, hat sich als Idee eine eigene Implementierung von Wizard mit Online-Multiplayer Funktion ergeben. Diese Idee wurde daher für dieses Projekt aufgegriffen. Dabei wurde bereits im Voraus des Projekts eine schnelle, prototypische Implementierung in Go erstellt. ???Diese wurde allerdings aufgrund ihrer mangelnden Übersichtlichkeit und Flexibilität schlussendlich im Rahmen dieses Projekts in Python neu implementiert und auch mit einem stark überarbeiteten und erweiterten Frontend versehen.
+Die grundlegende Idee zu diesem Projekt entstammt den Folgen der Corona-Pandemie. Durch die Kontaktbeschränkungen war es uns und unseren Kommilitonen leider nicht mehr möglich, nach einem langen Tag an der Hochschule eine Runde des Kartenspiels Wizard zu spielen. Da auch die Suche nach kostenlosen, brauchbaren Online-Lösungen für das Spiel keine befriedigenden Ergebnisse hervorbrachte, hat sich als Idee eine eigene Implementierung von Wizard mit Online-Multiplayer Funktion ergeben. Diese Idee wurde daher für dieses Projekt aufgegriffen und umgesetzt.
 
 \section{Anforderungen}
 
@@ -21,9 +21,9 @@ Davon ausgehend haben sich dann einige weitere Anforderungen ergeben:
 	\item Ansicht der Karten des (letzten) Stichs inklusive der ausspielenden Person
 	\item Hervorhebung der stechenden Karte inklusive der ausspielenden Person
 \end{itemize}
-Hiermit kann bereits problemslos gespielt werden, es bieten sich allerdings auch noch einige weitere praktische und unterhaltsame Funktionen an, welche das Spiel noch interessanter werden lassen würden und daher auch erfasst wurden:
+Hiermit kann bereits problemlos gespielt werden, es bieten sich allerdings auch noch einige weitere praktische und unterhaltsame Funktionen an, welche das Spiel noch interessanter werden lassen würden und daher auch erfasst wurden:
 \begin{itemize}
-	\item Auswahl zwischen den Jubiläumseditionen des Spiels
+	\item Auswahl zwischen den Jubiläumseditionen (zusätzliche Karten mit speziellen Effekten) des Spiels
 	\item Kalenderfunktion mit automatischer Benachrichtigungsfunktion zum Spielstart
 	\item Statistische Auswertung und Übersicht der Spieler
 	\item Abschlussbildschirm am Ende des Spiels
@@ -31,22 +31,30 @@ Hiermit kann bereits problemslos gespielt werden, es bieten sich allerdings auch
 	\item Benachrichtigungen beim eigenen Zug
 	\item Ansprechende graphische Effekte
 \end{itemize}
-Auf all diesen Anforderungen und Ideen basierend wurde das Spiel dann nach und nach entwickelt, wobei viele Ideen auch integriert wurde, einige allerdings auch (noch) nicht.
+Auf all diesen Anforderungen und Ideen basierend wurde das Spiel dann nach und nach entwickelt, begonnen mit einer möglichst einfachen, aber funktionalen Variante bis hin zum umfangreichen Endergebnis, wobei viele Ideen auch integriert wurden, einige allerdings auch (noch) nicht.
 
 \section{Planung und Entwurf}
 
-Entwickelt wurde die Webanwendung von einem Team bestehend aus Yunus Ayar und Maximilian Diesenbacher. Dabei fand die Kommunikation situationsbedingt vorrangig digital über Messengerdienste, Discord und Zoom statt. Circa alle zwei Wochen wurde in einem Meeting der erreichte Fortschritt besprochen und der Code zusammengeführt. Zusätzlich dazu war natürlich ein kontinuierlicher Austausch über Messenger möglich und es wurden selbstverständlich regelmäßige Tests der aktuellen Version mit einigen Kommilitonen durchgeführt.
+Entwickelt wurde die Webanwendung von einem Team bestehend aus Yunus Ayar und Maximilian Diesenbacher. Dabei fand die Kommunikation situationsbedingt vorrangig digital über Messenger-Dienste, Discord und Zoom statt. Circa alle zwei Wochen wurde in einem Meeting der erreichte Fortschritt besprochen und ggf. der Code zusammengeführt. Zusätzlich dazu war natürlich ein kontinuierlicher Austausch über Messenger möglich und es wurden selbstverständlich regelmäßige Tests der aktuellen Version mit einigen Kommilitonen durchgeführt.
 
 Aufgeteilt wurde die Arbeit grob in die Bereiche Backend, Frontend, API und Datenbank, wobei die ersten zwei insbesondere aufgrund ihres Umfangs vergleichsweise exklusiv verteilt wurden, also primär von einer Person bearbeitet wurden. An der API und der Datenbank wurde hingegen eher kollaborativ gearbeitet, da hier auch die beiden anderen Bereiche zusammengeführt werden und eine entsprechende Abstimmung stattfinden muss.
 
-Dabei fiel die Entscheidung bei der API auf das Framework FastAPI, da...(GrapQL) (Spiellogik im Fokus, GraphQL einfach)
+Dabei fiel die Entscheidung bei der API auf das moderne und performante Framework FastAPI, da das Projekt bereits sehr früh im Semester begonnen wurde und FastAPI ein einfaches und übersichtliches Framework darstellt. Da dies für FastAPI empfohlen wird, kam zur Entwicklung das Paket "uvicorn" zum Einsatz, welches einen flexiblen lokalen Backend-Server bietet. Außerdem sollte mit GraphQL eine flexible Technologie für die Interaktion mit der API zum Einsatz kommen. Mithilfe dieser können JSON-ähnliche Anfragen an das Backend geschickt werden, welches im Anschluss mit einer entsprechenden JSON-Datei antwortet. Hierfür hat sich das Paket "graphene" angeboten, welches eine einfache Bibliothek für GraphQL in Python ist. Durch diese Flexibilität wird auch insbesondere die API-Kommunikation in Frontend einfacher und übersichtlicher. Das entsprechende Frontend wurde vorrangig mit React und dem React-Framework Material-UI gebaut. Dabei wurde zudem zur Steigerung der Robustheit und Übersichtlichkeit kein einfaches Javascript, sondern Typescript verwendet. Im eigentlichen Backend kam natürlich primär Python zum Einsatz und für die Datenspeicherung wurde die Offline-Datenbank SQLite verwendet. Der Vorteil dieser ist, dass sie sich perfekt für kleinere Projekte eignet, da keine externe Datenbank aufgesetzt werden muss. Weil die Struktur der Datenbank den grundlegenden Aufbau des Spiels widerspiegelt, war einer der ersten Schritte die Erstellung eines entsprechenden Modells. Bei diesem wurden bereits aus allen der obigen Anforderungen Aspekte miteinbezogen, insbesondere die statistische Auswertung der Spiele. Dieses Modell wurde in seinen Details auch im Laufe des Projekts weiterentwickelt, hat in seiner allgemeinen Struktur allerdings einen zentralen Grundstein des Projekts dargestellt. Dabei ist schlussendlich folgende Struktur entstanden: ??????????????
 
-Das zugehörige Frontend wurde vorrangig mit React und dem React-Framework Material-UI gebaut. Dabei wurde zudem zur Steigerung der Robustheit und Übersichtlichkeit kein einfaches Javascript, sondern Typescript verwendet. Im eigentlichen Backend kam natürlich primär Python zum Einsatz und für die Datenspeicherung wurde die Offline-Datenbank SQLite verwendet. Der Vorteil dieser ist, dass sie sich perfekt für kleinere Projekte eignet, da keine externe Datenbank aufgesetzt werden muss. Da die Struktur dieser einen grundlegenden Aufbau des Spiels wiederspiegelt, war einer der ersten Schritte die Erstellung eines entsprechenden Modells. Bei diesem wurden bereits aus allen der obigen Anforderungen Aspekte miteinbezogen, insbesondere die statistische Auswertung der Spiele. Dieses Modell wurde in seinen Details auch im Laufe des Projekts weiterentwickelt, hat in seiner allgemeinen Struktur allerdings einen zentralen Grundstein des Projets dargestellt. Dabei ist schlussendlich folgende Struktur entstanden:
+Die zentralen Tools bei der Entwicklung an sich waren Visual Studio Code zur Programmierung und GitHub zur Codeverwaltung. Daneben kam auch spezielle Tools zum Einsatz. So wurde die API beispielsweise mit Insomnia getestet oder die Anwendung über Docker ausgeführt. Außerdem wurde im Repository, um die  Dependencies auf einem aktuellen Stand zu halten, der "Dependa-Bot" konfiguriert und somit aktiviert. Dieser erstellt im Falle einer nicht mehr aktuellen Version in den Dependencies des Projekts automatisch eine Pull-Request:
 
-Und bei der Datenbank wurde zuletzt auf SQLite gesetzt. 
-
-Die Entwicklung an sich wurde primär in Visual Studio Code erledigt und in GitHub verwaltet. Zur Verwaltung der Dependencies wurde außerdem ein Bot eingesetzt (GENAUER!!!). Bei der eigentlichen Implementierung wurde für die API primär auf FastAPI und das zugehörige Paket für GraphQL "graphene" gesetzt. 
-
-WIESO??? 
+\begin{lstlisting}
+version: 2
+updates:
+	- package-ecosystem: "npm" # See documentation for possible values
+	  directory: "/frontend" # Location of package manifests
+	  schedule:
+		interval: "daily"
+	
+	- package-ecosystem: "pip"
+	  directory: "/backend"
+	  schedule:
+		interval: "daily"
+\end{lstlisting}
 
 
