@@ -1923,10 +1923,10 @@
   resolved "https://registry.yarnpkg.com/@types/q/-/q-1.5.4.tgz#15925414e0ad2cd765bfef58842f7e26a7accb24"
   integrity sha512-1HcDas8SEj4z1Wc696tH56G8OlRaH/sqZOynNNB+HF0WOeXPaxTtbYzJY2oEfiUxjSKjhCKr+MvR7dCHcEelug==
 
-"@types/react-big-calendar@^0.31.0":
-  version "0.31.0"
-  resolved "https://registry.yarnpkg.com/@types/react-big-calendar/-/react-big-calendar-0.31.0.tgz#abe2c0804149db8a4ee3faeb3f358fe616d427be"
-  integrity sha512-DzwLHcU8z9il1p18rPHEPmZqwfz8vSDYDjur4Qsh3Aw+nOHgzu+ZuAIXSPEVtBrku4GAiYlP/Ti1NrOdweqqGw==
+"@types/react-big-calendar@^0.36.0":
+  version "0.36.0"
+  resolved "https://registry.yarnpkg.com/@types/react-big-calendar/-/react-big-calendar-0.36.0.tgz#1611d7d9d7cb7b1e9dc48ab03df440071545ebdc"
+  integrity sha512-GgUnI8+H2jqj0V06YFu+nstoJzJNiZXskJqv3hBjskuNCiKOwRA06IEP2+6yS+Y3Cec2MBwDaYbmoDRHnsHOfw==
   dependencies:
     "@types/prop-types" "*"
     "@types/react" "*"
@@ -1988,15 +1988,7 @@
   dependencies:
     "@types/react" "*"
 
-"@types/react@*":
-  version "17.0.0"
-  resolved "https://registry.yarnpkg.com/@types/react/-/react-17.0.0.tgz#5af3eb7fad2807092f0046a1302b7823e27919b8"
-  integrity sha512-aj/L7RIMsRlWML3YB6KZiXB3fV2t41+5RBGYF8z+tAKU43Px8C3cYUZsDvf1/+Bm4FK21QWBrDutu8ZJ/70qOw==
-  dependencies:
-    "@types/prop-types" "*"
-    csstype "^3.0.2"
-
-"@types/react@>=16.9.11":
+"@types/react@*", "@types/react@>=16.9.11":
   version "17.0.6"
   resolved "https://registry.yarnpkg.com/@types/react/-/react-17.0.6.tgz#0ec564566302c562bf497d73219797a5e0297013"
   integrity sha512-u/TtPoF/hrvb63LdukET6ncaplYsvCvmkceasx8oG84/ZCsoLxz9Z/raPBP4lTAiWW1Jb889Y9svHmv8R26dWw==
