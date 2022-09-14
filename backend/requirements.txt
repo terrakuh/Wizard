@@ -8,7 +8,7 @@ graphene==2.1.*
 graphql-core==2.3.*
 graphql-relay==2.0.*
 h11==0.12.*
-idna==2.10
+idna==3.4
 promise==2.3
 pydantic==1.8.*
 requests==2.25.*
